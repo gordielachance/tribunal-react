@@ -145,7 +145,7 @@ export const Map = (props) => {
       sourceId,
       {
         'type': 'image',
-        'url': feature.properties.media_url,
+        'url': feature.properties.media_url,//'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg'
         'coordinates': coordinates
       }
    )
