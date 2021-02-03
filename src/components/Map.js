@@ -1,6 +1,6 @@
 import React, { useRef, useEffect,useState }  from "react";
 import ReactDOM from 'react-dom';
-import {MAPBOX_TOKEN} from "./../Constants";
+import {MAPBOX_TOKEN,WP_URL} from "./../Constants";
 import { MarkerIcons } from "./MarkerIcons";
 import { MarkerPopup } from "./MarkerPopup";
 import mapboxgl from 'mapbox-gl';
@@ -15,29 +15,55 @@ export const Map = (props) => {
   const mapContainerRef = useRef(null);
   const [map,setMap] = useState(undefined);
 
-  const geoSources = {
+  const mapSources = {
     markers:{
       "type":"geojson",
-      "data":"http://tribunaldp/wp-json/geoposts/v1/geojson/markers"
+      "data":WP_URL + "/wp-json/geoposts/v1/geojson/markers"
+    },
+    rasters:{
+      "type":"geojson",
+      "data":WP_URL + "/wp-json/geoposts/v1/geojson/rasters"
+    },
+    basemap: {
+      'type': 'raster',
+      'tiles': [
+        'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+      ],
+      'tileSize': 256,
+      'paint' : {
+        "raster-opacity" : 0.5
+      }
     }
   };
 
-  const markerLayer = {
-    'id': 'markers',
-    'type': 'symbol',
-    'source': 'markers',
-    'layout': {
-      'icon-image': 'marker-yellow',
-      // get the title name from the source's "title" property
-      'text-field': ['get', 'title'],
-      'text-font': [
-        'Open Sans Semibold',
-        'Arial Unicode MS Bold'
-      ],
-      'text-offset': [0, 1.25],
-      'text-anchor': 'top'
+  const mapGeoJson = {};
+
+  const mapLayers = {
+    basemap:{
+      'id': 'basemap',
+      'type': 'raster',
+      'source': 'basemap',
+      'minzoom': 0,
+      'maxzoom': 22
+    },
+    markers:{
+      'id': 'markers',
+      'type': 'symbol',
+      'source': 'markers',
+      'layout': {
+        'icon-image': 'marker-yellow',
+        // get the title name from the source's "title" property
+        'text-field': ['get', 'title'],
+        'text-font': [
+          'Open Sans Semibold',
+          'Arial Unicode MS Bold'
+        ],
+        'text-offset': [0, 1.25],
+        'text-anchor': 'top'
+      }
     }
-  };
+
+  }
 
   /*
   Get JSONs from 'data' url and replace it with the loaded content.
@@ -53,6 +79,8 @@ export const Map = (props) => {
       for (var key in sources) {
         const source = sources[key];
 
+        if (source.type!=='geojson') continue;
+
         axios.get(
           source.data, //URL
           {
@@ -61,7 +89,8 @@ export const Map = (props) => {
             }
         })
         .then(function (response) {
-          source.data = response.data;
+          mapGeoJson[key] = response.data; //fill geojson obj
+          source.data = response.data; //replace URL by geojson data
           sourceLoadedCount = sourceLoadedCount + 1;
 
           if (sourceLoadedCount === Object.keys(sources).length){
@@ -76,6 +105,61 @@ export const Map = (props) => {
     })
   }
 
+  const initSources = async() => {
+    return new Promise((resolve, reject) => {
+      //load geoJSON data
+      const geoJsonSources = Object.entries(mapSources).reduce((acc, [key, source]) =>{
+        if (source.type==='geojson'){
+          acc[key] = source;
+        }
+        return acc;
+      }, {});
+
+      fetchGeoJsons(geoJsonSources)
+      .then(function (response) {
+        console.log("GEOJSON LOADED",response);
+
+        //now that the data has been populated, load all sources
+        for (var key in mapSources) {
+          const source = mapSources[key];
+          map.addSource(key,source);
+        }
+
+        resolve();
+
+      }).catch(function (error) {
+        reject(error);
+      });
+
+    });
+  }
+
+  const addRaster = (feature) => {
+    const sourceId = "source-raster-"+feature.properties.media_id;
+    const layerId = "layer-raster-"+feature.properties.media_id;
+    let coordinates = feature.geometry.coordinates[0];
+    coordinates.pop();//remove last item of the polygon (the closing vertex)
+
+    //add source for this image
+    map.addSource(
+      sourceId,
+      {
+        'type': 'image',
+        'url': feature.properties.media_url,
+        'coordinates': coordinates
+      }
+   )
+
+   //add image
+   map.addLayer({
+     "id": layerId,
+     "source": sourceId,
+     "type": "raster",
+     "paint": {"raster-opacity": 0.85}
+   })
+
+  }
+
   const initMapLayers = () => {
 
     //load SVG icons
@@ -85,26 +169,31 @@ export const Map = (props) => {
         customIcon.src = icon.src;
     });
 
-    //get geojson
-    //load geo data
-    fetchGeoJsons(geoSources)
+    initSources()
     .then(function (response) {
-      console.log("GEOJSON LOADED",response);
+      //basemap
+      map.addLayer(mapLayers.basemap);
 
-      //load sources
-      for (var key in response) {
-        const source = response[key];
-        map.addSource(key,source);
+      //rasters
+      let rasterFeatures = mapGeoJson?.rasters?.features;
+
+      for (var key in rasterFeatures) {
+        const feature = rasterFeatures[key];
+        addRaster(feature);
+
       }
 
-      // Add a symbol layer
-      map.addLayer(markerLayer);
+      //markers
+      map.addLayer(mapLayers.markers);
 
+      //list all layers
 
-      const count = map.querySourceFeatures('markers').length;
-      console.log("markers count",count);
+      console.log("layers list:");
+      console.log(map.getStyle().layers);
+
 
     })
+
   }
 
   const initMapPopups = () => {
@@ -163,7 +252,7 @@ export const Map = (props) => {
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/gordielachance/ckfgsu82q2atq19s00mal3f81',
+      style: 'mapbox://styles/gordielachance/ckkplfnd60xgg17o0ilwozq2o',
       center: [4.3779,50.7786],
       zoom: 10
     });
@@ -205,7 +294,6 @@ export const Map = (props) => {
   useEffect(() => {
 
     if (!map) return;
-
 
     initMapLayers();
     initMapPopups();
