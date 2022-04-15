@@ -1,29 +1,31 @@
 import React, { useRef, useEffect,useState }  from "react";
 import ReactDOM from 'react-dom';
-import {MAPBOX_TOKEN,WP_URL} from "./../Constants";
-import { MarkerIcons } from "./MarkerIcons";
-import { MarkerPopup } from "./MarkerPopup";
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import axios from 'axios';
+import { Loader,Dimmer,Container } from 'semantic-ui-react';
+
+import {MAPBOX_TOKEN,WP_URL} from "./../Constants";
+import { MarkerIcons } from "./MarkerIcons";
+import { MarkerPopup } from "./MarkerPopup";
 import './Map.scss';
+import MarkerPost from "./MarkerPost";
 
 
-export const Map = (props) => {
+const Map = (props) => {
 
   const mapContainerRef = useRef(null);
   const [map,setMap] = useState(undefined);
+  const hasInitMap = useRef(false);
+  const [sources,setSources] = useState(undefined);
+  const [loading,setLoading] = useState(true);
 
-  const mapSources = {
-    markers:{
-      "type":"geojson",
-      "data":WP_URL + "/wp-json/geoposts/v1/geojson/markers"
-    },
-    rasters:{
-      "type":"geojson",
-      "data":WP_URL + "/wp-json/geoposts/v1/geojson/rasters"
-    },
+  const [modalOpen,setModalOpen] = useState(false);
+  const [modalPostId,setModalPostId] = useState(undefined);
+
+  //sources before having been prepared
+  const rawSources = {
     basemap: {
       'type': 'raster',
       'tiles': [
@@ -33,10 +35,16 @@ export const Map = (props) => {
       'paint' : {
         "raster-opacity" : 0.5
       }
+    },
+    markers:{
+      "type":"geojson",
+      "data":WP_URL + "/wp-json/geoposts/v1/geojson/markers"
+    },
+    rasters:{
+      "type":"geojson",
+      "data":WP_URL + "/wp-json/geoposts/v1/geojson/rasters"
     }
   };
-
-  const mapGeoJson = {};
 
   const mapLayers = {
     basemap:{
@@ -66,72 +74,79 @@ export const Map = (props) => {
   }
 
   /*
-  Get JSONs from 'data' url and replace it with the loaded content.
+  Get JSONs from url and replace it with the loaded content.
   So we can access de geoJSON data without the need of mapbox.
   */
 
-  const fetchGeoJsons = async (sources) => {
+  const fillGeoJsonSources = async (sources) => {
 
-    return new Promise((resolve, reject) => {
 
-      let sourceLoadedCount = 0;
 
-      for (var key in sources) {
-        const source = sources[key];
+    console.log("FILLING GEOJSON SOURCES FROM REMOTE URLS...",sources);
 
-        if (source.type!=='geojson') continue;
+    const promises = Object.keys(sources).map(function(key, index) {
+      const source = sources[key];
 
-        axios.get(
-          source.data, //URL
-          {
-            headers: {
-              'Content-Type': 'application/json'
+      return axios.get(
+        source.data, //URL
+        {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    return axios
+    .all(promises)
+    .then(responses => {
+
+      //return a copy of the initial object and replace the 'data' prop with our responses
+      const filledSources = Object.fromEntries(
+        Object.entries(sources).map(
+
+          ([k, v], i) => [
+            k,
+            {
+              ...v,
+              data:responses[i].data
             }
-        })
-        .then(function (response) {
-          mapGeoJson[key] = response.data; //fill geojson obj
-          source.data = response.data; //replace URL by geojson data
-          sourceLoadedCount = sourceLoadedCount + 1;
 
-          if (sourceLoadedCount === Object.keys(sources).length){
-            resolve(sources);
-          }
-        })
-        .catch((error) => {// error
-          reject(error);
-        })
-      };
+          ]
+        )
+      );
+      return filledSources;
 
     })
+    .catch(errors => {
+      // react on errors.
+      console.error(errors);
+    });
+
   }
 
-  const initSources = async() => {
-    return new Promise((resolve, reject) => {
-      //load geoJSON data
-      const geoJsonSources = Object.entries(mapSources).reduce((acc, [key, source]) =>{
-        if (source.type==='geojson'){
-          acc[key] = source;
-        }
-        return acc;
-      }, {});
+  const loadSources = async() => {
 
-      fetchGeoJsons(geoJsonSources)
-      .then(function (response) {
-        console.log("GEOJSON LOADED",response);
+    //filter geoJson sources
+    let geoJsonSources = {}
+    for (const [key, source] of Object.entries(rawSources)) {
+      if (source.type==='geojson'){
+        geoJsonSources[key] = source;
+      }
+    }
 
-        //now that the data has been populated, load all sources
-        for (var key in mapSources) {
-          const source = mapSources[key];
-          map.addSource(key,source);
-        }
+    return fillGeoJsonSources(geoJsonSources)
+    .then(function (filledGeoJsonSources) {
 
-        resolve();
+      //merge initial datas with the new datas
+      const newSources = {...rawSources, ...filledGeoJsonSources };
+      setSources(newSources);
+    })
 
-      }).catch(function (error) {
-        reject(error);
-      });
-
+    .catch(errors => {
+      // react on errors.
+      console.error(errors);
     });
+
   }
 
   const addRaster = (feature) => {
@@ -160,39 +175,56 @@ export const Map = (props) => {
 
   }
 
-  const initMapLayers = () => {
+  const initMapSources = () => {
+    //append map sources
+    console.log("INIT MAP SOURCES");
+    for (var key in sources) {
+      const data = sources[key];
+      map.addSource(key,data);
+    }
 
+  }
+
+  const initMapMarkers = () => {
     //load SVG icons
     MarkerIcons.forEach(icon => {
         let customIcon = new Image(24, 24);
         customIcon.onload = () => map.addImage(icon.name, customIcon)
         customIcon.src = icon.src;
     });
+  }
 
-    initSources()
-    .then(function (response) {
-      //basemap
-      map.addLayer(mapLayers.basemap);
+  const initMapRasters = () => {
+    //rasters
+    let rasterFeatures = sources.rasters.data.features;
 
-      //rasters
-      let rasterFeatures = mapGeoJson?.rasters?.features;
+    console.log(`INITIALIZING ${rasterFeatures.length} RASTERS`,rasterFeatures);
 
-      for (var key in rasterFeatures) {
-        const feature = rasterFeatures[key];
-        addRaster(feature);
+    for (var key in rasterFeatures) {
+      const feature = rasterFeatures[key];
+      addRaster(feature);
+    }
+  }
 
-      }
+  const initMapLayers = () => {
 
-      //markers
-      map.addLayer(mapLayers.markers);
+    //basemap
+    map.addLayer(mapLayers.basemap);
 
-      //list all layers
+    //markers
+    map.addLayer(mapLayers.markers);
 
-      console.log("layers list:");
-      console.log(map.getStyle().layers);
+    map.on('click', 'markers', (e) => {
+      const feature = e.features[0];
+      const post_id = feature.properties.id;
+      setModalPostId(post_id);
+      setModalOpen(true);
+    });
 
 
-    })
+
+    //list all layers
+    console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
 
   }
 
@@ -244,9 +276,7 @@ export const Map = (props) => {
 
   }
 
-
-  //At init
-  useEffect(() => {
+  const initMap = () => {
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -258,8 +288,6 @@ export const Map = (props) => {
     });
 
     map.once('load', (e) => {
-
-      console.log("MAPBOX LOADED!");
 
       map.resize(); // fit to container
 
@@ -280,30 +308,70 @@ export const Map = (props) => {
           'zoom':map.getZoom().toFixed(2)
         })
       });
-
       setMap(map);
     });
 
+    return map;
 
+  }
+
+  //At init
+  useEffect(() => {
+    loadSources();
+    const map = initMap();
     // Clean up on unmount
     return () => map.remove();
 
-  }, []);
+  },[]);
+
+  useEffect(() => {
+    if (sources === undefined) return;
+    if (map === undefined) return;
+    setLoading(false);
+  },[sources,map])
+
+  useEffect(() => {
+    console.log("LOADING:",loading);
+  },[loading])
 
   //when map is initialized
   useEffect(() => {
-
-    if (!map) return;
-
-    initMapLayers();
-    initMapPopups();
-
+    if (map===undefined) return;
+    console.log("MAP INITIALIZED");
 
   }, [map]);
 
+  //when map is initialized
+  useEffect(() => {
+    if (hasInitMap.current) return;
+    if (sources === undefined) return;
+    if (map === undefined) return;
+
+    initMapSources();
+    initMapMarkers();
+    //initMapRasters();
+    initMapLayers();
+    initMapPopups();
+
+    hasInitMap.current = true;
+
+  }, [map,sources]);
+
+
+
   return (
-    <>
+    <Dimmer.Dimmable as={Container} dimmed={loading} id="map-container">
+      <Dimmer active={loading} inverted>
+        <Loader />
+      </Dimmer>
+      <MarkerPost
+      open={modalOpen}
+      post_id={modalPostId}
+      onClose={()=>setModalOpen(false)}
+      />
       <div id="map" ref={mapContainerRef} />
-    </>
+    </Dimmer.Dimmable>
   );
 }
+
+export default Map
