@@ -1,19 +1,26 @@
 import React, { useRef, useEffect,useState }  from "react";
 import ReactDOM from 'react-dom';
+import { useParams,useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import axios from 'axios';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
 
-import {MAPBOX_TOKEN,WP_URL} from "./../Constants";
+import {MAPBOX_TOKEN,WP_URL,DEBUG} from "./../Constants";
+import {getMarkerUrl,getFeatureByPostId,getDistanceToClosestFeature} from "../Constants";
+
 import { MarkerIcons } from "./MarkerIcons";
 import { MarkerPopup } from "./MarkerPopup";
 import './Map.scss';
 import MarkerPost from "./MarkerPost";
-
+import MapSidebar from "./MapSidebar";
+import * as turf from "@turf/turf";
 
 const Map = (props) => {
+
+  const params = useParams();
+  const navigate = useNavigate();
 
   const mapContainerRef = useRef(null);
   const [map,setMap] = useState(undefined);
@@ -21,28 +28,34 @@ const Map = (props) => {
   const [sources,setSources] = useState(undefined);
   const [loading,setLoading] = useState(true);
 
-  const [modalOpen,setModalOpen] = useState(false);
-  const [modalPostId,setModalPostId] = useState(undefined);
+  const currentFeatureId = params?.markerId;//id of the feature that has its details shown
+  const [activeFeatureId,setActiveFeatureId] = useState(currentFeatureId);//id of the feature that has its popup open
+  const [activeFeaturePopup,setActiveFeaturePopup] = useState();//current feature popup (so we can remove it)
+
+  const [sidebarBounds,setSidebarBounds] = useState();
+  const [sidebarCenter,setSidebarCenter] = useState();
 
   //sources before having been prepared
   const rawSources = {
     basemap: {
-      'type': 'raster',
-      'tiles': [
-        'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+      type:         'raster',
+      tiles: [
+                    'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
       ],
-      'tileSize': 256,
-      'paint' : {
-        "raster-opacity" : 0.5
+      tileSize:     256,
+      paint : {
+                    "raster-opacity" : 0.5
       }
     },
     markers:{
-      "type":"geojson",
-      "data":WP_URL + "/wp-json/geoposts/v1/geojson/markers"
+      type:         "geojson",
+      data:         WP_URL + "/wp-json/geoposts/v1/geojson/markers",
+      generateId:   true // This ensures that all features have unique IDs
     },
     rasters:{
-      "type":"geojson",
-      "data":WP_URL + "/wp-json/geoposts/v1/geojson/rasters"
+      type:         "geojson",
+      data:         WP_URL + "/wp-json/geoposts/v1/geojson/rasters",
+      generateId:   true // This ensures that all features have unique IDs
     }
   };
 
@@ -177,7 +190,7 @@ const Map = (props) => {
 
   const initMapSources = () => {
     //append map sources
-    console.log("INIT MAP SOURCES");
+    console.log("INIT MAP SOURCES",sources);
     for (var key in sources) {
       const data = sources[key];
       map.addSource(key,data);
@@ -185,7 +198,7 @@ const Map = (props) => {
 
   }
 
-  const initMapMarkers = () => {
+  const initMapIcons = () => {
     //load SVG icons
     MarkerIcons.forEach(icon => {
         let customIcon = new Image(24, 24);
@@ -206,6 +219,43 @@ const Map = (props) => {
     }
   }
 
+  const addFeaturePopup = feature => {
+
+    if (feature === undefined){
+      throw 'Popup requires a feature parameter.';
+    }
+
+    var coordinates = feature.geometry.coordinates.slice();
+
+    //
+    // Create a popup, but don't add it to the map yet.
+    var popup = new mapboxgl.Popup(
+      {
+        closeButton: false,
+        closeOnClick: false
+      }
+    );
+
+    //get popup content
+    const content = getMarkerPopupContent(feature);
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    /*
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+    */
+
+    // Populate the popup and set its coordinates
+    // based on the feature found.
+    return popup
+    .setLngLat(coordinates)
+    .setDOMContent(content)
+    .addTo(map);
+  }
+
   const initMapLayers = () => {
 
     //basemap
@@ -214,66 +264,81 @@ const Map = (props) => {
     //markers
     map.addLayer(mapLayers.markers);
 
-    map.on('click', 'markers', (e) => {
-      const feature = e.features[0];
-      const post_id = feature.properties.id;
-      setModalPostId(post_id);
-      setModalOpen(true);
+    //Update cursor on marker
+    map.on('mouseenter','markers', e => {
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
     });
 
+    //Reset cursor on marker
+    map.on('mouseleave','markers', e => {
+      map.getCanvas().style.cursor = '';
+    });
 
+    //open (add) popup when clicking marker
+    map.on('click','markers', e => {
+      var feature = e.features[0];
+      setActiveFeatureId(feature.properties.post_id);
+    });
 
     //list all layers
     console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
 
   }
 
-  const initMapPopups = () => {
+  const getMarkerPopupContent = feature => {
+    // create the popup
+    const el = document.createElement('div');
+    ReactDOM.render(
+      <MarkerPopup
+      title={feature.properties.title}
+      description={feature.properties.excerpt}
+      tags={feature.properties.tags}
+      onClick={(e)=>{showFullMarker(feature)}}
+      />
+      , el
+    );
 
-    // Create a popup, but don't add it to the map yet.
-    var popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
+    return el;
+  }
 
-    const markerPopupPopupEnter = function (e) {
-      // Change the cursor style as a UI indicator.
-      map.getCanvas().style.cursor = 'pointer';
 
-      var feature = e.features[0];
-      var coordinates = feature.geometry.coordinates.slice();
+  const initMapMarkers = () => {
+    const features = sources.markers.data.features;
 
-      const popupEl = document.createElement('div');
-      ReactDOM.render(
-        <MarkerPopup
-        title={feature.properties.title}
-        />
-        , popupEl
-      );
+    // add markers to map
+    for (const feature of features) {
 
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
+      // create the handle
+      /*
+      const handle = document.createElement('div');
+      handle.className = 'marker';
+      */
+      const handle = undefined;
 
-      // Populate the popup and set its coordinates
-      // based on the feature found.
-      popup
-      .setLngLat(coordinates)
-      .setDOMContent(popupEl)
-      .addTo(map);
-    };
+      //create the marker
+      const marker = new mapboxgl.Marker(handle);
 
-    const markerPopupPopupLeave = function (e) {
-      map.getCanvas().style.cursor = '';
-      popup.remove();
-    };
+      // create the popup
+      const popupContent = getMarkerPopupContent(feature);
+      const popup = new mapboxgl.Popup({ offset: 25 }) // add popups
+      /*
+      .setHTML(
+      ` <h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`
+      )
+      */
+      .setDOMContent(popupContent)
 
-    map.on('mouseenter','markers', markerPopupPopupEnter);
-    map.on('mouseleave','markers', markerPopupPopupLeave);
+      //initialize
+      marker
+      .setLngLat(feature.geometry.coordinates)
+      .setPopup(popup)
+      .addTo(map)
+      //.togglePopup();
 
+      marker.getElement().addEventListener('click', () => marker.togglePopup());
+
+    }
   }
 
   const initMap = () => {
@@ -302,16 +367,22 @@ const Map = (props) => {
       // Add navigation control (the +/- zoom buttons)
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      map.on('moveend', (e) => {
-        console.log({
-          'center':[map.getCenter().lng.toFixed(4),map.getCenter().lat.toFixed(4)],
-          'zoom':map.getZoom().toFixed(2)
-        })
-      });
+      setSidebarBounds(map.getBounds()); //on load
+      setSidebarCenter(map.getCenter()); //on load
+
       setMap(map);
     });
 
-    return map;
+    map.on('moveend', (e) => {
+      setSidebarBounds(map.getBounds());
+      setSidebarCenter(map.getCenter());
+      console.log({
+        'bounds':map.getBounds(),
+        'center':[map.getCenter().lng.toFixed(4),map.getCenter().lat.toFixed(4)],
+        'zoom':map.getZoom().toFixed(2)
+      })
+    });
+
 
   }
 
@@ -321,8 +392,13 @@ const Map = (props) => {
     const map = initMap();
     // Clean up on unmount
     return () => map.remove();
-
   },[]);
+
+  //when map is initialized
+  useEffect(() => {
+    if (map===undefined) return;
+    console.log("MAP INITIALIZED",map);
+  }, [map]);
 
   useEffect(() => {
     if (sources === undefined) return;
@@ -336,28 +412,113 @@ const Map = (props) => {
 
   //when map is initialized
   useEffect(() => {
-    if (map===undefined) return;
-    console.log("MAP INITIALIZED");
-
-  }, [map]);
-
-  //when map is initialized
-  useEffect(() => {
     if (hasInitMap.current) return;
     if (sources === undefined) return;
     if (map === undefined) return;
 
     initMapSources();
-    initMapMarkers();
+    initMapIcons();
     //initMapRasters();
     initMapLayers();
-    initMapPopups();
+    //initMapMarkers();
 
     hasInitMap.current = true;
 
   }, [map,sources]);
 
+  /*
+  create a circle that extends to the closest marker,
+  and zoom on it.
+  */
+  const fitToFeature = feature => {
 
+    const center = feature.geometry.coordinates;
+    const radius = getDistanceToClosestFeature(feature,sources.markers.data.features);
+    const circle = turf.circle(center,radius);
+
+    //for debug purposes
+    if (DEBUG){
+
+      if (map.getLayer("zoomCircleLayer")) {
+        map.removeLayer("zoomCircleLayer");
+      }
+
+      if (map.getSource("zoomCircleSource")) {
+        map.removeSource("zoomCircleSource");
+      }
+
+      map.addSource("zoomCircleSource", {
+      	type: "geojson",
+      	data: circle
+      });
+
+      map.addLayer({
+        id: 'zoomCircleLayer',
+        type: 'fill',
+        source: 'zoomCircleSource',
+        paint: {
+          "fill-color": "blue",
+          "fill-opacity": 0.6
+        }
+      });
+    }
+
+    //compute a bouding box for this circle
+    const bbox = turf.bbox(circle);
+
+    map.fitBounds(bbox, {
+      padding:100//px
+    });
+  }
+
+  useEffect(()=>{
+    if (activeFeatureId === undefined) return;
+
+
+
+    const feature = getFeatureByPostId(sources.markers.data.features,activeFeatureId);
+
+    console.log("ACTIVE FEATURE ID",activeFeatureId,feature,sources.markers.data.features);
+
+    //remove current popup if any
+    if (activeFeaturePopup){
+      activeFeaturePopup.remove();
+    }
+
+    //open popup
+    try {
+      const popup = addFeaturePopup(feature);
+      setActiveFeaturePopup(popup);
+      console.log("ACTIVE FEATURE",feature);
+    } catch (error) {
+      console.error(error);
+    }
+
+  },[activeFeatureId])
+
+
+  const showFullMarker = feature => {
+    const url = getMarkerUrl(feature);
+    console.log("MARKER URL",url);
+    navigate(url);
+  }
+
+  const handleSidebarFeatureClick = post_id => {
+
+    //get feature
+    const feature = getFeatureByPostId(sources.markers.data.features,post_id);
+
+    //set active
+    setActiveFeatureId(post_id);
+
+    //center/zoom on marker
+    fitToFeature(feature);
+
+  }
+
+  const handleDisableLayers = slugs => {
+    console.log("MAP DISABLED LAYERS",slugs);
+  }
 
   return (
     <Dimmer.Dimmable as={Container} dimmed={loading} id="map-container">
@@ -365,9 +526,17 @@ const Map = (props) => {
         <Loader />
       </Dimmer>
       <MarkerPost
-      open={modalOpen}
-      post_id={modalPostId}
-      onClose={()=>setModalOpen(false)}
+      post_id={currentFeatureId}
+      onClose={()=>navigate(props.url)}
+      />
+      <MapSidebar
+      active={true}
+      bounds={sidebarBounds}
+      center={sidebarCenter}
+      features={sources?.markers.data.features}
+      activeFeatureId={activeFeatureId}
+      onFeatureClick={handleSidebarFeatureClick}
+      onDisableLayers={handleDisableLayers}
       />
       <div id="map" ref={mapContainerRef} />
     </Dimmer.Dimmable>

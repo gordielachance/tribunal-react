@@ -1,8 +1,11 @@
 import React from "react";
-import './MarkerPopup.scss';
 import classNames from "classnames";
+import { Icon,Label,Checkbox,Accordion,Button } from 'semantic-ui-react';
+import './MarkerPopup.scss';
 
 export const MarkerPopup = (props) => {
+
+  const tags = (props.tags || []);
 
   return (
     <div
@@ -11,8 +14,8 @@ export const MarkerPopup = (props) => {
     })}
     >
       <div className="popup-title">{props.title}</div>
-      <div className="popup-description">
-
+      <div className="popup-content">
+      {props.description}
       {
         /*
         props.district &&
@@ -23,24 +26,18 @@ export const MarkerPopup = (props) => {
         */
       }
 
-      {props.surface &&
-        <p>
-          <label>Surface</label>
-          <span>{props.surface} sqm</span>
-        </p>
-      }
-      {props.delivery &&
-        <p>
-          <label>Delivery Date</label>
-          <span>{props.delivery}</span>
-        </p>
-      }
-      {props.status &&
-        <p>
-          <label>Status</label>
-          <span>{props.status.name}</span>
-        </p>
-      }
+      <p>
+        {
+            tags.map((tag,k) => {
+              return(
+                <Label key={k}>{tag}</Label>
+              )
+            })
+        }
+      </p>
+      </div>
+      <div class="popup-actions">
+        <Button onClick={props.onClick}>Ouvrir</Button>
       </div>
     </div>
   );

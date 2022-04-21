@@ -4,11 +4,11 @@ import { Modal,Dimmer,Loader } from 'semantic-ui-react';
 import {WP_URL} from "./../Constants";
 
 const MarkerPost = (props) => {
-  const [loading,setLoading] = useState(true);
+  const [loading,setLoading] = useState(false);
   const [post,setPost] = useState();
 
-  const getPostData = async(post_id) => {
-    const url = WP_URL + "/wp-json/wp/v2/posts/?filter[p]=" + post_id;
+  const getMarkerPost = async(post_id) => {
+    const url = WP_URL + "/wp-json/geoposts/v1/marker/" + post_id;
     return axios.get(url);
   }
 
@@ -19,7 +19,7 @@ const MarkerPost = (props) => {
     setPost();
     setLoading(true);
 
-    getPostData(props.post_id)
+    getMarkerPost(props.post_id)
     .then(response => response.data)
     .then(response => {
       console.log("BACKEND POST RESPONSE",response);
@@ -38,16 +38,30 @@ const MarkerPost = (props) => {
     <Modal
       className="marker-post"
       closeIcon
-      open={props.open}
+      open={props.post_id}
       onClose={props.onClose}
     >
-      <Modal.Header>Login</Modal.Header>
+      <Modal.Header>
+      {
+        post ?
+          <span>{post.post_title}</span>
+        :
+          <span>...</span>
+      }
+      </Modal.Header>
         <Dimmer.Dimmable as={Modal.Content} dimmed={loading}>
           <Dimmer active={loading} inverted>
             <Loader />
           </Dimmer>
           <Modal.Description>
-            TOTO
+          {
+            post &&
+            <div
+              dangerouslySetInnerHTML={{
+                __html: post.post_content
+              }}>
+            </div>
+          }
           </Modal.Description>
         </Dimmer.Dimmable>
     </Modal>

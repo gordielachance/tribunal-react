@@ -1,2 +1,16 @@
 .marker-popup{
+  .popup-title{
+    font-weight: bold;
+    text-align: center;
+    border-bottom:1px solid lightgrey;
+    padding-bottom:.5em;
+  }
+  .popup-content{
+    padding:.5em 0;
+  }
+  .popup-actions{
+    text-align:center;
+    border-top:1px solid lightgrey;
+    padding-top:.5em;
+  }
 }
