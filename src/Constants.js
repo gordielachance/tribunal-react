@@ -58,15 +58,7 @@ export const sortFeaturesByDistance = (targetFeature,features) => {
 export const getDistanceToClosestFeature = (targetFeature,features) => {
   const featuresByDistance = sortFeaturesByDistance(targetFeature,features);
   const match = featuresByDistance[0];
-  const dist = match?.properties.distance;
-
-  console.log("DISTS",featuresByDistance.map(feature=>{
-    return feature.properties.distance
-  }))
-
-  console.log("GET DISTANCE",dist,{match:match,target:targetFeature,sorted:featuresByDistance});
-
-  return dist;
+  return match?.properties.distance;
 }
 
 export const getHumanDistance = dist => {

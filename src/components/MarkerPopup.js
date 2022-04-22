@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { Icon,Label,Checkbox,Accordion,Button } from 'semantic-ui-react';
+import { Label,Button } from 'semantic-ui-react';
 import './MarkerPopup.scss';
 
 export const MarkerPopup = (props) => {
@@ -16,16 +16,6 @@ export const MarkerPopup = (props) => {
       <div className="popup-title">{props.title}</div>
       <div className="popup-content">
       {props.description}
-      {
-        /*
-        props.district &&
-        <p>
-          <label>District</label>
-          <span>{props.district}</span>
-        </p>
-        */
-      }
-
       <p>
         {
             tags.map((tag,k) => {

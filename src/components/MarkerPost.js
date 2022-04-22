@@ -36,9 +36,9 @@ const MarkerPost = (props) => {
 
   return(
     <Modal
-      className="marker-post"
+      className="marker-modal"
       closeIcon
-      open={props.post_id}
+      open={(props.post_id !== undefined)}
       onClose={props.onClose}
     >
       <Modal.Header>

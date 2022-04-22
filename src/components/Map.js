@@ -32,7 +32,6 @@ const Map = (props) => {
   const [activeFeatureId,setActiveFeatureId] = useState(currentFeatureId);//id of the feature that has its popup open
   const [activeFeaturePopup,setActiveFeaturePopup] = useState();//current feature popup (so we can remove it)
 
-  const [sidebarBounds,setSidebarBounds] = useState();
   const [sidebarCenter,setSidebarCenter] = useState();
 
   //sources before having been prepared
@@ -49,13 +48,11 @@ const Map = (props) => {
     },
     markers:{
       type:         "geojson",
-      data:         WP_URL + "/wp-json/geoposts/v1/geojson/markers",
-      generateId:   true // This ensures that all features have unique IDs
+      data:         WP_URL + "/wp-json/geoposts/v1/geojson/markers"
     },
     rasters:{
       type:         "geojson",
-      data:         WP_URL + "/wp-json/geoposts/v1/geojson/rasters",
-      generateId:   true // This ensures that all features have unique IDs
+      data:         WP_URL + "/wp-json/geoposts/v1/geojson/rasters"
     }
   };
 
@@ -74,6 +71,7 @@ const Map = (props) => {
       'layout': {
         'icon-image': 'marker-yellow',
         // get the title name from the source's "title" property
+        /*
         'text-field': ['get', 'title'],
         'text-font': [
           'Open Sans Semibold',
@@ -81,6 +79,7 @@ const Map = (props) => {
         ],
         'text-offset': [0, 1.25],
         'text-anchor': 'top'
+        */
       }
     }
 
@@ -367,14 +366,12 @@ const Map = (props) => {
       // Add navigation control (the +/- zoom buttons)
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      setSidebarBounds(map.getBounds()); //on load
       setSidebarCenter(map.getCenter()); //on load
 
       setMap(map);
     });
 
     map.on('moveend', (e) => {
-      setSidebarBounds(map.getBounds());
       setSidebarCenter(map.getCenter());
       console.log({
         'bounds':map.getBounds(),
@@ -389,16 +386,24 @@ const Map = (props) => {
   //At init
   useEffect(() => {
     loadSources();
-    const map = initMap();
+    initMap();
     // Clean up on unmount
-    return () => map.remove();
+    return () => {
+      if (map){
+        map.remove();
+      }
+    }
   },[]);
 
-  //when map is initialized
   useEffect(() => {
     if (map===undefined) return;
     console.log("MAP INITIALIZED",map);
   }, [map]);
+
+  useEffect(() => {
+    if (sources===undefined) return;
+    console.log("SOURCES INITIALIZED",sources);
+  }, [sources]);
 
   useEffect(() => {
     if (sources === undefined) return;
@@ -467,14 +472,13 @@ const Map = (props) => {
     const bbox = turf.bbox(circle);
 
     map.fitBounds(bbox, {
+      maxZoom:16,
       padding:100//px
     });
   }
 
   useEffect(()=>{
     if (activeFeatureId === undefined) return;
-
-
 
     const feature = getFeatureByPostId(sources.markers.data.features,activeFeatureId);
 
@@ -514,6 +518,14 @@ const Map = (props) => {
     //center/zoom on marker
     fitToFeature(feature);
 
+    /*
+    map.easeTo({
+      center:feature.geometry.coordinates,
+      zoom:14,
+      duration: 3000,
+    })
+    */
+
   }
 
   const handleDisableLayers = slugs => {
@@ -531,7 +543,6 @@ const Map = (props) => {
       />
       <MapSidebar
       active={true}
-      bounds={sidebarBounds}
       center={sidebarCenter}
       features={sources?.markers.data.features}
       activeFeatureId={activeFeatureId}
