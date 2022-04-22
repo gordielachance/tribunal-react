@@ -21,7 +21,6 @@ const MapSettings = (props) => {
 
   return (
     <div id="map-settings">
-      <h4>Paramètres</h4>
       <div id="map-settings-orderby">
         <h5>Tri des marqueurs</h5>
         <ul>

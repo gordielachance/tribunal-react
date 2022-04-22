@@ -37,7 +37,7 @@ $sidebarHandleWidth:25px;
   &:not(.active){
     margin-left:-$sidebarWidth;
   }
-  .sidebar-content {
+  #sidebar-container {
     padding: 1em;
     width:#{$sidebarWidth};
     display:flex;
@@ -49,7 +49,18 @@ $sidebarHandleWidth:25px;
     ul{
       overflow-y: auto;
     }
+    #sidebar-header{
+      height:20%;
+    }
+    #sidebar-content{
+      display: flex;
+      flex-direction: column;
+      height:80%;
 
+    }
+    #map-header{
+      margin-bottom:2em;
+    }
   }
 
   .sidebar-toggle {

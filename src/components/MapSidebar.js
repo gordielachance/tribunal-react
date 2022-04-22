@@ -2,7 +2,7 @@ import React, { useEffect,useState }  from "react";
 import classNames from "classnames";
 
 import { Link } from "react-router-dom";
-import { Icon } from 'semantic-ui-react';
+import { Icon,Menu } from 'semantic-ui-react';
 import * as turf from "@turf/turf";
 import {getFeatureIndexByPostId,getHumanDistance} from "../Constants";
 import MapSettings from "../components/MapSettings";
@@ -54,6 +54,7 @@ const MarkerList = props => {
 const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState(props.active);
+  const [section,setSection] = useState('markers');
   const [sortBy,setSortBy] = useState('date');
 
   const toggleActive = () => {
@@ -66,6 +67,29 @@ const MapSidebar = (props) => {
 
   const currentFeatureIndex = getFeatureIndexByPostId(props.features,props.activeFeatureId);
 
+  const renderSection = section => {
+    switch(section){
+      case 'settings':
+        return (
+          <MapSettings
+          features={props.features}
+          sortBy={sortBy}
+          />
+        )
+      break;
+      default://markers
+        return(
+          <MarkerList
+          center={props.center}
+          items={props.features}
+          currentIndex={currentFeatureIndex}
+          onFeatureClick={props.onFeatureClick}
+          sortBy={sortBy}
+          />
+        )
+    }
+  }
+
   return (
     <div
     className={classNames({
@@ -73,28 +97,38 @@ const MapSidebar = (props) => {
       active:   isActive
     })}
     >
-      <div className="sidebar-content">
-        <div id="logo">
-          <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
+
+      <div id="sidebar-container">
+
+        <div id="sidebar-header">
+          <div id="logo">
+            <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
+          </div>
+
+          <Link to="/">Retour au menu</Link>
         </div>
+        <div id="sidebar-content">
+          <div id="map-header">
+            <h3>NOM DE LA CARTE</h3>
 
-        <Link to="/">Retour au menu</Link>
-        <h3>NOM DE LA CARTE</h3>
+            <Menu pointing secondary>
+              <Menu.Item
+                name='Marqueurs'
+                active={section === 'markers'}
+                onClick={e=>setSection('markers')}
+              />
+              <Menu.Item
+                name='Options'
+                active={section === 'settings'}
+                onClick={e=>setSection('settings')}
+              />
+            </Menu>
+          </div>
 
-        <Link to="/">Paramètres</Link>
-
-        <MapSettings
-        features={props.features}
-        sortBy={sortBy}
-        />
-        <MarkerList
-        center={props.center}
-        items={props.features}
-        currentIndex={currentFeatureIndex}
-        onFeatureClick={props.onFeatureClick}
-        sortBy={sortBy}
-        />
-
+          {
+            renderSection(section)
+          }
+          </div>
       </div>
       <div className="sidebar-toggle clickable" onClick={toggleActive} >
         <span>

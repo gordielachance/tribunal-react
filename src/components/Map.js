@@ -42,9 +42,7 @@ const Map = (props) => {
                     'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
       ],
       tileSize:     256,
-      paint : {
-                    "raster-opacity" : 0.5
-      }
+
     },
     markers:{
       type:         "geojson",
@@ -62,27 +60,23 @@ const Map = (props) => {
       'type': 'raster',
       'source': 'basemap',
       'minzoom': 0,
-      'maxzoom': 22
+      'maxzoom': 22,
+      paint : {
+        "raster-opacity" : 0.1
+      }
     },
     markers:{
-      'id': 'markers',
-      'type': 'symbol',
-      'source': 'markers',
-      'layout': {
-        'icon-image': 'marker-yellow',
-        // get the title name from the source's "title" property
-        /*
-        'text-field': ['get', 'title'],
-        'text-font': [
-          'Open Sans Semibold',
-          'Arial Unicode MS Bold'
-        ],
-        'text-offset': [0, 1.25],
-        'text-anchor': 'top'
-        */
+      id: 'markers',
+      type: 'circle',
+      source: 'markers',
+      paint: {
+        'circle-color':'#f3d511',
+        'circle-radius':5,
+        'circle-stroke-width': 1,
+        'circle-stroke-color': '#c6ad09'
       }
-    }
 
+    }
   }
 
   /*
@@ -161,9 +155,15 @@ const Map = (props) => {
 
   }
 
-  const addRaster = (feature) => {
-    const sourceId = "source-raster-"+feature.properties.media_id;
-    const layerId = "layer-raster-"+feature.properties.media_id;
+  const addSingleRaster = (feature) => {
+
+    const media_id = feature.properties.media_id;
+
+    console.log("ADDING RASTER ",media_id);
+
+    const sourceId = `source-raster-${media_id}`;
+    const layerId = `layer-raster-${media_id}`;
+
     let coordinates = feature.geometry.coordinates[0];
     coordinates.pop();//remove last item of the polygon (the closing vertex)
 
@@ -181,6 +181,8 @@ const Map = (props) => {
    map.addLayer({
      "id": layerId,
      "source": sourceId,
+     'minzoom': 11,
+     'maxzoom': 16,
      "type": "raster",
      "paint": {"raster-opacity": 0.85}
    })
@@ -206,16 +208,64 @@ const Map = (props) => {
     });
   }
 
+
   const initMapRasters = () => {
     //rasters
-    let rasterFeatures = sources.rasters.data.features;
+    const rasterFeatures = sources.rasters.data.features;
 
     console.log(`INITIALIZING ${rasterFeatures.length} RASTERS`,rasterFeatures);
 
-    for (var key in rasterFeatures) {
+    Object.keys(rasterFeatures).map(function(key) {
       const feature = rasterFeatures[key];
-      addRaster(feature);
+      addSingleRaster(feature);
+    })
+
+  }
+
+
+  const initMapRastersV1 = () => {
+    //rasters
+    const rasterFeatures = sources.rasters.data.features;
+
+    console.log("RASTERS",rasterFeatures);
+    console.log("RASTERS",sources.markers.data.features);
+
+    const imageFeatures = Object.keys(rasterFeatures).map(function(key) {
+      const item = rasterFeatures[key];
+      let coordinates = item.geometry.coordinates[0];
+      coordinates.pop();//remove last item of the polygon (the closing vertex)
+
+      return {
+        'type': 'image',
+        'url': item.properties.media_url,//'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg'
+        'coordinates': coordinates
+      }
+    })
+
+    const imageData = {
+      'type': 'FeatureCollection',
+      'features': [imageFeatures]
     }
+
+    console.log("IMGDATA",imageData);
+
+    map.addSource("imagesSource", {
+      type: "geojson",
+      data: imageData
+    });
+
+    /*
+    //add image
+    map.addLayer({
+      "id": 'imagesLayer',
+      "source": 'imagesSource',
+      "type": "raster",
+      "paint": {"raster-opacity": 0.85}
+    })
+    */
+
+    console.log(`INITIALIZING ${rasterFeatures.length} RASTERS`,rasterFeatures);
+
   }
 
   const addFeaturePopup = feature => {
