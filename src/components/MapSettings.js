@@ -1,50 +1,21 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 import MapTags from "../components/MapTags";
+import MapSort from "../components/MapSort";
 
 const MapSettings = (props) => {
 
-  const [sortBy,setSortBy] = useState('date');
-
-  const sortByList = {
-    date:{
-      name:'Date'
-    },
-    distance:{
-      name:'Distance'
-    }
-  }
-
-  const handleTagsUpdate = slugs => {
-    console.log("TAGS UPDATED",slugs);
-  }
-
   return (
     <div id="map-settings">
-      <div id="map-settings-orderby">
-        <h5>Tri des marqueurs</h5>
-        <ul>
-          {
-            Object.keys(sortByList).map(function(key) {
-              const item = sortByList[key];
-              const active = (sortBy === key);
-              return(
-                <li
-                key={key}
-                className={active ? 'active' : ''}
-                onClick={e=>{setSortBy(key)}}
-                >
-                  <span><Icon name="check"/></span>
-                  <span>{item.name}</span>
-                </li>
-              );
-            })
-          }
-        </ul>
-      </div>
+      <MapSort
+        features={props.features}
+        sortBy={props.sortBy}
+        onUpdate={props.onSortBy}
+      />
       <MapTags
         features={props.features}
-        onUpdate={handleTagsUpdate}
+        disabled={props.disabledTags}
+        onDisable={props.onDisableTags}
       />
     </div>
   );

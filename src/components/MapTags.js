@@ -3,7 +3,7 @@ import { Icon } from 'semantic-ui-react';
 
 const MapTags = props => {
 
-  const [disabled,setDisabled] = useState([]);
+  const [disabled,setDisabled] = useState(props.disabled || []);
 
   const handleClick = slug => {
 
@@ -51,15 +51,16 @@ const MapTags = props => {
 
   //pass update to parent
   useEffect(() => {
-    if (typeof props.onUpdate !== 'function') return;
+    if (typeof props.onDisable !== 'function') return;
 
+    /*
     const slugs = layerCollection.map(function(item) {
       return item.slug;
     })
-
     const enabled = slugs.filter(x => !disabled.includes(x));
+    */
 
-    props.onUpdate(enabled);
+    props.onDisable(disabled);
 
   },[disabled]);
 

@@ -3,59 +3,15 @@ import classNames from "classnames";
 
 import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
-import * as turf from "@turf/turf";
-import {getFeatureIndexByPostId,getHumanDistance} from "../Constants";
+
+import {getFeatureIndexByPostId} from "../Constants";
 import MapSettings from "../components/MapSettings";
-
-const MarkerList = props => {
-
-  const items = (props.items || []);
-  const currentIndex = props.currentIndex || 0;
-
-  return(
-    <>
-    {
-      items.length ?
-      <ul id="marker-list">
-
-        {
-          items.map((feature,k) => {
-            const active = currentIndex === k;
-            let distance = props.center ? turf.distance([props.center.lng,props.center.lat], feature.geometry) : undefined;//km
-            distance = (distance === 0) ? undefined : getHumanDistance(distance);
-            return (
-              <li
-              key={k}
-              onClick={e=>{props.onFeatureClick(feature.properties.post_id)}}
-              className={classNames({
-                active:   active
-              })}
-              >
-                <span>
-                  {distance}
-                </span>
-                <span>
-                  {feature.properties.title}
-                </span>
-              </li>
-            )
-          })
-        }
-      </ul>
-      :
-      <span>Pas de marqueurs</span>
-    }
-
-    </>
-
-  )
-}
+import MarkerList from "../components/MarkerList";
 
 const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState(props.active);
   const [section,setSection] = useState('markers');
-  const [sortBy,setSortBy] = useState('date');
 
   const toggleActive = () => {
     setisActive(!isActive);
@@ -73,7 +29,10 @@ const MapSidebar = (props) => {
         return (
           <MapSettings
           features={props.features}
-          sortBy={sortBy}
+          sortBy={props.sortMarkerBy}
+          onSortBy={props.onSortBy}
+          disabledTags={props.markerTagsDisabled}
+          onDisableTags={props.onDisableTags}
           />
         )
       break;
@@ -84,7 +43,8 @@ const MapSidebar = (props) => {
           items={props.features}
           currentIndex={currentFeatureIndex}
           onFeatureClick={props.onFeatureClick}
-          sortBy={sortBy}
+          disabledTags={props.markerTagsDisabled}
+          sortBy={props.sortMarkerBy}
           />
         )
     }

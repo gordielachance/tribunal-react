@@ -28,23 +28,16 @@ export const getFeatureIndexByPostId = (features,post_id) => {
 }
 
 //sort features by distance (returns a new copy of the array)
-export const sortFeaturesByDistance = (targetFeature,features) => {
+export const sortFeaturesByDistance = (origin,features) => {
 
-  //target index
-  const index = features.indexOf(targetFeature);
-  if (index === -1){
-    throw('Target not found in features collection.');
-  }
+  if (features === undefined) return;
 
   //clone set
   const collection = Array.prototype.slice.call(features);
 
-  //remove target from set
-  collection.splice(index, 1);
-
   //add 'distance' prop
   collection.forEach(feature => {
-    feature.properties.distance = turf.distance(targetFeature.geometry, feature.geometry);//in km
+    feature.properties.distance = turf.distance(origin, feature.geometry);//in km
   });
 
   return collection.sort((a, b) => {
@@ -55,8 +48,8 @@ export const sortFeaturesByDistance = (targetFeature,features) => {
 
 //in km
 //https://gist.github.com/jbranigan/f334f471f954d78880806451eee25bba
-export const getDistanceToClosestFeature = (targetFeature,features) => {
-  const featuresByDistance = sortFeaturesByDistance(targetFeature,features);
+export const getDistanceToClosestFeature = (origin,features) => {
+  const featuresByDistance = sortFeaturesByDistance(origin,features);
   const match = featuresByDistance[0];
   return match?.properties.distance;
 }

@@ -33,6 +33,8 @@ const Map = (props) => {
   const [activeFeaturePopup,setActiveFeaturePopup] = useState();//current feature popup (so we can remove it)
 
   const [sidebarCenter,setSidebarCenter] = useState();
+  const [sortMarkerBy,setSortMarkerBy] = useState('date');
+  const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
 
   //sources before having been prepared
   const rawSources = {
@@ -416,13 +418,13 @@ const Map = (props) => {
       // Add navigation control (the +/- zoom buttons)
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      setSidebarCenter(map.getCenter()); //on load
+      setSidebarCenter([map.getCenter().lng,map.getCenter().lat]); //on load
 
       setMap(map);
     });
 
     map.on('moveend', (e) => {
-      setSidebarCenter(map.getCenter());
+      setSidebarCenter([map.getCenter().lng,map.getCenter().lat]); //on load
       console.log({
         'bounds':map.getBounds(),
         'center':[map.getCenter().lng.toFixed(4),map.getCenter().lat.toFixed(4)],
@@ -487,9 +489,9 @@ const Map = (props) => {
   */
   const fitToFeature = feature => {
 
-    const center = feature.geometry.coordinates;
-    const radius = getDistanceToClosestFeature(feature,sources.markers.data.features);
-    const circle = turf.circle(center,radius);
+    const origin = feature.geometry.coordinates;
+    const radius = getDistanceToClosestFeature(origin,sources.markers.data.features);
+    const circle = turf.circle(origin,radius);
 
     //for debug purposes
     if (DEBUG){
@@ -578,8 +580,14 @@ const Map = (props) => {
 
   }
 
-  const handleDisableLayers = slugs => {
-    console.log("MAP DISABLED LAYERS",slugs);
+  const handleSortBy = key => {
+    console.log("SORT BY",key);
+    setSortMarkerBy(key);
+  }
+
+  const handleDisabledTags = slugs => {
+    console.log("DISABLED TAGS UPDATED",slugs);
+    setMarkerTagsDisabled(slugs);
   }
 
   return (
@@ -597,7 +605,10 @@ const Map = (props) => {
       features={sources?.markers.data.features}
       activeFeatureId={activeFeatureId}
       onFeatureClick={handleSidebarFeatureClick}
-      onDisableLayers={handleDisableLayers}
+      sortMarkerBy={sortMarkerBy}
+      onSortBy={handleSortBy}
+      markerTagsDisabled={markerTagsDisabled}
+      onDisableTags={handleDisabledTags}
       />
       <div id="map" ref={mapContainerRef} />
     </Dimmer.Dimmable>
