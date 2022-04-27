@@ -19,6 +19,7 @@
     "react-scripts": "^4.0.3",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.1.2",
+    "supercluster": "^7.1.5",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
