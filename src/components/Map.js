@@ -8,7 +8,7 @@ import axios from 'axios';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
 
 import {MAPBOX_TOKEN,WP_URL,DEBUG} from "./../Constants";
-import {getMarkerUrl,getFeatureByPostId,getDistanceToClosestFeature} from "../Constants";
+import {getMarkerUrl,getFeatureById,getDistanceToClosestFeature} from "../Constants";
 
 import { MarkerIcons } from "./MarkerIcons";
 import { MarkerPopup } from "./MarkerPopup";
@@ -46,6 +46,14 @@ const Map = (props) => {
       tileSize:     256,
 
     },
+    handDrawn: {
+      type:         'raster',
+      tiles: [
+                    'http://tribunaldesprejuges.org/wordpress/wp-content/uploads/tdp_tiles/GS/{z}/{x}/{y}.png'
+      ],
+      tileSize:     256,
+
+    },
     markers:{
       type:         "geojson",
       data:         WP_URL + "/wp-json/geoposts/v1/geojson/markers"
@@ -56,8 +64,8 @@ const Map = (props) => {
     }
   };
 
-  const mapLayers = {
-    basemap:{
+  const mapLayers = [
+    {
       'id': 'basemap',
       'type': 'raster',
       'source': 'basemap',
@@ -67,28 +75,35 @@ const Map = (props) => {
         "raster-opacity" : 0.1
       }
     },
-    markers:{
+    /*
+    {
+      'id': 'handDrawn',
+      'type': 'raster',
+      'source': 'handDrawn',
+      'minzoom': 0,
+      'maxzoom': 22,
+    },
+    */
+    {
       id: 'markers',
       type: 'circle',
       source: 'markers',
       paint: {
         'circle-color':'#f3d511',
-        'circle-radius':5,
-        'circle-stroke-width': 1,
+        'circle-radius':10,
+        'circle-stroke-width': 2,
         'circle-stroke-color': '#c6ad09'
       }
 
     }
-  }
+  ]
 
   /*
   Get JSONs from url and replace it with the loaded content.
-  So we can access de geoJSON data without the need of mapbox.
+  So we can access the geoJSON data without the need of mapbox.
   */
 
   const fillGeoJsonSources = async (sources) => {
-
-
 
     console.log("FILLING GEOJSON SOURCES FROM REMOTE URLS...",sources);
 
@@ -134,6 +149,8 @@ const Map = (props) => {
 
   const loadSources = async() => {
 
+    console.log("LOAD SOURCES",rawSources);
+
     //filter geoJson sources
     let geoJsonSources = {}
     for (const [key, source] of Object.entries(rawSources)) {
@@ -143,13 +160,29 @@ const Map = (props) => {
     }
 
     return fillGeoJsonSources(geoJsonSources)
+
+    //merge initial datas with the new datas
     .then(function (filledGeoJsonSources) {
-
-      //merge initial datas with the new datas
-      const newSources = {...rawSources, ...filledGeoJsonSources };
-      setSources(newSources);
+      return {...rawSources, ...filledGeoJsonSources };
     })
+    //set features unique IDs (that is what we use to select features in the code)
+    .then(function(sources) {
+      for (const [sourceKey, source] of Object.entries(sources)) {
+        if (!source?.data) continue;
+        if (source.data.type !== 'FeatureCollection') continue;
 
+        source.data.features = source.data.features.map(function(feature,index) {
+          return {
+            ...feature,
+            id:`${sourceKey}-feature-${index}`
+          }
+        })
+      }
+      return sources;
+    })
+    .then(function(sources) {
+      setSources(sources);
+    })
     .catch(errors => {
       // react on errors.
       console.error(errors);
@@ -157,41 +190,7 @@ const Map = (props) => {
 
   }
 
-  const addSingleRaster = (feature) => {
-
-    const media_id = feature.properties.media_id;
-
-    console.log("ADDING RASTER ",media_id);
-
-    const sourceId = `source-raster-${media_id}`;
-    const layerId = `layer-raster-${media_id}`;
-
-    let coordinates = feature.geometry.coordinates[0];
-    coordinates.pop();//remove last item of the polygon (the closing vertex)
-
-    //add source for this image
-    map.addSource(
-      sourceId,
-      {
-        'type': 'image',
-        'url': feature.properties.media_url,//'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg'
-        'coordinates': coordinates
-      }
-   )
-
-   //add image
-   map.addLayer({
-     "id": layerId,
-     "source": sourceId,
-     'minzoom': 11,
-     'maxzoom': 16,
-     "type": "raster",
-     "paint": {"raster-opacity": 0.85}
-   })
-
-  }
-
-  const initMapSources = () => {
+  const addMapSources = () => {
     //append map sources
     console.log("INIT MAP SOURCES",sources);
     for (var key in sources) {
@@ -208,66 +207,6 @@ const Map = (props) => {
         customIcon.onload = () => map.addImage(icon.name, customIcon)
         customIcon.src = icon.src;
     });
-  }
-
-
-  const initMapRasters = () => {
-    //rasters
-    const rasterFeatures = sources.rasters.data.features;
-
-    console.log(`INITIALIZING ${rasterFeatures.length} RASTERS`,rasterFeatures);
-
-    Object.keys(rasterFeatures).map(function(key) {
-      const feature = rasterFeatures[key];
-      addSingleRaster(feature);
-    })
-
-  }
-
-
-  const initMapRastersV1 = () => {
-    //rasters
-    const rasterFeatures = sources.rasters.data.features;
-
-    console.log("RASTERS",rasterFeatures);
-    console.log("RASTERS",sources.markers.data.features);
-
-    const imageFeatures = Object.keys(rasterFeatures).map(function(key) {
-      const item = rasterFeatures[key];
-      let coordinates = item.geometry.coordinates[0];
-      coordinates.pop();//remove last item of the polygon (the closing vertex)
-
-      return {
-        'type': 'image',
-        'url': item.properties.media_url,//'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg'
-        'coordinates': coordinates
-      }
-    })
-
-    const imageData = {
-      'type': 'FeatureCollection',
-      'features': [imageFeatures]
-    }
-
-    console.log("IMGDATA",imageData);
-
-    map.addSource("imagesSource", {
-      type: "geojson",
-      data: imageData
-    });
-
-    /*
-    //add image
-    map.addLayer({
-      "id": 'imagesLayer',
-      "source": 'imagesSource',
-      "type": "raster",
-      "paint": {"raster-opacity": 0.85}
-    })
-    */
-
-    console.log(`INITIALIZING ${rasterFeatures.length} RASTERS`,rasterFeatures);
-
   }
 
   const addFeaturePopup = feature => {
@@ -309,11 +248,9 @@ const Map = (props) => {
 
   const initMapLayers = () => {
 
-    //basemap
-    map.addLayer(mapLayers.basemap);
-
-    //markers
-    map.addLayer(mapLayers.markers);
+    mapLayers.forEach(layer => {
+      map.addLayer(layer);
+    })
 
     //Update cursor on marker
     map.on('mouseenter','markers', e => {
@@ -354,43 +291,6 @@ const Map = (props) => {
   }
 
 
-  const initMapMarkers = () => {
-    const features = sources.markers.data.features;
-
-    // add markers to map
-    for (const feature of features) {
-
-      // create the handle
-      /*
-      const handle = document.createElement('div');
-      handle.className = 'marker';
-      */
-      const handle = undefined;
-
-      //create the marker
-      const marker = new mapboxgl.Marker(handle);
-
-      // create the popup
-      const popupContent = getMarkerPopupContent(feature);
-      const popup = new mapboxgl.Popup({ offset: 25 }) // add popups
-      /*
-      .setHTML(
-      ` <h3>${feature.properties.title}</h3><p>${feature.properties.description}</p>`
-      )
-      */
-      .setDOMContent(popupContent)
-
-      //initialize
-      marker
-      .setLngLat(feature.geometry.coordinates)
-      .setPopup(popup)
-      .addTo(map)
-      //.togglePopup();
-
-      marker.getElement().addEventListener('click', () => marker.togglePopup());
-
-    }
-  }
 
   const initMap = () => {
 
@@ -431,6 +331,13 @@ const Map = (props) => {
         'zoom':map.getZoom().toFixed(2)
       })
     });
+
+    //when a specific source has been loaded
+    map.on('sourcedata', (e) => {
+      if (e.sourceId !== 'markers') return;
+      if (!e.isSourceLoaded) return;
+      console.log("SOURCE DATA LOADED",e.source);
+});
 
 
   }
@@ -473,11 +380,9 @@ const Map = (props) => {
     if (sources === undefined) return;
     if (map === undefined) return;
 
-    initMapSources();
+    addMapSources();
     initMapIcons();
-    //initMapRasters();
     initMapLayers();
-    //initMapMarkers();
 
     hasInitMap.current = true;
 
@@ -524,7 +429,7 @@ const Map = (props) => {
     const bbox = turf.bbox(circle);
 
     map.fitBounds(bbox, {
-      maxZoom:16,
+      maxZoom:14,
       padding:100//px
     });
   }
@@ -532,7 +437,7 @@ const Map = (props) => {
   useEffect(()=>{
     if (activeFeatureId === undefined) return;
 
-    const feature = getFeatureByPostId(sources.markers.data.features,activeFeatureId);
+    const feature = getFeatureById(sources.markers.data.features,activeFeatureId);
 
     console.log("ACTIVE FEATURE ID",activeFeatureId,feature,sources.markers.data.features);
 
@@ -559,13 +464,15 @@ const Map = (props) => {
     navigate(url);
   }
 
-  const handleSidebarFeatureClick = post_id => {
+  const handleSidebarFeatureClick = feature_id => {
+
+    console.log("HANDLE CLICK",feature_id);
 
     //get feature
-    const feature = getFeatureByPostId(sources.markers.data.features,post_id);
+    const feature = getFeatureById(sources.markers.data.features,feature_id);
 
     //set active
-    setActiveFeatureId(post_id);
+    setActiveFeatureId(feature_id);
 
     //center/zoom on marker
     fitToFeature(feature);
@@ -603,7 +510,7 @@ const Map = (props) => {
       active={true}
       center={sidebarCenter}
       features={sources?.markers.data.features}
-      activeFeatureId={activeFeatureId}
+      feature_id={activeFeatureId}
       onFeatureClick={handleSidebarFeatureClick}
       sortMarkerBy={sortMarkerBy}
       onSortBy={handleSortBy}

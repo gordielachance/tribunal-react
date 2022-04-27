@@ -26,8 +26,12 @@ export const MarkerPopup = (props) => {
         }
       </p>
       </div>
-      <div class="popup-actions">
-        <Button onClick={props.onClick}>Ouvrir</Button>
+      <div className="popup-actions">
+        {
+          props.post_id &&
+          <Button onClick={props.onClick}>Ouvrir</Button>
+        }
+        <Button onClick={props.onClose}>Fermer</Button>
       </div>
     </div>
   );

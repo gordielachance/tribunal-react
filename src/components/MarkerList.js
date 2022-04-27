@@ -4,67 +4,95 @@ import * as turf from "@turf/turf";
 
 import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
-import {getHumanDistance,sortFeaturesByDistance} from "../Constants";
+import {getHumanDistance,setFeatureDistance,sortFeaturesByDistance,getFeatureId} from "../Constants";
 
 const MarkerList = props => {
+  const map = props.map;
+  const [features,setFeatures] = useState(props.features);
+  const [sortedFeatures,setSortedFeatures] = useState(features);
 
-  const items = props.items || [];
-  const [sortedItems,setSortedItems] = useState(items);
+  //update from prop
+  useEffect(() => {
 
-  const currentIndex = props.currentIndex || 0;
+    if (props.features === undefined) return;
+
+    console.log("LIST FEATURES",props.features);
+
+    //clone array; we don't want to alter the original data
+    const features = JSON.parse(JSON.stringify(props.features));
+
+    //add a distance attribute
+    if (props.center){
+      //add 'distance' prop
+      features.forEach(feature => {
+        setFeatureDistance(feature,props.center);
+      });
+    }
+
+    setFeatures(features);
+
+  },[props.features,props.center]);
 
   useEffect(() => {
 
-    let sorted = items;
+    if (features === undefined) return;
+
+    let sorted = features;
 
     //sort markers
     switch(props.sortBy){
       case 'distance':
-        if (props.center){
-          console.log("SORT BY DISTANCE FROM",props.center);
-          sorted = sortFeaturesByDistance(props.center,sorted);
-        }
-
+        sorted = sortFeaturesByDistance(sorted,props.center);
       break;
       default://date
       break;
     }
 
-    setSortedItems(sorted);
+    setSortedFeatures(sorted);
 
-  },[props.sortBy,props.center]);
+  },[features,props.sortBy]);
 
-  useEffect(() => {
-    console.log("SORTED",sortedItems);
-  },[sortedItems]);
+  //TOUFIX should not be updated when props.center changes; distance should be computed in parent ?
 
+  const getSortByText = feature => {
 
+    //sort markers
+    switch(props.sortBy){
+      case 'distance':
+        return feature.properties.distance ? getHumanDistance(feature.properties.distance) : undefined;
+      break;
+      default://date
+        return feature.properties.timestamp
+      break;
+    }
 
-  console.log("MARKERS SORT BY",props.sortBy);
+  }
 
   return(
     <>
     {
-      sortedItems.length ?
+      (sortedFeatures || []).length ?
       <ul id="marker-list">
 
         {
-          sortedItems.map((feature,k) => {
-            const active = currentIndex === k;
-            const humanDistance = feature.properties.distance ? getHumanDistance(feature.properties.distance) : undefined;
+          sortedFeatures.map((feature,k) => {
+
+            const feature_id = getFeatureId(feature);
+
+            const active = (props.feature_id === feature_id);
             return (
               <li
               key={k}
-              onClick={e=>{props.onFeatureClick(feature.properties.post_id)}}
+              onClick={e=>{props.onFeatureClick(feature_id)}}
               className={classNames({
                 active:   active
               })}
               >
                 <span>
-                  {humanDistance}
-                </span>
-                <span>
                   {feature.properties.title}
+                </span>
+                <span className="sortByText">
+                  {getSortByText(feature)}
                 </span>
               </li>
             )

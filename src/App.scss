@@ -77,6 +77,8 @@ $sidebarHandleWidth:25px;
 #marker-list{
   li{
     @extend .clickable;
+    display: flex;
+    justify-content: space-between;
     transition:background-color .25s;
     &:not(:last-child){
       border-bottom: 1px solid lightgrey;
@@ -87,6 +89,10 @@ $sidebarHandleWidth:25px;
     }
     &.active{
       background-color:rgba(0,0,0,0.05);
+    }
+    .sortByText{
+      color:grey;
+      margin-right:1em;
     }
   }
 }

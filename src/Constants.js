@@ -13,22 +13,20 @@ export const getMarkerUrl = feature => {
   return `/markers/${feature.properties.post_id}/${feature.properties.name}`;
 }
 
-export const getFeatureByPostId = (features,post_id) => {
-  return (features || []).find(feature => {
-    return (feature.properties.post_id === post_id);
-  })
+export const getFeatureId = feature => {
+  return feature.properties.unique_id;
 }
 
-export const getFeatureIndexByPostId = (features,post_id) => {
-  const index = (features || []).findIndex(feature => {
-    return (feature.properties.post_id === post_id);
-  })
+export const getFeatureById = (features,id) => {
+  return (features || []).find(feature => getFeatureId(feature) === id)
+}
 
-  return (index > -1) ? index : undefined;
+export const setFeatureDistance = (feature,origin) => {
+  feature.properties.distance = turf.distance(feature.geometry,origin);//in km
 }
 
 //sort features by distance (returns a new copy of the array)
-export const sortFeaturesByDistance = (origin,features) => {
+export const sortFeaturesByDistance = (features,origin) => {
 
   if (features === undefined) return;
 
@@ -37,7 +35,7 @@ export const sortFeaturesByDistance = (origin,features) => {
 
   //add 'distance' prop
   collection.forEach(feature => {
-    feature.properties.distance = turf.distance(origin, feature.geometry);//in km
+    setFeatureDistance(feature,origin);
   });
 
   return collection.sort((a, b) => {
@@ -49,7 +47,7 @@ export const sortFeaturesByDistance = (origin,features) => {
 //in km
 //https://gist.github.com/jbranigan/f334f471f954d78880806451eee25bba
 export const getDistanceToClosestFeature = (origin,features) => {
-  const featuresByDistance = sortFeaturesByDistance(origin,features);
+  const featuresByDistance = sortFeaturesByDistance(features,origin);
   const match = featuresByDistance[0];
   return match?.properties.distance;
 }
