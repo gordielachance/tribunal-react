@@ -62,6 +62,8 @@ const MapSidebar = (props) => {
             onSortBy={props.onSortBy}
             disabledTags={props.markerTagsDisabled}
             onDisableTags={props.onDisableTags}
+            disabledFormats={props.markerFormatsDisabled}
+            onDisableFormats={props.onDisableFormats}
             />
           }
           {

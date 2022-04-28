@@ -1,7 +1,7 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 
-const MapTags = props => {
+const MapSettingsFormats = props => {
 
   const [disabled,setDisabled] = useState(props.disabled || []);
 
@@ -25,18 +25,15 @@ const MapTags = props => {
   }
 
   //get pairs of layer name => array of post IDs
-  const getLayerCollection = features => {
+  const getCollection = features => {
     const output = {};
 
     (features || []).forEach(feature => {
-      const slugs = feature.properties.layer_slugs;
-
-      (slugs || []).forEach(slug => {
-        if ( !output.hasOwnProperty(slug) ){
-          output[slug] = []
-        }
-        output[slug].push(feature.properties.post_id);
-      })
+      const slug = feature.properties.format;
+      if ( !output.hasOwnProperty(slug) ){
+        output[slug] = []
+      }
+      output[slug].push(feature.properties.post_id);
     });
     return Object.keys(output).map(function(slug) {
       const item = output[slug];
@@ -47,29 +44,20 @@ const MapTags = props => {
     })
   }
 
-  const layerCollection = getLayerCollection(props.features);
+  const collection = getCollection(props.features);
 
   //pass update to parent
   useEffect(() => {
     if (typeof props.onDisable !== 'function') return;
-
-    /*
-    const slugs = layerCollection.map(function(item) {
-      return item.slug;
-    })
-    const enabled = slugs.filter(x => !disabled.includes(x));
-    */
-
     props.onDisable(disabled);
-
   },[disabled]);
 
   return(
-    <div id="map-settings-tags">
-      <h5>Tags</h5>
+    <div id="map-settings-formats">
+      <h5>Type</h5>
       <ul>
         {
-          layerCollection.map(function(item) {
+          collection.map(function(item) {
             const slug = item.slug;
             const count = item.ids.length;
 
@@ -91,4 +79,4 @@ const MapTags = props => {
   )
 }
 
-export default MapTags
+export default MapSettingsFormats

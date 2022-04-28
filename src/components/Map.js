@@ -12,7 +12,7 @@ import {MAPBOX_TOKEN,WP_URL,DEBUG} from "./../Constants";
 import {getMarkerUrl,getFeatureById,getDistanceFromOriginToClosestFeature,getDistanceFromFeatureToClosest} from "../Constants";
 
 import { MarkerIcons } from "./MarkerIcons";
-import { MarkerPopup } from "./MarkerPopup";
+import { FeaturePopup } from "./FeatureCard";
 import './Map.scss';
 import MarkerPost from "./MarkerPost";
 import MapSidebar from "./MapSidebar";
@@ -40,6 +40,10 @@ const Map = (props) => {
   const [mapMoving,setMapMoving] = useState(false);
   const [sortMarkerBy,setSortMarkerBy] = useState('date');
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
+  const [tagsFilter,setTagsFilter] = useState();
+  const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
+  const [formatsFilter,setFormatsFilter] = useState();
+  const [markersFilter,setMarkersFilter] = useState();
 
   const rawMapData = {
     map:{
@@ -132,7 +136,7 @@ const Map = (props) => {
     })
 
     //get popup content
-    const content = getMarkerPopupContent(feature);
+    const content = getFeaturePopupContent(feature);
 
     // Ensure that if the map is zoomed out such that multiple
     // copies of the feature are visible, the popup appears
@@ -188,15 +192,12 @@ const Map = (props) => {
 
   }
 
-  const getMarkerPopupContent = feature => {
+  const getFeaturePopupContent = feature => {
     // create the popup
     const el = document.createElement('div');
     ReactDOM.render(
-      <MarkerPopup
-      title={feature.properties.title}
-      description={feature.properties.excerpt}
-      post_id={feature.properties.post_id}
-      tags={feature.properties.tags}
+      <FeaturePopup
+      feature={feature}
       onClick={e=>{showFullMarker(feature)}}
       onClose={e=>setActiveFeatureId()}
       />
@@ -564,34 +565,6 @@ const Map = (props) => {
     setSortMarkerBy(key);
   }
 
-  const handleDisabledTags = slugs => {
-    console.log("DISABLED TAGS UPDATED",slugs);
-    setMarkerTagsDisabled(slugs);
-
-    const getTagsFilter = tags => {
-
-      //no tags set
-      if ( (tags || []).length === 0) return;
-
-      //expression for each tag
-      const tagFilters = tags.map(tag=>['in',tag,['get', 'layer_slugs']])
-
-      return ['any'].concat(tagFilters);
-
-    }
-
-    const tagsFilter = getTagsFilter(slugs);
-
-    if (tagsFilter){
-      map.setFilter("markers",['!',getTagsFilter(slugs)]);
-    }else{
-      map.setFilter("markers",undefined);
-    }
-
-
-  }
-
-
   //At init
   useEffect(() => {
 
@@ -691,6 +664,81 @@ const Map = (props) => {
 
   },[activePopupId])
 
+
+  //build features tags filter
+  useEffect(()=>{
+    const buildFilter = tags => {
+
+      //no tags set
+      if ( (tags || []).length === 0) return;
+
+      //expression for each tag
+      const tagFilters = tags.map(tag=>['in',tag,['get', 'layer_slugs']])
+
+      return ['any'].concat(tagFilters);
+
+    }
+
+    let filter = buildFilter(markerTagsDisabled);
+
+    if (filter){//exclude all
+      filter = ['!',filter];
+    }
+
+    setTagsFilter(filter);
+  },[markerTagsDisabled])
+
+  //build features formats filter
+  useEffect(()=>{
+    const buildFilter = formats => {
+
+      //no formats set
+      if ( (formats || []).length === 0) return;
+
+      return ['in', ['get', 'format'], ['literal', formats]];
+
+    }
+
+    let filter = buildFilter(markerFormatsDisabled);
+
+    if (filter){//exclude all
+      filter = ['!',filter];
+    }
+
+    setFormatsFilter(filter);
+  },[markerFormatsDisabled])
+
+  //set global marker filters
+  useEffect(()=>{
+
+    const filters = [
+      tagsFilter,
+      formatsFilter
+    ]
+
+    const buildFilter = filters => {
+
+      filters = filters.filter(function(filter) {
+        return filter !== undefined;
+      });
+
+      //no filters
+      if ( (filters || []).length === 0) return;
+      return ['all'].concat(filters);
+    }
+
+    const filter = buildFilter(filters);
+    setMarkersFilter(filter);
+
+  },[tagsFilter,formatsFilter])
+
+  //set global marker filters
+  useEffect(()=>{
+    if (map === undefined) return;
+    console.log("RUN GLOBAL FILTER",markersFilter);
+    map.setFilter("markers",markersFilter);
+  },[markersFilter])
+
   return (
     <Dimmer.Dimmable as={Container} dimmed={loading} id="map-container">
       <Dimmer active={loading} inverted>
@@ -710,7 +758,10 @@ const Map = (props) => {
       sortMarkerBy={sortMarkerBy}
       onSortBy={handleSortBy}
       markerTagsDisabled={markerTagsDisabled}
-      onDisableTags={handleDisabledTags}
+      onDisableTags={slugs=>setMarkerTagsDisabled(slugs)}
+      markerFormatsDisabled={markerFormatsDisabled}
+      onDisableFormats={slugs=>setMarkerFormatsDisabled(slugs)}
+      hasMarkersFilters={(markersFilter!==undefined)}
       />
       <div
       id="map"

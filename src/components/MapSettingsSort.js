@@ -1,7 +1,7 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 
-const MapSort = props => {
+const MapSettingsSort = props => {
 
   const [sortBy,setSortBy] = useState(props.sortBy);
 
@@ -49,4 +49,4 @@ const MapSort = props => {
   )
 }
 
-export default MapSort
+export default MapSettingsSort

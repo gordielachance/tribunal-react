@@ -4,7 +4,8 @@ import * as turf from "@turf/turf";
 
 import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
-import {getHumanDistance,setFeatureDistance} from "../Constants";
+import { FeatureCard } from "./FeatureCard";
+import {setFeatureDistance,getHumanDistance} from "../Constants";
 
 const MarkerList = props => {
 
@@ -89,18 +90,13 @@ const MarkerList = props => {
             const active = (props.feature_id === feature_id);
             return (
               <li
-              key={k}
+              key={"feature-card-"+k}
               onClick={e=>{props.onFeatureClick(feature_id)}}
               className={classNames({
                 active:   active
               })}
               >
-                <span>
-                  {feature.properties.title}
-                </span>
-                <span className="sortByText">
-                  {getSortByText(feature)}
-                </span>
+                <FeatureCard feature={feature}/>
               </li>
             )
           })

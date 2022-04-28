@@ -99,11 +99,18 @@ $sidebarHandleWidth:25px;
   &.mapMoving{
     opacity:.5;
   }
-  li{
+  > li{
     @extend .clickable;
     display: flex;
     justify-content: space-between;
     transition:background-color .25s;
+
+    .feature-card{
+      .feature-description{
+        display:none;
+      }
+    }
+
     &:not(:last-child){
       border-bottom: 1px solid lightgrey;
       padding: 1em 0;
@@ -141,7 +148,8 @@ $sidebarHandleWidth:25px;
   }
 }
 
-#map-settings-tags{
+#map-settings-tags,
+#map-settings-formats{
   li{
     .icon{
       opacity:.25;
@@ -180,5 +188,51 @@ $sidebarHandleWidth:25px;
   width:50%;
   img{
 
+  }
+}
+
+.feature-card{
+  .feature-header{
+
+    .feature-title{
+      font-weight: bold;
+    }
+    .feature-meta{
+      color: grey;
+      &.feature-tags{
+        margin:0;
+        padding:0;
+        display: inline;
+        list-style: none;
+
+        li{
+          display:inline-block;
+          &:not(:last-child){
+            margin-right:.5em;
+          }
+          .label{
+            font-weight: normal;
+            margin: 0.25em 0;
+            font-size:.8em;
+            padding: 0.4em 0.5em;
+          }
+        }
+      }
+    }
+  }
+  .feature-description{
+    padding:.5em 0;
+  }
+}
+
+.feature-popup{
+  .feature-header{
+    text-align: center;
+    padding-bottom:.5em;
+  }
+  .feature-actions{
+    text-align:center;
+    border-top:1px solid lightgrey;
+    padding-top:.5em;
   }
 }
