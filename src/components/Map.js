@@ -568,12 +568,26 @@ const Map = (props) => {
     console.log("DISABLED TAGS UPDATED",slugs);
     setMarkerTagsDisabled(slugs);
 
-    const tagsFilter = ['in', ['get', 'post_id'], ['literal', [546, 240,195]]];
+    const getTagsFilter = tags => {
 
-    console.log("SET TAGS FILTER",tagsFilter);
-    map.setFilter("markers",tagsFilter);
+      //no tags set
+      if ( (tags || []).length === 0) return;
 
-    //map.setFilter("markers",['==', 'post_id', 528]);
+      //expression for each tag
+      const tagFilters = tags.map(tag=>['in',tag,['get', 'layer_slugs']])
+
+      return ['any'].concat(tagFilters);
+
+    }
+
+    const tagsFilter = getTagsFilter(slugs);
+
+    if (tagsFilter){
+      map.setFilter("markers",['!',getTagsFilter(slugs)]);
+    }else{
+      map.setFilter("markers",undefined);
+    }
+
 
   }
 

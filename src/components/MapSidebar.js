@@ -48,7 +48,7 @@ const MapSidebar = (props) => {
                 onClick={e=>setSection('markers')}
               />
               <Menu.Item
-                name='Options'
+                name='Filtres'
                 active={section === 'settings'}
                 onClick={e=>setSection('settings')}
               />
