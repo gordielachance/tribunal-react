@@ -7,7 +7,7 @@ export const DEBUG = IS_LOCAL;
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 export const WP_URL = 'http://tribunaldp.local'//'http://www.tribunaldesprejuges.org';//'http://tribunaldp';
 
-
+export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
 
 export const getMarkerUrl = feature => {
   return `/markers/${feature.properties.post_id}/${feature.properties.name}`;

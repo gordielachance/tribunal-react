@@ -15,10 +15,6 @@ const FeatureTags = (props) => {
     setSlugs(slugs);
   },[props.tags,props.format])
 
-  const formatSlugs = ['aside','gallery','link','image','quote','status','video','audio','chat']
-
-
-
   const getIcon = slug => {
     switch(slug){
       case 'gallery':

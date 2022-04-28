@@ -1,38 +1,28 @@
-import React, {useState,useEffect} from 'react';
+import React, {useState,useEffect,useRef} from 'react';
 import axios from 'axios';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
 import {WP_URL} from "./../Constants";
 
 const MarkerPost = (props) => {
-  const [loading,setLoading] = useState(false);
-  const [post,setPost] = useState();
+  const iframeContent = useRef(null);
+  const [title,setTitle] = useState('...');
+  const [loading,setLoading] = useState(true);
+  const iframeUrl = WP_URL + `/?p=${props.post_id}` + '&iframe'
 
-  const getMarkerPost = async(post_id) => {
-    const url = WP_URL + "/wp-json/geoposts/v1/marker/" + post_id;
-    return axios.get(url);
+  const handleLoaded = () => {
+    const iframeItem = iframeContent.current;
+
+    console.log("IFRAME",iframeItem);
+
+    try{
+      const iFrameTitle = iframeItem.contentWindow.document.title;
+      setTitle(iFrameTitle);
+    } catch (error) {
+      console.log("error getting iframe title",error);
+    }
+
+    setLoading(false);
   }
-
-  useEffect(() => {
-
-    if (props.post_id === undefined) return;
-
-    setPost();
-    setLoading(true);
-
-    getMarkerPost(props.post_id)
-    .then(response => response.data)
-    .then(response => {
-      console.log("BACKEND POST RESPONSE",response);
-      setPost(response);
-    })
-    .catch(error => {
-      console.error(error);
-    })
-    .finally(function(){
-      setLoading(false);
-    })
-
-  },[props.post_id]);
 
   return(
     <Modal
@@ -43,10 +33,7 @@ const MarkerPost = (props) => {
     >
       <Modal.Header>
       {
-        post ?
-          <span>{post.post_title}</span>
-        :
-          <span>...</span>
+          <span>{title}</span>
       }
       </Modal.Header>
         <Dimmer.Dimmable as={Modal.Content} dimmed={loading}>
@@ -54,14 +41,12 @@ const MarkerPost = (props) => {
             <Loader />
           </Dimmer>
           <Modal.Description>
-          {
-            post &&
-            <div
-              dangerouslySetInnerHTML={{
-                __html: post.post_content
-              }}>
-            </div>
-          }
+            <iframe
+            id="marker-iframe"
+            ref={iframeContent}
+            src={iframeUrl}
+            onLoad={handleLoaded}
+            />
           </Modal.Description>
         </Dimmer.Dimmable>
     </Modal>

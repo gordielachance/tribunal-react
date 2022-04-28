@@ -168,19 +168,12 @@ $sidebarHandleWidth:25px;
 }
 
 .marker-modal{
-  >.content{
-    max-height: 80vh;
-    overflow: auto;
-    .description{
-      img{
-        height:auto;
-      }
-      iframe{
-        width:100%;
-        margin:auto;
-      }
-    }
+  height:80%;
+  .content,.description,#marker-iframe{
+    width:100%;
+    height:100%;
   }
+
 }
 
 #logo{
