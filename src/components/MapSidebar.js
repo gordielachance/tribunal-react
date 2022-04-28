@@ -67,7 +67,8 @@ const MapSidebar = (props) => {
           {
             (section === 'markers') &&
             <MarkerList
-            center={props.center}
+            mapCenter={props.mapCenter}
+            mapMoving={props.mapMoving}
             features={props.features}
             feature_id={props.feature_id}
             onFeatureClick={props.onFeatureClick}

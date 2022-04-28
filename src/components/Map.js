@@ -1,4 +1,4 @@
-import React, { useRef, useEffect,useState }  from "react";
+import React, { useRef,useEffect,useState,useCallback }  from "react";
 import ReactDOM from 'react-dom';
 import { useParams,useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
@@ -6,9 +6,10 @@ import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import axios from 'axios';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
+import classNames from "classnames";
 
 import {MAPBOX_TOKEN,WP_URL,DEBUG} from "./../Constants";
-import {getMarkerUrl,getFeatureById,getDistanceToClosestFeature,getFeatureId} from "../Constants";
+import {getMarkerUrl,getFeatureById,getDistanceFromOriginToClosestFeature,getDistanceFromFeatureToClosest} from "../Constants";
 
 import { MarkerIcons } from "./MarkerIcons";
 import { MarkerPopup } from "./MarkerPopup";
@@ -24,268 +25,90 @@ const Map = (props) => {
 
   const mapContainerRef = useRef(null);
   const [map,setMap] = useState(undefined);
-  const hasInitMap = useRef(false);
-  const [sources,setSources] = useState(undefined);
   const [loading,setLoading] = useState(true);
 
   const currentFeatureId = params?.markerId;//id of the feature that has its details shown
-  const [activeFeatureId,setActiveFeatureId] = useState();//id of the feature that has its popup open
-  const previousFeatureId = useRef();
+  const [activeFeatureId,setActiveFeatureId] = useState();//id of the active feature
+  const [activePopupId,setActivePopupId] = useState();//id of the active feature
   const previousPopupId = useRef();
 
-  const [featurePopup,setFeaturePopup] = useState();//current feature popup (so we can remove it)
+  const previousFeatureId = useRef();
 
-  const [sidebarCenter,setSidebarCenter] = useState();
+  const markerPopup = useRef();//current feature popup (so we can remove it)
+
+  const [mapCenter,setMapCenter] = useState();
+  const [mapMoving,setMapMoving] = useState(false);
   const [sortMarkerBy,setSortMarkerBy] = useState('date');
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
 
-  const mapFocusFeatureId = useRef();
-
-  //sources before having been prepared
-  const rawSources = {
-    basemap: {
-      type:         'raster',
-      tiles: [
-                    'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
-      ],
-      tileSize:     256,
-
+  const rawMapData = {
+    map:{
+      style: 'mapbox://styles/gordielachance/ckkplfnd60xgg17o0ilwozq2o',
+      center: [4.3779,50.7786],
+      zoom: 10
     },
-    handDrawn: {
-      type:         'raster',
-      tiles: [
-                    'http://tribunaldesprejuges.org/wordpress/wp-content/uploads/tdp_tiles/GS/{z}/{x}/{y}.png'
-      ],
-      tileSize:     256,
+    sources:{
 
-    },
-    markers:{
-      type:         "geojson",
-      data:         WP_URL + "/wp-json/geoposts/v1/geojson/markers",
-      generateId:   true
-    }
-  };
-
-  const mapLayers = [
-    {
-      'id': 'basemap',
-      'type': 'raster',
-      'source': 'basemap',
-      'minzoom': 0,
-      'maxzoom': 22,
-      paint : {
-        "raster-opacity" : 0.1
-      }
-    },
-    /*
-    {
-      'id': 'handDrawn',
-      'type': 'raster',
-      'source': 'handDrawn',
-      'minzoom': 0,
-      'maxzoom': 22,
-    },
-    */
-    {
-      id: 'markers',
-      type: 'circle',
-      source: 'markers',
-      paint: {
-        'circle-color':'#f3d511',
-        'circle-radius':10,
-        'circle-stroke-width': 2,
-        'circle-stroke-color': [
-          'case',
-          ['boolean', ['feature-state', 'active'], false],
-          '#000000',
-          '#c6ad09',//fallback
+      basemap: {
+        type:'raster',
+        tiles: [
+          'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
         ],
+        tileSize:256,
 
+      },
+      /*
+      handDrawn: {
+        type:'raster',
+        tiles: [
+          'http://tribunaldesprejuges.org/wordpress/wp-content/uploads/tdp_tiles/GS/{z}/{x}/{y}.png'
+        ],
+        tileSize:256,
+
+      },
+      */
+      markers:{
+        type:"geojson",
+        data:WP_URL + "/wp-json/geoposts/v1/geojson/markers",
+        promoteId:'unique_id' //property to use for mapbox features IDs.
+        //generateId:   true
       }
-
-    }
-  ]
-
-
-  /*
-  Get JSONs from url and replace it with the loaded content.
-  So we can access the geoJSON data without the need of mapbox.
-  */
-
-  const fillGeoJsonSources = async (sources) => {
-
-    console.log("FILLING GEOJSON SOURCES FROM REMOTE URLS...",sources);
-
-    const promises = Object.keys(sources).map(function(key, index) {
-      const source = sources[key];
-
-      return axios.get(
-        source.data, //URL
-        {
-        headers: {
-          'Content-Type': 'application/json'
+    },
+    layers:{
+      basemap:{
+        type: 'raster',
+        source: 'basemap',
+        minzoom: 0,
+        maxzoom: 22,
+        paint : {
+          "raster-opacity" : 0.1
         }
-      })
-    })
-
-    return axios
-    .all(promises)
-    .then(responses => {
-
-      //return a copy of the initial object and replace the 'data' prop with our responses
-      const filledSources = Object.fromEntries(
-        Object.entries(sources).map(
-
-          ([k, v], i) => [
-            k,
-            {
-              ...v,
-              data:responses[i].data
-            }
-
+      },
+      handDrawn:{
+        type: 'raster',
+        source: 'handDrawn',
+        minzoom: 0,
+        maxzoom: 22,
+      },
+      markers:{
+        type: 'circle',
+        source: 'markers',
+        paint: {
+          'circle-color':'#f3d511',
+          'circle-radius':10,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': [
+            'case',
+            ['boolean', ['feature-state', 'active'], false],
+            '#000000',
+            '#c6ad09',//fallback
           ]
-        )
-      );
-      return filledSources;
-
-    })
-    .catch(errors => {
-      // react on errors.
-      console.error(errors);
-    });
-
-  }
-
-  const loadSources = async() => {
-
-    console.log("LOAD SOURCES",rawSources);
-
-    //filter geoJson sources
-    let geoJsonSources = {}
-    for (const [key, source] of Object.entries(rawSources)) {
-      if (source.type==='geojson'){
-        geoJsonSources[key] = source;
-      }
-    }
-
-    return fillGeoJsonSources(geoJsonSources)
-
-    //merge initial datas with the new datas
-    .then(function (filledGeoJsonSources) {
-      return {...rawSources, ...filledGeoJsonSources };
-    })
-    //TOUFIX TOUREMOVE
-    .then(function(sources){
-      sources.markers.data = {
-        "type":"FeatureCollection",
-        "features":[
-        	{
-        		"properties":{
-        			"post_id":925,
-        			"post_type":"geoposts_marker",
-        			"layerkeys":[
-
-        			],
-        			"classes":[
-        				"geoposts-layer",
-        				"geoposts_marker",
-        				"geoposts-post-925",
-        				"geoposts-popup-on-hover"
-        			],
-        			"icon_id":0,
-        			"title":"Jette - G\u00e9ographie des pr\u00e9jug\u00e9s",
-        			"name":"jette-geographie-des-prejuges",
-        			"format":false,
-        			"excerpt":"Cr\u00e9ation de carte subjective de la commune de Jette avec un groupe de jeunes de l&rsquo;\u00e9cole Saint-Pierre de Jette.",
-        			"timestamp":1613600421,
-        			"tag_slugs":[
-
-        			],
-        			"layer_slugs":[
-
-        			],
-        			"thumbnail":"http:\/\/tribunaldp.local\/wordpress\/wp-content\/uploads\/2021\/02\/JETTE_version-DEZOOM_200dpi_5.jpg",
-        			"has_more":true
-        		},
-        		"style":{
-        			"opacity":1
-        		},
-        		"type":"Feature",
-        		"geometry":{
-        			"type":"Point",
-        			"coordinates":[
-        				4.3263281726710003,
-        				50.877655625861998
-        			]
-        		}
-        	},
-        	{
-        		"properties":{
-        			"title":"NO POST ID",
-        			"name":"cartes-subjectives",
-        			"format":false,
-        			"excerpt":"Cr\u00e9ation de carte subjective de la commune de Neder-over-Heembeek avec un groupe de jeunes de la Cit\u00e9 Versailles.",
-        			"timestamp":1613595450
-        		},
-        		"type":"Feature",
-        		"geometry":{
-        			"type":"Point",
-        			"coordinates":[
-        				4.3777731241898996,
-        				50.896284446804003
-        			]
-        		}
-        	}
-        ]
         }
-      return sources;
-    })
-    //set features unique IDs (that is what we use to select features in the code)
-    .then(function(sources) {
-      for (const [sourceKey, source] of Object.entries(sources)) {
-        if (!source?.data) continue;
-        if (source.data.type !== 'FeatureCollection') continue;
-
-        source.data.features = source.data.features.map(function(feature,index) {
-          return {
-            ...feature,
-            properties:{
-              ...feature.properties,
-              unique_id:`${sourceKey}-feature-${index}`
-            }
-          }
-        })
       }
-      return sources;
-    })
-    .then(function(sources) {
-      setSources(sources);
-    })
-    .catch(errors => {
-      // react on errors.
-      console.error(errors);
-    });
-
-  }
-
-  const addMapSources = () => {
-    //append map sources
-    console.log("INIT MAP SOURCES",sources);
-    for (var key in sources) {
-      const data = sources[key];
-      map.addSource(key,data);
     }
-
   }
 
-  const initMapIcons = () => {
-    //load SVG icons
-    MarkerIcons.forEach(icon => {
-        let customIcon = new Image(24, 24);
-        customIcon.onload = () => map.addImage(icon.name, customIcon)
-        customIcon.src = icon.src;
-    });
-  }
+  const [dataMap,setDataMap] = useState();
 
   const addFeaturePopup = feature => {
 
@@ -305,8 +128,7 @@ const Map = (props) => {
     );
 
     popup.on('close', function(e) {
-        console.log("CLOSED POPUP FOR FEATURE",getFeatureId(feature))
-        console.log("CURREANT FEAT",activeFeatureId)
+      setActivePopupId(undefined);
     })
 
     //get popup content
@@ -329,11 +151,7 @@ const Map = (props) => {
     .addTo(map);
   }
 
-  const initMapLayers = () => {
-
-    mapLayers.forEach(layer => {
-      map.addLayer(layer);
-    })
+  const initMapListeners = map => {
 
     //Update cursor on marker
     map.on('mouseenter','markers', e => {
@@ -346,6 +164,13 @@ const Map = (props) => {
       map.getCanvas().style.cursor = '';
     });
 
+    /*
+    const handleMarkerClick = useCallback((e) => {
+
+    },[])
+    */
+
+
     //open (add) popup when clicking marker
     map.on('click','markers', e => {
 
@@ -353,21 +178,13 @@ const Map = (props) => {
 
       //clicked marker
       const feature = e.features[0];
-      const feature_id = getFeatureId(feature);
-
-      console.log("clicked",feature_id,feature);
-
-      setActiveFeatureId(feature_id);
-
-      //popup
-      const hasPopup = (feature.state?.popup === true);
-
-      togglePopupOnMap(feature,!hasPopup);
+      activateFeature(feature.id);
 
     });
 
-    //list all layers
-    console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
+    map.on('idle', () => {
+      console.log('A idle event occurred.');
+    });
 
   }
 
@@ -389,18 +206,208 @@ const Map = (props) => {
     return el;
   }
 
+  const initData = async(inputData) => {
+    //it is not currently possible to query ALL the features of a geoJSON source; and we need them for calculations.
+    //so, we need to preload them :/
+    //https://github.com/mapbox/mapbox-gl-js/issues/9720
+    const swapGeoJsonSources = async sources => {
 
+      /*
+      //update geojson sources:
+      /update data from url > json
+      */
 
-  const initMap = () => {
+      const updateGeoJsonSources = async geoJsonSources => {
+
+        console.log("FILLING GEOJSON SOURCES FROM REMOTE URLS...",geoJsonSources);
+
+        const promises = Object.keys(geoJsonSources).map(function(key, index) {
+          const source = geoJsonSources[key];
+
+          return axios.get(
+            source.data, //URL
+            {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+        })
+
+        return axios
+        .all(promises)
+        .then(responses => {
+
+          //return a copy of the initial object and replace the 'data' prop with our responses
+          const filledSources = Object.fromEntries(
+            Object.entries(geoJsonSources).map(
+
+              ([k, v], i) => [
+                k,
+                {
+                  ...v,
+                  data:responses[i].data
+                }
+
+              ]
+            )
+          );
+          return filledSources;
+
+        })
+        .catch(errors => {
+          // react on errors.
+          console.error(errors);
+        });
+
+      }
+
+      //filter geoJson sources
+      let geoJsonSources = {}
+      for (const [key, source] of Object.entries(sources)) {
+        if (source.type==='geojson'){
+          geoJsonSources[key] = source;
+        }
+      }
+
+      return updateGeoJsonSources(geoJsonSources)
+
+      //merge initial datas with the new datas
+      .then(function (filledGeoJsonSources) {
+        return {...sources, ...filledGeoJsonSources };
+      })
+      .catch(errors => {
+        // react on errors.
+        console.error(errors);
+      });
+    }
+
+    const fetchedSources = await swapGeoJsonSources(inputData.sources);
+
+    const outputData = {
+      ...inputData,
+      sources:fetchedSources
+    }
+
+    //TOUFIX URGENT DEMO CONTENT
+    /*
+    outputData.sources.markers.data = {
+      "type":"FeatureCollection",
+      "features":[
+        {
+          "properties":{
+            "post_id":925,
+            "post_type":"geoposts_marker",
+            "layerkeys":[
+
+            ],
+            "classes":[
+              "geoposts-layer",
+              "geoposts_marker",
+              "geoposts-post-925",
+              "geoposts-popup-on-hover"
+            ],
+            "icon_id":0,
+            "title":"Jette - G\u00e9ographie des pr\u00e9jug\u00e9s",
+            "name":"jette-geographie-des-prejuges",
+            "format":false,
+            "excerpt":"Cr\u00e9ation de carte subjective de la commune de Jette avec un groupe de jeunes de l&rsquo;\u00e9cole Saint-Pierre de Jette.",
+            "timestamp":1613600421,
+            "tag_slugs":[
+
+            ],
+            "layer_slugs":[
+
+            ],
+            "thumbnail":"http:\/\/tribunaldp.local\/wordpress\/wp-content\/uploads\/2021\/02\/JETTE_version-DEZOOM_200dpi_5.jpg",
+            "has_more":true
+          },
+          "style":{
+            "opacity":1
+          },
+          "type":"Feature",
+          "geometry":{
+            "type":"Point",
+            "coordinates":[
+              4.3263281726710003,
+              50.877655625861998
+            ]
+          }
+        },
+        {
+          "properties":{
+            "title":"NO POST ID",
+            "name":"cartes-subjectives",
+            "format":false,
+            "excerpt":"Cr\u00e9ation de carte subjective de la commune de Neder-over-Heembeek avec un groupe de jeunes de la Cit\u00e9 Versailles.",
+            "timestamp":1613595450
+          },
+          "type":"Feature",
+          "geometry":{
+            "type":"Point",
+            "coordinates":[
+              4.3777731241898996,
+              50.896284446804003
+            ]
+          }
+        }
+      ]
+    }
+    */
+
+    const setFeatureIds = (features,prefix) => {
+      for (var index in features) {
+        const feature = features[index];
+        const id = `${prefix}-feature-${index}`;
+
+        features[index] = {
+          ...feature,
+          properties:{
+            ...feature.properties,
+            unique_id:id
+          }
+        }
+      }
+    }
+
+    //Set unique features IDs (that is what we use to select features in the code)
+    setFeatureIds(outputData.sources.markers.data.features,'markers');
+
+    return outputData;
+  }
+
+  const initMap = async (dataMap) => {
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
-
     const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/gordielachance/ckkplfnd60xgg17o0ilwozq2o',
-      center: [4.3779,50.7786],
-      zoom: 10
+      ...dataMap.map,
+      container: mapContainerRef.current
     });
+
+    map.on('load', () => {
+      //init mapbox sources
+      for (var key in dataMap.sources) {
+        const data = dataMap.sources[key];
+        console.log("ADD SOURCE",key,data);
+        map.addSource(key,data);
+      }
+
+      //init mapbox layers
+      for (var key in dataMap.layers) {
+        //conform data for mapbox layers
+        const data = {
+          ...dataMap.layers[key],
+          id:key
+        }
+        console.log("ADD LAYER",key,data);
+        map.addLayer(data);
+      }
+
+      //list all layers
+      console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
+
+      setMap(map);
+      setLoading(false);
+    })
 
     map.once('load', (e) => {
 
@@ -417,13 +424,23 @@ const Map = (props) => {
       // Add navigation control (the +/- zoom buttons)
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      setSidebarCenter([map.getCenter().lng,map.getCenter().lat]); //on load
+      setMapCenter([map.getCenter().lng,map.getCenter().lat]); //on load
 
-      setMap(map);
+      initMapListeners(map);
+
+    });
+
+    map.on('movestart', (e) => {
+      setMapMoving(true);
     });
 
     map.on('moveend', (e) => {
-      setSidebarCenter([map.getCenter().lng,map.getCenter().lat]); //on load
+      setMapMoving(false);
+    });
+
+
+    map.on('moveend', (e) => {
+      setMapCenter([map.getCenter().lng,map.getCenter().lat]); //on load
       console.log({
         'bounds':map.getBounds(),
         'center':[map.getCenter().lng.toFixed(4),map.getCenter().lat.toFixed(4)],
@@ -432,69 +449,37 @@ const Map = (props) => {
     });
 
     //when a specific source has been loaded
-    map.on('sourcedata', (e) => {
+    map.once('sourcedata', (e) => {
       if (e.sourceId !== 'markers') return;
       if (!e.isSourceLoaded) return;
       console.log("SOURCE DATA LOADED",e.source);
-});
+      const sourceObject = map.getSource('markers');
+      console.log("RESOURCE YO",sourceObject);
+      var features = map.querySourceFeatures('markers');
+      console.log("FEATURES YO",features);
+    });
 
 
   }
-
-  //At init
-  useEffect(() => {
-    loadSources();
-    initMap();
-    // Clean up on unmount
-    return () => {
-      if (map){
-        map.remove();
-      }
-    }
-  },[]);
-
-  useEffect(() => {
-    if (map===undefined) return;
-    console.log("MAP INITIALIZED",map);
-  }, [map]);
-
-  useEffect(() => {
-    if (sources===undefined) return;
-    console.log("SOURCES INITIALIZED",sources);
-  }, [sources]);
-
-  useEffect(() => {
-    if (sources === undefined) return;
-    if (map === undefined) return;
-    setLoading(false);
-  },[sources,map])
-
-  useEffect(() => {
-    console.log("LOADING:",loading);
-  },[loading])
-
-  //when map is initialized
-  useEffect(() => {
-    if (hasInitMap.current) return;
-    if (sources === undefined) return;
-    if (map === undefined) return;
-
-    addMapSources();
-    initMapIcons();
-    initMapLayers();
-
-    hasInitMap.current = true;
-
-  }, [map,sources]);
 
   /*
   create a circle that extends to the closest marker,
   and zoom on it.
   */
-  const fitToFeature = feature => {
+  const fitToFeature = useCallback((feature) => {
+
+    //get minimum zoom to see clearly this marker
+
+    /*
+    //distance from feature to the nearest point
+    const distanceToNearest = getDistanceFromFeatureToClosest(feature_id,dataMap.sources.markers.data.features);
+    console.log("NEAREST MARKER DIST",distanceToNearest);
+    return;
+    */
+
 
     const origin = feature.geometry.coordinates;
-    const radius = getDistanceToClosestFeature(origin,sources.markers.data.features);
+    const radius = getDistanceFromOriginToClosestFeature(origin,dataMap.sources.markers.data.features);
     const circle = turf.circle(origin,radius);
 
     //for debug purposes
@@ -531,90 +516,7 @@ const Map = (props) => {
       maxZoom:14,
       padding:100//px
     });
-  }
-
-  useEffect(()=>{
-    if (activeFeatureId === undefined) return;
-
-    //remove current popup if any
-    if (featurePopup){
-      featurePopup.remove();
-    }
-
-    const feature = getFeatureById(sources?.markers.data.features,activeFeatureId);
-
-
-
-  },[activeFeatureId])
-
-  const setActiveMarkerOnMap = feature => {
-
-    //unset previous
-    if (previousFeatureId.current !== undefined) {
-      map.setFeatureState(
-        { source: 'markers', id: previousFeatureId.current },
-        { active: false }
-      );
-    }
-    //set current
-    if (feature?.id !== undefined){
-      previousFeatureId.current = feature.id
-      map.setFeatureState(
-        { source: 'markers', id: feature.id },
-        { active: true }
-      );
-    }
-  }
-
-  const togglePopupOnMap = (feature,bool) => {
-
-    //unset previous
-    if (previousPopupId.current !== undefined) {
-      map.setFeatureState(
-        { source: 'markers', id: previousPopupId.current },
-        { popup: false }
-      );
-    }
-    //set current
-    if (feature?.id !== undefined){
-
-      if (bool){
-        previousPopupId.current = feature.id
-        map.setFeatureState(
-          { source: 'markers', id: feature.id },
-          { popup: true }
-        );
-
-        //open popup
-        try {
-          const popup = addFeaturePopup(feature);
-          setFeaturePopup(popup);
-        } catch (error) {
-          console.error(error);
-        }
-
-      }else{
-        previousPopupId.current = undefined;
-      }
-
-
-    }
-
-    console.log("FEATBLI",feature);
-  }
-
-  //visually toggle active marker on map
-  useEffect(()=>{
-
-    console.log("ACTIVE FEAT KEY",activeFeatureId);
-
-    // Find all features in one source layer in a vector source
-    const features = map?.querySourceFeatures('markers');
-    const feature = (features || []).find(feature => getFeatureId(feature) === activeFeatureId)
-    setActiveMarkerOnMap(feature);
-
-
-  },[activeFeatureId])
+  }, [map,dataMap?.sources.markers.data.features]);
 
   const showFullMarker = feature => {
     const url = getMarkerUrl(feature);
@@ -622,18 +524,30 @@ const Map = (props) => {
     navigate(url);
   }
 
+  //set feature as 'active' + display its popup.
+  //!!! the features MUST exists in the viewport (because we'll update its state, etc.)
+  const activateFeature = feature_id => {
+    setActiveFeatureId(feature_id);
+    setActivePopupId(feature_id);
+
+    const feature = getFeatureById(dataMap?.sources.markers.data.features,feature_id);
+    console.log("FEATURE ACTIVATED",feature);
+
+
+  }
+
   const handleSidebarFeatureClick = feature_id => {
 
-    console.log("SIDEBAR CLICK",feature_id);
-
-
-
-    //set active
-    setActiveFeatureId(feature_id);
+    const feature = getFeatureById(dataMap?.sources.markers.data.features,feature_id);
 
     //center/zoom on marker
-    const feature = getFeatureById(sources?.markers.data.features,feature_id);
     fitToFeature(feature);
+
+    //wait until the map movements stops,
+    //so mapbox can handle the feature (it only consider features within the viewport)
+    map.once('idle', () => {
+      activateFeature(feature_id);
+    });
 
     /*
     map.easeTo({
@@ -653,7 +567,115 @@ const Map = (props) => {
   const handleDisabledTags = slugs => {
     console.log("DISABLED TAGS UPDATED",slugs);
     setMarkerTagsDisabled(slugs);
+
+    const tagsFilter = ['in', ['get', 'post_id'], ['literal', [546, 240,195]]];
+
+    console.log("SET TAGS FILTER",tagsFilter);
+    map.setFilter("markers",tagsFilter);
+
+    //map.setFilter("markers",['==', 'post_id', 528]);
+
   }
+
+
+  //At init
+  useEffect(() => {
+
+    //we cannot use await directly within useEffect; so use a function wrapper + handle cancelling.
+    //https://devtrium.com/posts/async-functions-useeffect
+    let isSubscribed = true;
+
+    const prepareMapData = async () => {
+      const data = await initData(rawMapData);
+
+      // set state with the result if `isSubscribed` is true
+      if (isSubscribed) {
+        setDataMap(data);
+      }
+    }
+
+    prepareMapData()
+    .catch(console.error);
+
+    // cancel any future `setData`
+    return () => isSubscribed = false;
+
+  },[]);
+
+  //When dataMap is loaded
+  useEffect(() => {
+    if (dataMap === undefined) return;
+    initMap(dataMap);
+
+    // Clean up on unmount
+    return () => {
+      if (map){
+        map.remove();
+      }
+    }
+  },[dataMap]);
+
+  //visually toggle active marker on map
+
+  //when we activate a marker
+  useEffect(()=>{
+    if (map === undefined) return;
+    if (activeFeatureId === undefined) return;
+
+    //get feature on map
+    const features = map.querySourceFeatures('markers');
+    const feature = (features || []).find(feature => feature.id === activeFeatureId);
+
+    //set its 'active' state
+    const setFeatureActive = feature => {
+
+      //unset previous
+      if (previousFeatureId.current !== undefined) {
+        map.setFeatureState(
+          { source: 'markers', id: previousFeatureId.current },
+          { active: false }
+        );
+      }
+      //set current
+      if (feature?.id !== undefined){
+        previousFeatureId.current = feature.id
+        map.setFeatureState(
+          { source: 'markers', id: feature.id },
+          { active: true }
+        );
+      }
+    }
+    setFeatureActive(feature);
+
+  },[activeFeatureId])
+
+  //when we want to open a popup
+  useEffect(()=>{
+    if (map === undefined) return;
+
+    //remove previous popup
+    if ( (activePopupId === undefined) || (activePopupId !== previousPopupId.current) ){
+      //remove current popup if any
+      if (markerPopup.current){
+        markerPopup.current.remove();
+        markerPopup.current = undefined;
+      }
+    }
+
+    //set new popup
+    if (activePopupId !== undefined){
+      //get feature on map
+      const features = map.querySourceFeatures('markers');
+      const feature = (features || []).find(feature => feature.id === activeFeatureId);
+
+      //set its popup
+      markerPopup.current = addFeaturePopup(feature);
+      previousPopupId.current = activePopupId;//keep track of the last opened popup
+    }
+
+
+
+  },[activePopupId])
 
   return (
     <Dimmer.Dimmable as={Container} dimmed={loading} id="map-container">
@@ -666,8 +688,9 @@ const Map = (props) => {
       />
       <MapSidebar
       active={true}
-      center={sidebarCenter}
-      features={sources?.markers.data.features}
+      mapMoving={mapMoving}
+      mapCenter={mapCenter}
+      features={dataMap?.sources.markers.data.features}
       feature_id={activeFeatureId}
       onFeatureClick={handleSidebarFeatureClick}
       sortMarkerBy={sortMarkerBy}
@@ -675,7 +698,13 @@ const Map = (props) => {
       markerTagsDisabled={markerTagsDisabled}
       onDisableTags={handleDisabledTags}
       />
-      <div id="map" ref={mapContainerRef} />
+      <div
+      id="map"
+      ref={mapContainerRef}
+      className={classNames({
+        mapMoving: mapMoving
+      })}
+      />
     </Dimmer.Dimmable>
   );
 }

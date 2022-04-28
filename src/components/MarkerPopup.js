@@ -31,7 +31,6 @@ export const MarkerPopup = (props) => {
           props.post_id &&
           <Button onClick={props.onClick}>Ouvrir</Button>
         }
-        <Button onClick={props.onClose}>Fermer</Button>
       </div>
     </div>
   );

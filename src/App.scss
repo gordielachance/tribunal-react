@@ -22,6 +22,27 @@
   width:100%;
 }
 
+@keyframes newPopup {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+#map{
+  .mapboxgl-popup{
+    animation: newPopup .2s linear; //when inserted
+    transition: opacity .2s;//when map moving
+  }
+  &.mapMoving{
+    .mapboxgl-popup{
+      opacity:0;
+    }
+  }
+}
+
 $sidebarWidth:275px;
 $sidebarHandleWidth:25px;
 .sidebar{
@@ -75,6 +96,9 @@ $sidebarHandleWidth:25px;
 }
 
 #marker-list{
+  &.mapMoving{
+    opacity:.5;
+  }
   li{
     @extend .clickable;
     display: flex;

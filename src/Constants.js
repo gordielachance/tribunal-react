@@ -13,42 +13,53 @@ export const getMarkerUrl = feature => {
   return `/markers/${feature.properties.post_id}/${feature.properties.name}`;
 }
 
-export const getFeatureId = feature => {
-  return feature.properties.unique_id;
-}
-
 export const getFeatureById = (features,id) => {
-  return (features || []).find(feature => getFeatureId(feature) === id)
+  return (features || []).find(feature => feature.properties.unique_id === id)
 }
 
 export const setFeatureDistance = (feature,origin) => {
   feature.properties.distance = turf.distance(feature.geometry,origin);//in km
 }
 
-//sort features by distance (returns a new copy of the array)
-export const sortFeaturesByDistance = (features,origin) => {
+export const getDistanceFromFeatureToClosest = (feature_id,features) => {
 
-  if (features === undefined) return;
+  const feature = getFeatureById(features,feature_id);
 
-  //clone set
-  const collection = Array.prototype.slice.call(features);
+  if (feature === undefined){
+    throw 'Missing feature parameter.';
+  }
 
-  //add 'distance' prop
-  collection.forEach(feature => {
-    setFeatureDistance(feature,origin);
-  });
+  //remove the current feature from the set
+  features = Array.prototype.slice.call(features);
+  const index = features.indexOf(feature);
+  features.splice(index, 1);
 
-  return collection.sort((a, b) => {
-    return a.properties.distance - b.properties.distance;
-  });
-
+  const origin = feature.geometry;
+  return getDistanceFromOriginToClosestFeature(origin,features);
 }
 
 //in km
 //https://gist.github.com/jbranigan/f334f471f954d78880806451eee25bba
-export const getDistanceToClosestFeature = (origin,features) => {
-  const featuresByDistance = sortFeaturesByDistance(features,origin);
-  const match = featuresByDistance[0];
+export const getDistanceFromOriginToClosestFeature = (origin,features) => {
+
+  if (features === undefined){
+    throw 'Missing features parameter.';
+  }
+
+  //clone set
+  features = Array.prototype.slice.call(features);
+
+  //add 'distance' prop
+  features.forEach(feature => {
+    setFeatureDistance(feature,origin);
+  });
+
+  //sort by distance
+  const sorted = features.sort((a, b) => {
+    return a.properties.distance - b.properties.distance;
+  });
+
+  const match = sorted[0];
   return match?.properties.distance;
 }
 

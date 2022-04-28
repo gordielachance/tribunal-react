@@ -4,35 +4,34 @@ import * as turf from "@turf/turf";
 
 import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
-import {getHumanDistance,setFeatureDistance,sortFeaturesByDistance,getFeatureId} from "../Constants";
+import {getHumanDistance,setFeatureDistance} from "../Constants";
 
 const MarkerList = props => {
-  const map = props.map;
+
   const [features,setFeatures] = useState(props.features);
-  const [sortedFeatures,setSortedFeatures] = useState(features);
+  const [sortedFeatures,setSortedFeatures] = useState();
 
-  //update from prop
-  useEffect(() => {
+  //set features distance if a center is defined
+  useEffect(()=>{
 
-    if (props.features === undefined) return;
-
-    console.log("LIST FEATURES",props.features);
+    if(!props.mapCenter) return;
 
     //clone array; we don't want to alter the original data
-    const features = JSON.parse(JSON.stringify(props.features));
+    let features = JSON.parse(JSON.stringify(props.features || []));
 
     //add a distance attribute
-    if (props.center){
+    if (props.mapCenter){
       //add 'distance' prop
       features.forEach(feature => {
-        setFeatureDistance(feature,props.center);
+        setFeatureDistance(feature,props.mapCenter);
       });
     }
 
     setFeatures(features);
 
-  },[props.features,props.center]);
+  },[props.mapCenter])
 
+  //sort features
   useEffect(() => {
 
     if (features === undefined) return;
@@ -42,7 +41,10 @@ const MarkerList = props => {
     //sort markers
     switch(props.sortBy){
       case 'distance':
-        sorted = sortFeaturesByDistance(sorted,props.center);
+        //sort by distance
+        sorted = features.sort((a, b) => {
+          return a.properties.distance - b.properties.distance;
+        });
       break;
       default://date
       break;
@@ -52,7 +54,7 @@ const MarkerList = props => {
 
   },[features,props.sortBy]);
 
-  //TOUFIX should not be updated when props.center changes; distance should be computed in parent ?
+  //TOUFIX should not be updated when center changes; distance should be computed in parent ?
 
   const getSortByText = feature => {
 
@@ -72,12 +74,17 @@ const MarkerList = props => {
     <>
     {
       (sortedFeatures || []).length ?
-      <ul id="marker-list">
+      <ul
+        id="marker-list"
+        className={classNames({
+          mapMoving: props.mapMoving
+        })}
+        >
 
         {
           sortedFeatures.map((feature,k) => {
 
-            const feature_id = getFeatureId(feature);
+            const feature_id = feature.properties.unique_id;
 
             const active = (props.feature_id === feature_id);
             return (
