@@ -7,7 +7,7 @@ import MapSettingsSort from "../components/MapSettingsSort";
 const MapSettings = (props) => {
 
   return (
-    <div id="map-settings">
+    <div id="map-settings" className="map-content">
       <MapSettingsSort
         features={props.features}
         sortBy={props.sortBy}

@@ -61,7 +61,7 @@ const Map = (props) => {
         tileSize:256,
 
       },
-      /*
+
       handDrawn: {
         type:'raster',
         tiles: [
@@ -70,7 +70,7 @@ const Map = (props) => {
         tileSize:256,
 
       },
-      */
+
       markers:{
         type:"geojson",
         data:WP_URL + "/wp-json/geoposts/v1/geojson/markers",

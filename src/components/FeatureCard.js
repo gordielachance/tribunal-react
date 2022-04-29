@@ -10,7 +10,7 @@ const FeatureTags = (props) => {
   useEffect(()=>{
     let slugs = (props.tags || []);
     if (props.format){
-      slugs.push(props.format);
+      slugs = [props.format].concat(slugs);
     }
     setSlugs(slugs);
   },[props.tags,props.format])

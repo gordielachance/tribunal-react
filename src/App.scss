@@ -63,13 +63,6 @@ $sidebarHandleWidth:25px;
     width:#{$sidebarWidth};
     display:flex;
     flex-direction: column;
-    #marker-list{
-      display:flex;
-      flex-direction: column;
-    }
-    ul{
-      overflow-y: auto;
-    }
     #sidebar-header{
       height:20%;
     }
@@ -77,10 +70,14 @@ $sidebarHandleWidth:25px;
       display: flex;
       flex-direction: column;
       height:80%;
-
-    }
-    #map-header{
-      margin-bottom:2em;
+      #map-header{
+        margin-bottom:2em;
+      }
+      .map-content{
+        display:flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
     }
   }
 
@@ -101,8 +98,13 @@ $sidebarHandleWidth:25px;
   }
   > li{
     @extend .clickable;
-    display: flex;
-    justify-content: space-between;
+    margin:0 1em;
+    &:not(:last-child){
+      border-bottom:1px solid lightgrey;
+      margin-bottom: 1em;
+      padding-bottom: 1em;
+      border-bottom: 1px solid lightgrey;
+    }
     transition:background-color .25s;
 
     .feature-card{
@@ -111,10 +113,6 @@ $sidebarHandleWidth:25px;
       }
     }
 
-    &:not(:last-child){
-      border-bottom: 1px solid lightgrey;
-      padding: 1em 0;
-    }
     &:hover{
       background-color:rgba(0,0,0,0.025);
     }
@@ -128,43 +126,54 @@ $sidebarHandleWidth:25px;
   }
 }
 
-#map-settings li{
-  display:flex;
-  padding: 0.25em 0;
-  @extend .clickable;
-}
-
-#map-settings-orderby{
-  li{
-    .icon{
-      opacity:.25;
+#map-settings{
+  > * {
+    margin: 0 1em;
+    &:not(:last-child){
+      border-bottom:1px solid lightgrey;
+      margin-bottom: 1em;
+      padding-bottom: 1em;
     }
-    &.active{
-      font-weight: bold;
+
+  }
+  li{
+    display:flex;
+    padding: 0.25em 0;
+    @extend .clickable;
+  }
+
+  #map-settings-orderby{
+    li{
       .icon{
-        opacity:1;
+        opacity:.25;
+      }
+      &.active{
+        font-weight: bold;
+        .icon{
+          opacity:1;
+        }
       }
     }
   }
-}
 
-#map-settings-tags,
-#map-settings-formats{
-  li{
-    .icon{
-      opacity:.25;
-    }
-    &.active{
+  #map-settings-tags,
+  #map-settings-formats{
+    li{
       .icon{
-        opacity:1;
+        opacity:.25;
+      }
+      &.active{
+        .icon{
+          opacity:1;
+        }
+      }
+      .count{
+        margin-left:.5em;
+        color:grey;
       }
     }
-    .count{
-      margin-left:.5em;
-      color:grey;
-    }
-  }
 
+  }
 }
 
 .marker-modal{

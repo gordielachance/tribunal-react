@@ -78,6 +78,7 @@ const MarkerList = props => {
       <ul
         id="marker-list"
         className={classNames({
+          'map-content':true,
           mapMoving: props.mapMoving
         })}
         >
