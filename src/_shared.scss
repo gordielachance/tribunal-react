@@ -1,0 +1,43 @@
+.clickable{
+  cursor:pointer;
+}
+
+.freeze{
+    pointer-events: none;
+    opacity:.5;
+}
+
+.flash{
+  animation: opacityPulse 0.5s linear infinite;
+}
+
+.flash-twice{
+  animation: opacityPulse 0.2s linear 2;
+}
+
+.cover-img{
+  &img{
+    vertical-align: top;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+  background-position: center center;
+  background-size: cover;
+  background-repeat:no-repeat;
+}
+
+@keyframes opacityFadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes opacityPulse {
+    0% {opacity: 1;}
+    50% {opacity: 0.5; }
+    100% {opacity: 1;}
+}

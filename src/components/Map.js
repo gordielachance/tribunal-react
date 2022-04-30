@@ -9,7 +9,7 @@ import { Loader,Dimmer,Container } from 'semantic-ui-react';
 import classNames from "classnames";
 
 import {MAPBOX_TOKEN,WP_URL,DEBUG} from "./../Constants";
-import {getMarkerUrl,getFeatureById,getDistanceFromOriginToClosestFeature,getDistanceFromFeatureToClosest} from "../Constants";
+import {getFeatureById,getDistanceFromOriginToClosestFeature,getDistanceFromFeatureToClosest} from "../Constants";
 
 import { MarkerIcons } from "./MarkerIcons";
 import { FeaturePopup } from "./FeatureCard";
@@ -20,14 +20,15 @@ import * as turf from "@turf/turf";
 
 const Map = (props) => {
 
-  const params = useParams();
   const navigate = useNavigate();
+
+  const { mapName,markerId } = useParams();
 
   const mapContainerRef = useRef(null);
   const [map,setMap] = useState(undefined);
   const [loading,setLoading] = useState(true);
 
-  const currentFeatureId = params?.markerId;//id of the feature that has its details shown
+  const currentFeatureId = markerId;//id of the feature that has its details shown
   const [activeFeatureId,setActiveFeatureId] = useState();//id of the active feature
   const [activePopupId,setActivePopupId] = useState();//id of the active feature
   const previousPopupId = useRef();
@@ -61,7 +62,7 @@ const Map = (props) => {
         tileSize:256,
 
       },
-
+      /*
       handDrawn: {
         type:'raster',
         tiles: [
@@ -70,7 +71,7 @@ const Map = (props) => {
         tileSize:256,
 
       },
-
+      */
       markers:{
         type:"geojson",
         data:WP_URL + "/wp-json/geoposts/v1/geojson/markers",
@@ -519,6 +520,10 @@ const Map = (props) => {
     });
   }, [map,dataMap?.sources.markers.data.features]);
 
+  const getMarkerUrl = feature => {
+    return `/carte/${mapName}/marker/${feature.properties.post_id}/${feature.properties.name}`;
+  }
+
   const showFullMarker = feature => {
     const url = getMarkerUrl(feature);
     console.log("MARKER URL",url);
@@ -746,7 +751,7 @@ const Map = (props) => {
       </Dimmer>
       <MarkerPost
       post_id={currentFeatureId}
-      onClose={()=>navigate(props.url)}
+      onClose={()=>navigate(`/carte/${mapName}`)}
       />
       <MapSidebar
       active={true}

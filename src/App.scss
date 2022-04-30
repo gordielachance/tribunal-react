@@ -1,240 +1,44 @@
-.clickable{
-  cursor:pointer;
+@import "./_shared";
+
+/*
+The following class-endings: *-enter, *-enter-active, *-exit, *-exit-active,
+have very specific meanings to <CSSTransition />
+(see more: https://reactcommunity.org/react-transition-group/css-transition)
+*/
+
+.fade-enter {
+  opacity: 0;
+  transform: translate(0, 25px);
+  z-index: 1;
+}
+.fade-enter.fade-enter-active {
+  opacity: 1;
+  transform: translate(0, 0);
+
+  transition: opacity 250ms ease-out, transform 300ms ease;
+}
+.fade-exit {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+.fade-exit.fade-exit-active {
+  opacity: 0;
+  transform: translate(0, 30px);
+
+  transition: opacity 250ms ease-out, transform 300ms ease;
 }
 
+
+//////////////////////
 
 .App{
   width:100%;
   height:100%;
 }
-#page-content{
+
+#singleMapPage{
   width:100%;
   height:100%;
   display: flex;
   flex-direction: column;
-}
-
-#map-container{
-	flex:1;
-	position:relative;
-  margin:0;
-  padding:0;
-  width:100%;
-}
-
-@keyframes newPopup {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
-#map{
-  .mapboxgl-popup{
-    animation: newPopup .2s linear; //when inserted
-    transition: opacity .2s;//when map moving
-  }
-  &.mapMoving{
-    .mapboxgl-popup{
-      opacity:0;
-    }
-  }
-}
-
-$sidebarWidth:275px;
-$sidebarHandleWidth:25px;
-.sidebar{
-  position: absolute;
-  z-index: 2;
-  background: white;
-  height: 100%;
-  display:flex;
-  flex-direction: row;
-  flex-basis:calc(#{$sidebarWidth} + #{$sidebarHandleWidth});
-
-  transition:margin-left .5s;
-  &:not(.active){
-    margin-left:-$sidebarWidth;
-  }
-  #sidebar-container {
-    padding: 1em;
-    width:#{$sidebarWidth};
-    display:flex;
-    flex-direction: column;
-    #sidebar-header{
-      height:20%;
-    }
-    #sidebar-content{
-      display: flex;
-      flex-direction: column;
-      height:80%;
-      #map-header{
-        margin-bottom:2em;
-      }
-      .map-content{
-        display:flex;
-        flex-direction: column;
-        overflow-y: auto;
-      }
-    }
-  }
-
-  .sidebar-toggle {
-    background:#666666;
-    flex-basis:$sidebarHandleWidth;
-    flex-grow:0;
-    display:flex;
-    align-items: center;
-    justify-content: center;
-    color:white;
-  }
-}
-
-#marker-list{
-  &.mapMoving{
-    opacity:.5;
-  }
-  > li{
-    @extend .clickable;
-    margin:0 1em;
-    &:not(:last-child){
-      border-bottom:1px solid lightgrey;
-      margin-bottom: 1em;
-      padding-bottom: 1em;
-      border-bottom: 1px solid lightgrey;
-    }
-    transition:background-color .25s;
-
-    .feature-card{
-      .feature-description{
-        display:none;
-      }
-    }
-
-    &:hover{
-      background-color:rgba(0,0,0,0.025);
-    }
-    &.active{
-      background-color:rgba(0,0,0,0.05);
-    }
-    .sortByText{
-      color:grey;
-      margin-right:1em;
-    }
-  }
-}
-
-#map-settings{
-  > * {
-    margin: 0 1em;
-    &:not(:last-child){
-      border-bottom:1px solid lightgrey;
-      margin-bottom: 1em;
-      padding-bottom: 1em;
-    }
-
-  }
-  li{
-    display:flex;
-    padding: 0.25em 0;
-    @extend .clickable;
-  }
-
-  #map-settings-orderby{
-    li{
-      .icon{
-        opacity:.25;
-      }
-      &.active{
-        font-weight: bold;
-        .icon{
-          opacity:1;
-        }
-      }
-    }
-  }
-
-  #map-settings-tags,
-  #map-settings-formats{
-    li{
-      .icon{
-        opacity:.25;
-      }
-      &.active{
-        .icon{
-          opacity:1;
-        }
-      }
-      .count{
-        margin-left:.5em;
-        color:grey;
-      }
-    }
-
-  }
-}
-
-.marker-modal{
-  height:80%;
-  .content,.description,#marker-iframe{
-    width:100%;
-    height:100%;
-  }
-
-}
-
-#logo{
-  margin:auto;
-  width:50%;
-  img{
-
-  }
-}
-
-.feature-card{
-  .feature-header{
-
-    .feature-title{
-      font-weight: bold;
-    }
-    .feature-meta{
-      color: grey;
-      &.feature-tags{
-        margin:0;
-        padding:0;
-        display: inline;
-        list-style: none;
-
-        li{
-          display:inline-block;
-          &:not(:last-child){
-            margin-right:.5em;
-          }
-          .label{
-            font-weight: normal;
-            margin: 0.25em 0;
-            font-size:.8em;
-            padding: 0.4em 0.5em;
-          }
-        }
-      }
-    }
-  }
-  .feature-description{
-    padding:.5em 0;
-  }
-}
-
-.feature-popup{
-  .feature-header{
-    text-align: center;
-    padding-bottom:.5em;
-  }
-  .feature-actions{
-    text-align:center;
-    border-top:1px solid lightgrey;
-    padding-top:.5em;
-  }
 }

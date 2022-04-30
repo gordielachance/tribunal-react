@@ -9,10 +9,6 @@ export const WP_URL = 'http://tribunaldp.local'//'http://www.tribunaldesprejuges
 
 export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
 
-export const getMarkerUrl = feature => {
-  return `/markers/${feature.properties.post_id}/${feature.properties.name}`;
-}
-
 export const getFeatureById = (features,id) => {
   return (features || []).find(feature => feature.properties.unique_id === id)
 }
