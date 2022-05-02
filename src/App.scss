@@ -6,34 +6,93 @@ have very specific meanings to <CSSTransition />
 (see more: https://reactcommunity.org/react-transition-group/css-transition)
 */
 
-.fade-enter {
-  opacity: 0;
-  transform: translate(0, 25px);
-  z-index: 1;
+//horizontal
+.slideHorizontalNext-enter {
+  transform: translateX(100%);
 }
-.fade-enter.fade-enter-active {
-  opacity: 1;
-  transform: translate(0, 0);
-
-  transition: opacity 250ms ease-out, transform 300ms ease;
+.slideHorizontalNext-enter-active {
+  transform: translateX(0%);
+  transition: transform 1000ms ease-in-out;
 }
-.fade-exit {
-  opacity: 1;
-  transform: translate(0, 0);
+.slideHorizontalNext-exit {
+  transform: translateX(0%);
 }
-.fade-exit.fade-exit-active {
-  opacity: 0;
-  transform: translate(0, 30px);
-
-  transition: opacity 250ms ease-out, transform 300ms ease;
+.slideHorizontalNext-exit-active {
+  transform: translateX(-100%);
+  transition: transform 1000ms ease-in-out;
 }
 
+//horizontal backwards
+.slideHorizontalPrevious-enter {
+  transform: translateX(-100%);
+}
+.slideHorizontalPrevious-enter-active {
+  transform: translateX(0%);
+  transition: transform 1000ms ease-in-out;
+}
+.slideHorizontalPrevious-exit {
+  transform: translateX(0%);
+}
+.slideHorizontalPrevious-exit-active {
+  transform: translateX(100%);
+  transition: transform 1000ms ease-in-out;
+}
+
+//vertical
+.slideVerticalNext-enter {
+  transform: translateY(100%);
+}
+.slideVerticalNext-enter-active {
+  transform: translateY(0%);
+  transition: transform 1000ms ease-in-out;
+}
+.slideVerticalNext-exit {
+  transform: translateY(0%);
+}
+.slideVerticalNext-exit-active {
+  transform: translateY(-100%);
+  transition: transform 1000ms ease-in-out;
+}
+
+
+//vertical backwards
+.slideVerticalPrevious-enter {
+  transform: translateY(-100%);
+}
+.slideVerticalPrevious-enter-active {
+  transform: translateY(0%);
+  transition: transform 1000ms ease-in-out;
+}
+.slideVerticalPrevious-exit {
+  transform: translateY(0%);
+}
+.slideVerticalPrevious-exit-active {
+  transform: translateY(100%);
+  transition: transform 1000ms ease-in-out;
+}
 
 //////////////////////
 
 .App{
   width:100%;
   height:100%;
+}
+
+.page{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  &#homePage{
+    background-color:#ffb9b9;
+  }
+  &#mapListPage{
+    background-color:#9eff9e;
+  }
+  &#singleMapPage{
+    background-color:#c7c2f7;
+  }
 }
 
 #singleMapPage{
