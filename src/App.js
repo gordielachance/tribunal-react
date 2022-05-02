@@ -89,6 +89,8 @@ function App() {
 
       const transition = getTransitionData(oldPath,newPath);
 
+      console.log("TRANSITION",transition);
+
       setTransitionHorizontal(transition.horizontal);
       setTransitionBackwards(transition.backwards);
       setTransitionSteps(transition.steps);
@@ -139,8 +141,8 @@ function App() {
             <Route path="/cartes" element={<MapListPage/>} />
             <Route path="/agenda" element={<AgendaPage/>} />
             <Route path="/credits" element={<CreditsPage/>} />
-            <Route path="/carte/:mapName" element={<SingleMapPage/>} />
-            <Route path="/carte/:mapName/marker/:markerId/:markerName" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapId/:mapName" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapId/:mapName/marker/:markerId/:markerName" element={<SingleMapPage/>} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </CSSTransition>

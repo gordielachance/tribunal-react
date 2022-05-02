@@ -1,5 +1,4 @@
 import React, {useState,useEffect,useRef} from 'react';
-import axios from 'axios';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
 import {WP_URL} from "./../Constants";
 
