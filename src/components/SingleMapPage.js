@@ -30,7 +30,7 @@ const SingleMapPage = (props) => {
     getSingleMap(mapId)
     .then(post => {
       console.log("MAP POPULATED",post);
-      setPost(posts);
+      setPost(post);
 
     })
     .catch(error => {

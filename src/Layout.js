@@ -3,7 +3,7 @@ import { Routes ,Route, Link, useLocation } from 'react-router-dom';
 import { Container } from 'semantic-ui-react';
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import type { FC } from "react";
-import './App.scss';
+import './Layout.scss';
 
 import HomePage from "./components/HomePage";
 import MapListPage from "./components/MapListPage";
@@ -11,12 +11,7 @@ import SingleMapPage from "./components/SingleMapPage";
 import AgendaPage from "./components/AgendaPage";
 import CreditsPage from "./components/CreditsPage";
 
-
-/*
-import Map from "./components/Map";
-*/
-
-function App() {
+function Layout() {
 
   const location = useLocation();
 
@@ -129,7 +124,7 @@ function App() {
   },[transitionHorizontal,transitionBackwards])
 
   return (
-    <div className="App">
+    <div id="layout">
     <TransitionGroup
     >
         <CSSTransition
@@ -151,4 +146,4 @@ function App() {
   );
 }
 
-export default App;
+export default Layout;

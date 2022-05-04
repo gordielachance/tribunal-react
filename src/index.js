@@ -5,16 +5,19 @@ import {
 } from "react-router-dom";
 import 'semantic-ui-css/semantic.min.css';
 import reportWebVitals from './reportWebVitals';
+import { AppProvider } from "./AppContext";
 
 import './index.scss';
-import App from './App';
+import Layout from './Layout';
 
 
 ReactDOM.render(
   <React.StrictMode>
-    <Router>
-      <App />
-    </Router>
+    <AppProvider>
+      <Router>
+        <Layout/>
+      </Router>
+    </AppProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
