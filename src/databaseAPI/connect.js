@@ -10,7 +10,12 @@ const WP_REST_URL = WP_URL + '/wp-json';
 // Define defaults
 const databaseAPI = axios.create({
     baseURL: WP_REST_URL,
-    withCredentials:false
+    withCredentials:false,
+    /*
+    params:{
+      context: 'react'
+    }
+    */
 });
 
 export {databaseAPI};

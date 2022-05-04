@@ -4,7 +4,6 @@ import { useParams,useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import axios from 'axios';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
 import classNames from "classnames";
 
@@ -17,14 +16,15 @@ import './Map.scss';
 import MarkerPost from "./MarkerPost";
 import MapSidebar from "./MapSidebar";
 import * as turf from "@turf/turf";
+import { useApp } from '../AppContext';
 
 const Map = (props) => {
 
   const navigate = useNavigate();
 
-  const { mapName,markerId } = useParams();
+  const {mapName,markerId} = useParams();
+  const {mapContainerRef} = useApp();
 
-  const mapContainerRef = useRef(null);
   const [map,setMap] = useState(undefined);
   const [loading,setLoading] = useState(true);
 
@@ -45,75 +45,6 @@ const Map = (props) => {
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
   const [formatsFilter,setFormatsFilter] = useState();
   const [markersFilter,setMarkersFilter] = useState();
-
-  const rawMapData = {
-    map:{
-      style: 'mapbox://styles/gordielachance/ckkplfnd60xgg17o0ilwozq2o',
-      center: [4.3779,50.7786],
-      zoom: 10
-    },
-    sources:{
-
-      basemap: {
-        type:'raster',
-        tiles: [
-          'https://stamen-tiles-d.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
-        ],
-        tileSize:256,
-
-      },
-      /*
-      handDrawn: {
-        type:'raster',
-        tiles: [
-          'http://tribunaldesprejuges.org/wordpress/wp-content/uploads/tdp_tiles/GS/{z}/{x}/{y}.png'
-        ],
-        tileSize:256,
-
-      },
-      */
-      markers:{
-        type:"geojson",
-        data:WP_URL + "/wp-json/geoposts/v1/geojson/markers",
-        promoteId:'unique_id' //property to use for mapbox features IDs.
-        //generateId:   true
-      }
-    },
-    layers:{
-      basemap:{
-        type: 'raster',
-        source: 'basemap',
-        minzoom: 0,
-        maxzoom: 22,
-        paint : {
-          "raster-opacity" : 0.1
-        }
-      },
-      handDrawn:{
-        type: 'raster',
-        source: 'handDrawn',
-        minzoom: 0,
-        maxzoom: 22,
-      },
-      markers:{
-        type: 'circle',
-        source: 'markers',
-        paint: {
-          'circle-color':'#f3d511',
-          'circle-radius':10,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': [
-            'case',
-            ['boolean', ['feature-state', 'active'], false],
-            '#000000',
-            '#c6ad09',//fallback
-          ]
-        }
-      }
-    }
-  }
-
-  const [dataMap,setDataMap] = useState();
 
   const addFeaturePopup = feature => {
 
@@ -158,34 +89,108 @@ const Map = (props) => {
 
   const initMapListeners = map => {
 
-    //Update cursor on marker
-    map.on('mouseenter','markers', e => {
-      // Change the cursor style as a UI indicator.
-      map.getCanvas().style.cursor = 'pointer';
-    });
+    const initMapMarkersListeners = () => {
 
-    //Reset cursor on marker
-    map.on('mouseleave','markers', e => {
-      map.getCanvas().style.cursor = '';
-    });
+      const layerName = 'drawingPolygons';
+      const sourceName = 'drawingPolygons';
 
-    /*
-    const handleMarkerClick = useCallback((e) => {
+      //Update cursors IN
+      map.on('mouseenter',layerName, e => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+      });
 
-    },[])
-    */
+      //Update cursors OUT
+      map.on('mouseleave',layerName, e => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      /*
+      const handleMarkerClick = useCallback((e) => {
+
+      },[])
+      */
 
 
-    //open (add) popup when clicking marker
-    map.on('click','markers', e => {
+      //open (add) popup when clicking marker
+      map.on('click',layerName, e => {
 
-      if (e.features.length === 0) return;
+        if (e.features.length === 0) return;
 
-      //clicked marker
-      const feature = e.features[0];
-      activateFeature(feature.id);
+        //clicked marker
+        const feature = e.features[0];
+        activateFeature(feature.id);
 
-    });
+      });
+    }
+
+    const initMapPolygonsListeners = () => {
+
+      const handlesLayerName = 'polygonHandles';
+      const polygonsLayerName = 'drawingPolygonsFill';
+      const sourceName = 'drawingPolygons';
+      let hoveredHandle = null;
+      let hoveredPolygon = null;
+
+      //Update cursors IN
+      map.on('mouseenter',handlesLayerName, e => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      //Update cursors OUT
+      map.on('mouseleave',handlesLayerName, e => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      // When the user moves their mouse over the handle
+      map.on('mousemove',handlesLayerName, (e) => {
+        if (e.features.length > 0) {
+
+          const handleFeature = e.features[0];
+          hoveredHandle = handleFeature.id;
+          hoveredPolygon = handleFeature.properties.target_id;
+
+          //handle
+          map.setFeatureState(
+            { source: sourceName, id: hoveredHandle },
+            { hover: true }
+          );
+          //polygon
+          map.setFeatureState(
+            { source: sourceName, id: hoveredPolygon },
+            { hover: true }
+          );
+        }
+      });
+
+      // When the mouse leaves the state-fill layer, update the feature state of the
+      // previously hovered feature.
+      map.on('mouseleave',polygonsLayerName, () => {
+
+        //handle
+        if (hoveredHandle !== null) {
+          map.setFeatureState(
+            { source: sourceName, id: hoveredHandle },
+            { hover: false }
+          );
+          hoveredHandle = null;
+        }
+        //polygon
+        if (hoveredPolygon !== null) {
+          map.setFeatureState(
+            { source: sourceName, id: hoveredPolygon },
+            { hover: false }
+          );
+          hoveredPolygon = null;
+        }
+
+      });
+    }
+
+    initMapMarkersListeners();
+    initMapPolygonsListeners();
+
 
     map.on('idle', () => {
       console.log('A idle event occurred.');
@@ -207,17 +212,16 @@ const Map = (props) => {
 
     return el;
   }
-
+  /*
   const initData = async(inputData) => {
     //it is not currently possible to query ALL the features of a geoJSON source; and we need them for calculations.
     //so, we need to preload them :/
     //https://github.com/mapbox/mapbox-gl-js/issues/9720
     const swapGeoJsonSources = async sources => {
 
-      /*
       //update geojson sources:
       /update data from url > json
-      */
+
 
       const updateGeoJsonSources = async geoJsonSources => {
 
@@ -290,72 +294,6 @@ const Map = (props) => {
       sources:fetchedSources
     }
 
-    //TOUFIX URGENT DEMO CONTENT
-    /*
-    outputData.sources.markers.data = {
-      "type":"FeatureCollection",
-      "features":[
-        {
-          "properties":{
-            "post_id":925,
-            "post_type":"geoposts_marker",
-            "layerkeys":[
-
-            ],
-            "classes":[
-              "geoposts-layer",
-              "geoposts_marker",
-              "geoposts-post-925",
-              "geoposts-popup-on-hover"
-            ],
-            "icon_id":0,
-            "title":"Jette - G\u00e9ographie des pr\u00e9jug\u00e9s",
-            "name":"jette-geographie-des-prejuges",
-            "format":false,
-            "excerpt":"Cr\u00e9ation de carte subjective de la commune de Jette avec un groupe de jeunes de l&rsquo;\u00e9cole Saint-Pierre de Jette.",
-            "timestamp":1613600421,
-            "tag_slugs":[
-
-            ],
-            "layer_slugs":[
-
-            ],
-            "thumbnail":"http:\/\/tribunaldp.local\/wordpress\/wp-content\/uploads\/2021\/02\/JETTE_version-DEZOOM_200dpi_5.jpg",
-            "has_more":true
-          },
-          "style":{
-            "opacity":1
-          },
-          "type":"Feature",
-          "geometry":{
-            "type":"Point",
-            "coordinates":[
-              4.3263281726710003,
-              50.877655625861998
-            ]
-          }
-        },
-        {
-          "properties":{
-            "title":"NO POST ID",
-            "name":"cartes-subjectives",
-            "format":false,
-            "excerpt":"Cr\u00e9ation de carte subjective de la commune de Neder-over-Heembeek avec un groupe de jeunes de la Cit\u00e9 Versailles.",
-            "timestamp":1613595450
-          },
-          "type":"Feature",
-          "geometry":{
-            "type":"Point",
-            "coordinates":[
-              4.3777731241898996,
-              50.896284446804003
-            ]
-          }
-        }
-      ]
-    }
-    */
-
     const setFeatureIds = (features,prefix) => {
       for (var index in features) {
         const feature = features[index];
@@ -376,42 +314,60 @@ const Map = (props) => {
 
     return outputData;
   }
+  */
+  const prepareData = data => {
 
-  const initMap = async (dataMap) => {
+    console.log("INIT MAPBOX MAP",data);
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
     const map = new mapboxgl.Map({
-      ...dataMap.map,
+      ...data.map,
+      center: [4.3779,50.7786],
       container: mapContainerRef.current
     });
 
     map.on('load', () => {
+
+      if (data.sources.drawingPolygons){
+        //TOUFIX TEMPORARY
+          const handlesData = JSON.parse(JSON.stringify(data.sources.drawingPolygons));
+          console.log("SETUP DRAWING POLYGONS MARKERS",handlesData);
+          handlesData.data.features = handlesData.data.features.map(feature => {
+            const center = turf.center(feature.geometry);
+            return {
+              ...center,
+              properties:{
+                unique_id:feature.properties.unique_id + '-handle',
+                target_id:feature.properties.unique_id//link to original polygon
+              }
+            }
+          })
+          data.sources.polygonHandles = handlesData;
+          console.log("POLYGON HANDLES",data.sources.polygonHandles);
+      }
+
       //init mapbox sources
-      for (var key in dataMap.sources) {
-        const data = dataMap.sources[key];
-        console.log("ADD SOURCE",key,data);
-        map.addSource(key,data);
+      for (var key in data.sources) {
+        const sourceData = data.sources[key];
+        console.log("ADD SOURCE",key,sourceData);
+        map.addSource(key,sourceData);
+
+
       }
 
       //init mapbox layers
-      for (var key in dataMap.layers) {
+      for (var key in data.layers) {
         //conform data for mapbox layers
-        const data = {
-          ...dataMap.layers[key],
+        const layerData = {
+          ...data.layers[key],
           id:key
         }
-        console.log("ADD LAYER",key,data);
-        map.addLayer(data);
+        console.log("ADD LAYER",key,layerData);
+        map.addLayer(layerData);
       }
 
       //list all layers
       console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
-
-      setMap(map);
-      setLoading(false);
-    })
-
-    map.once('load', (e) => {
 
       map.resize(); // fit to container
 
@@ -429,6 +385,9 @@ const Map = (props) => {
       setMapCenter([map.getCenter().lng,map.getCenter().lat]); //on load
 
       initMapListeners(map);
+
+      setMap(map);
+      setLoading(false);
 
     });
 
@@ -474,14 +433,14 @@ const Map = (props) => {
 
     /*
     //distance from feature to the nearest point
-    const distanceToNearest = getDistanceFromFeatureToClosest(feature_id,dataMap.sources.markers.data.features);
+    const distanceToNearest = getDistanceFromFeatureToClosest(feature_id,props.data.sources.markers.data.features);
     console.log("NEAREST MARKER DIST",distanceToNearest);
     return;
     */
 
 
     const origin = feature.geometry.coordinates;
-    const radius = getDistanceFromOriginToClosestFeature(origin,dataMap.sources.markers.data.features);
+    const radius = getDistanceFromOriginToClosestFeature(origin,props.data.sources.markers.data.features);
     const circle = turf.circle(origin,radius);
 
     //for debug purposes
@@ -518,7 +477,7 @@ const Map = (props) => {
       maxZoom:14,
       padding:100//px
     });
-  }, [map,dataMap?.sources.markers.data.features]);
+  }, [map,props.data?.sources.markers.data.features]);
 
   const getMarkerUrl = feature => {
     return `/carte/${mapName}/marker/${feature.properties.post_id}/${feature.properties.name}`;
@@ -536,7 +495,7 @@ const Map = (props) => {
     setActiveFeatureId(feature_id);
     setActivePopupId(feature_id);
 
-    const feature = getFeatureById(dataMap?.sources.markers.data.features,feature_id);
+    const feature = getFeatureById(props.data?.sources.markers.data.features,feature_id);
     console.log("FEATURE ACTIVATED",feature);
 
 
@@ -544,7 +503,7 @@ const Map = (props) => {
 
   const handleSidebarFeatureClick = feature_id => {
 
-    const feature = getFeatureById(dataMap?.sources.markers.data.features,feature_id);
+    const feature = getFeatureById(props.data?.sources.markers.data.features,feature_id);
 
     //center/zoom on marker
     fitToFeature(feature);
@@ -572,32 +531,9 @@ const Map = (props) => {
 
   //At init
   useEffect(() => {
+    if (props.data === undefined) return;
 
-    //we cannot use await directly within useEffect; so use a function wrapper + handle cancelling.
-    //https://devtrium.com/posts/async-functions-useeffect
-    let isSubscribed = true;
-
-    const prepareMapData = async () => {
-      const data = await initData(rawMapData);
-
-      // set state with the result if `isSubscribed` is true
-      if (isSubscribed) {
-        setDataMap(data);
-      }
-    }
-
-    prepareMapData()
-    .catch(console.error);
-
-    // cancel any future `setData`
-    return () => isSubscribed = false;
-
-  },[]);
-
-  //When dataMap is loaded
-  useEffect(() => {
-    if (dataMap === undefined) return;
-    initMap(dataMap);
+    prepareData(props.data);
 
     // Clean up on unmount
     return () => {
@@ -605,7 +541,8 @@ const Map = (props) => {
         map.remove();
       }
     }
-  },[dataMap]);
+
+  },[props.data]);
 
   //visually toggle active marker on map
 
@@ -678,7 +615,7 @@ const Map = (props) => {
       if ( (tags || []).length === 0) return;
 
       //expression for each tag
-      const tagFilters = tags.map(tag=>['in',tag,['get', 'layer_slugs']])
+      const tagFilters = tags.map(tag=>['in',tag,['get', 'tag_slugs']]) //URGENT TOU FIX
 
       return ['any'].concat(tagFilters);
 
@@ -754,10 +691,11 @@ const Map = (props) => {
       onClose={()=>navigate(`/carte/${mapName}`)}
       />
       <MapSidebar
+      title={props.title}
       active={true}
       mapMoving={mapMoving}
       mapCenter={mapCenter}
-      features={dataMap?.sources.markers.data.features}
+      features={props.data?.sources.markers.data.features}
       feature_id={activeFeatureId}
       onFeatureClick={handleSidebarFeatureClick}
       sortMarkerBy={sortMarkerBy}
@@ -768,6 +706,7 @@ const Map = (props) => {
       onDisableFormats={slugs=>setMarkerFormatsDisabled(slugs)}
       hasMarkersFilters={(markersFilter!==undefined)}
       />
+
       <div
       id="map"
       ref={mapContainerRef}

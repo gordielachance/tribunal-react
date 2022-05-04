@@ -1,50 +1,86 @@
 import React,{useState,useEffect} from "react";
 import { useParams,Link } from 'react-router-dom';
 import { Container } from 'semantic-ui-react';
-import axios from 'axios';
-import {WP_URL} from "./../Constants";
+import DatabaseAPI from "../databaseAPI/api";
 
 import Map from "./Map";
 
-const getSingleMap = (post_id) => {
-  return axios.get(
-    WP_URL + '/wp-json/wp/v2/maps/' + post_id,
-    {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(response => response.data)
-}
+
 
 const SingleMapPage = (props) => {
 
   const { mapId } = useParams();
 
-  const [loading,setLoading] = useState();
+  const [loading,setLoading] = useState(true);
   const [post,setPost] = useState();
+  const [mapData,setMapData] = useState();
 
-  //load map post
+  const prepareMapData = data => {
+
+    //set unique IDs for features in geojson sources
+    const setFeatureIds = (features,prefix) => {
+      for (var index in features) {
+        const feature = features[index];
+        const id = `${prefix}-${index}`;
+
+        features[index] = {
+          ...feature,
+          properties:{
+            ...feature.properties,
+            unique_id:id
+          }
+        }
+      }
+      console.info("...POPULATED UNIQUE IDs FOR FEATURES IN SOURCE",prefix,features);
+    }
+
+    for (var key in data.sources) {
+
+      const source = data.sources[key];
+
+      if (source.type === 'geojson'){
+
+        data.sources[key] = {
+          ...data.sources[key],
+          promoteId:'unique_id' //property to use for mapbox features IDs.
+          //generateId:   true
+        }
+
+        setFeatureIds(source.data.features,key);
+      }
+
+    }
+    return data;
+  }
+
+  //load map post on init
   useEffect(()=>{
-    setLoading(true);
-    getSingleMap(mapId)
+    DatabaseAPI.getMapPost(mapId)
     .then(post => {
-      console.log("MAP POPULATED",post);
       setPost(post);
+    })
 
-    })
-    .catch(error => {
-      // react on errors.
-      console.error("error while fetching map",error);
-    })
-    .finally(()=>{
-      setLoading(false);
-    })
   },[])
+
+  useEffect(()=>{
+    if (post === undefined) return;
+    console.log("MAP POST POPULATED",post);
+    const mapData = prepareMapData(post?.map);
+    setMapData(mapData);
+  },[post])
+
+  useEffect(()=>{
+    if (mapData === undefined) return;
+    console.log("MAP DATA POPULATED",mapData);
+    setLoading(false);
+  },[mapData])
 
   return(
     <Container id="singleMapPage" className="page horizontal-page">
-      <Map/>
+      <Map
+      title={post?.title.react}
+      data={mapData}
+      />
     </Container>
   )
 }

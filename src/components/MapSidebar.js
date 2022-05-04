@@ -41,7 +41,7 @@ const MapSidebar = (props) => {
         </div>
         <div id="sidebar-content">
           <div id="map-header">
-            <h3>NOM DE LA CARTE</h3>
+            <h3>{props.title}</h3>
 
             <Menu pointing secondary>
               <Menu.Item

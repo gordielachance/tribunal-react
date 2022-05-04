@@ -1,5 +1,6 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
+import {getFormatIcon,getFormatText} from "../Constants";
 
 const MapSettingsFormats = props => {
 
@@ -35,16 +36,28 @@ const MapSettingsFormats = props => {
       }
       output[slug].push(feature.properties.post_id);
     });
-    return Object.keys(output).map(function(slug) {
+    const formats = Object.keys(output).map(function(slug) {
       const item = output[slug];
       return {
         slug:slug,
         ids:item
       }
     })
+
+    //move standard at the end
+    const standardFormatIndex = formats.findIndex(format => format.slug === 'standard');
+
+    if (standardFormatIndex !== -1) {
+      formats.push(formats.splice(standardFormatIndex, 1)[0]);
+    }
+
+    return formats;
+
+
   }
 
   const collection = getCollection(props.features);
+
 
   //pass update to parent
   useEffect(() => {
@@ -58,8 +71,10 @@ const MapSettingsFormats = props => {
       <ul>
         {
           collection.map(function(item) {
-            const slug = item.slug;
             const count = item.ids.length;
+
+            const formatIcon = getFormatIcon(item.slug);
+            const formatText = getFormatText(item.slug);
 
             return(
               <li
@@ -68,7 +83,12 @@ const MapSettingsFormats = props => {
               onClick={e=>{handleClick(item.slug)}}
               >
                 <span><Icon name="check"/></span>
-                <span>{item.slug}</span>
+                <span>
+                {formatIcon &&
+                  <Icon name={formatIcon}/>
+                }
+                {formatText}
+                </span>
                 <span className="count">{count}</span>
               </li>
             )

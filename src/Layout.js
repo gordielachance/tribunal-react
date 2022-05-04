@@ -86,9 +86,9 @@ function Layout() {
 
       console.log("TRANSITION",transition);
 
-      setTransitionHorizontal(transition.horizontal);
-      setTransitionBackwards(transition.backwards);
-      setTransitionSteps(transition.steps);
+      setTransitionHorizontal(transition?.horizontal);
+      setTransitionBackwards(transition?.backwards);
+      setTransitionSteps(transition?.steps);
 
     }
 

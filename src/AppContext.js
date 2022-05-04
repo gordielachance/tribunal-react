@@ -1,6 +1,6 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
-import React, { useState,useEffect,createContext } from 'react';
+import React, { useState,useEffect,createContext,useRef } from 'react';
 import DatabaseAPI from "./databaseAPI/api";
 
 const AppContext = createContext();
@@ -8,6 +8,7 @@ const AppContext = createContext();
 export function AppProvider({children}){
 	const [tags,setTags] = useState();
   const [maps,setMaps] = useState();
+	const mapContainerRef = useRef();
 
 	//load tags on init
   useEffect(() => {
@@ -34,7 +35,8 @@ export function AppProvider({children}){
   // Learn more in http://kcd.im/optimize-context
   const value = {
     tags:tags,
-    maps:maps
+    maps:maps,
+		mapContainerRef:mapContainerRef
 	};
 
   return (
@@ -47,7 +49,7 @@ export function AppProvider({children}){
 export function useApp() {
   const context = React.useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a AppProvider')
+    throw new Error('useApp must be used within a AppProvider')
   }
   return context
 }

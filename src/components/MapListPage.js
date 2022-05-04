@@ -32,9 +32,9 @@ const MapListPage = (props) => {
             maps.map((post,key) => {
               return(
                 <li key={post.id}>
-                  <h2><Link to={getMapUrl(post)}>{post.title.rendered}</Link></h2>
+                  <h2><Link to={getMapUrl(post)}>{post.title.react}</Link></h2>
                   <div>
-                    {post.excerpt.rendered}
+                    {post.excerpt.react}
                   </div>
                 </li>
               )

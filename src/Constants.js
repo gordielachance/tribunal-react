@@ -64,3 +64,57 @@ export const getDistanceFromOriginToClosestFeature = (origin,features) => {
 export const getHumanDistance = dist => {
   return dist.toFixed(2);
 }
+
+export function getFormatText(slug){
+
+  let text = slug;
+
+  switch(slug){
+    case 'gallery':
+      text='gallerie';
+    break;
+    case 'link':
+      text='lien';
+    break;
+    case 'quote':
+      text='citation';
+    break;
+    case 'video':
+      text='vidéo';
+    break;
+    case 'standard':
+      text = 'texte';
+    break;
+  }
+
+  if (!text) return;
+
+  return text.charAt(0).toUpperCase() + text.slice(1);
+
+}
+
+export function getFormatIcon(slug){
+  switch(slug){
+    case 'gallery':
+      return 'images outline';
+    break;
+    case 'link':
+      return 'linkify';
+    break;
+    case 'image':
+      return 'image outline';
+    break;
+    case 'quote':
+      return 'quote left';
+    break;
+    case 'video':
+      return 'video';
+    break;
+    case 'audio':
+      return 'volume down';
+    break;
+    case 'standard':
+      return 'bars';
+    break;
+  }
+}

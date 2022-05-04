@@ -8,9 +8,13 @@ export default class DatabaseAPI extends React.Component {
     const config = {
      method: 'get',
      url: `/wp/v2/tags`,
+     params:{
+       per_page:10000
+     }
     }
     return databaseAPI.request(config)
     .then(resp => resp.data)
+    .catch(error=>console.error("ERROR GETTING TAGS",error))
   }
 
   static async getMaps(){
@@ -21,24 +25,31 @@ export default class DatabaseAPI extends React.Component {
     }
     return databaseAPI.request(config)
     .then(resp => resp.data)
+    .catch(error=>console.error("ERROR GETTING MAPS",error))
   }
 
-  static async getPostByID(post_id) {
-
-    if (!post_id){
-      throw("Missing 'post_id' parameter.");
-    }
+  static async getMapPost(post_id){
 
     const config = {
      method: 'get',
-     url: `/soundsystem/v2/post/${post_id}`,
+     url: `wp/v2/maps/${post_id}`,
     }
 
     return databaseAPI.request(config)
     .then(resp => resp.data)
-    .then(function(item){
-      return item;
-    })
+    .catch(error=>console.error("ERROR GETTING MAP",post_id,error))
   }
+
+  static async getMapMarkers(post_id){
+    const config = {
+     method: 'get',
+     url: `wp/v2/maps/${post_id}/markers`,
+    }
+
+    return databaseAPI.request(config)
+    .then(resp => resp.data)
+    .catch(error=>console.error("ERROR GETTING MAP MARKERS",post_id,error))
+  }
+
 
 }

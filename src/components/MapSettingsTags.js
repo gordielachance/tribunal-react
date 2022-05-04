@@ -1,7 +1,11 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
+import { useApp } from '../AppContext';
 
 const MapSettingsTags = props => {
+
+  const appContext = useApp();
+
 
   const [disabled,setDisabled] = useState(props.disabled || []);
 
@@ -29,7 +33,7 @@ const MapSettingsTags = props => {
     const output = {};
 
     (features || []).forEach(feature => {
-      const slugs = feature.properties.layer_slugs;
+      const slugs = feature.properties.tag_slugs;
 
       (slugs || []).forEach(slug => {
         if ( !output.hasOwnProperty(slug) ){
@@ -61,7 +65,8 @@ const MapSettingsTags = props => {
       <ul>
         {
           collection.map(function(item) {
-            const slug = item.slug;
+
+            const wpTag = appContext.tags.find(term=>term.slug===item.slug);
             const count = item.ids.length;
 
             return(
@@ -71,7 +76,7 @@ const MapSettingsTags = props => {
               onClick={e=>{handleClick(item.slug)}}
               >
                 <span><Icon name="check"/></span>
-                <span>{item.slug}</span>
+                <span title={wpTag.description}>{wpTag.name}</span>
                 <span className="count">{count}</span>
               </li>
             )
