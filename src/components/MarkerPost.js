@@ -6,7 +6,7 @@ const MarkerPost = (props) => {
   const iframeContent = useRef(null);
   const [title,setTitle] = useState('...');
   const [loading,setLoading] = useState(true);
-  const iframeUrl = WP_URL + `/?p=${props.post_id}` + '&iframe'
+  const iframeUrl = WP_URL + '/?p=' + props.post_id + '&iframe';
 
   const handleLoaded = () => {
     const iframeItem = iframeContent.current;

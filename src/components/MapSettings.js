@@ -1,5 +1,4 @@
-import React, { useEffect,useState }  from "react";
-import { Icon } from 'semantic-ui-react';
+import React  from "react";
 import MapSettingsTags from "../components/MapSettingsTags";
 import MapSettingsFormats from "../components/MapSettingsFormats";
 import MapSettingsSort from "../components/MapSettingsSort";
@@ -7,7 +6,7 @@ import MapSettingsSort from "../components/MapSettingsSort";
 const MapSettings = (props) => {
 
   return (
-    <div id="map-settings" className="map-content">
+    <div id="map-settings" className="map-section">
       <MapSettingsSort
         features={props.features}
         sortBy={props.sortBy}

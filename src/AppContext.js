@@ -8,7 +8,12 @@ const AppContext = createContext();
 export function AppProvider({children}){
 	const [tags,setTags] = useState();
   const [maps,setMaps] = useState();
+	const [map,setMap] = useState();
 	const mapContainerRef = useRef();
+	const [mapData,setMapData] = useState();
+	const [selectedMarkerFeature,setSelectedMarkerFeature] = useState();
+	const [popupMarkerFeature,setPopupMarkerFeature] = useState();
+	const [popupDrawingFeature,setPopupDrawingFeature] = useState();
 
 	//load tags on init
   useEffect(() => {
@@ -31,12 +36,35 @@ export function AppProvider({children}){
 
   }, []);
 
+	useEffect(()=>{
+		if (mapData === undefined) return;
+    console.log("SET MAP DATA",mapData);
+	},[mapData])
+
+	useEffect(()=>{
+    console.log("SET POPUP MARKER FEATURE",popupMarkerFeature);
+	},[popupMarkerFeature])
+
+	useEffect(()=>{
+    console.log("SET POPUP DRAWING FEATURE",popupDrawingFeature);
+	},[popupDrawingFeature])
+
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
   const value = {
+		mapContainerRef:mapContainerRef,
     tags:tags,
     maps:maps,
-		mapContainerRef:mapContainerRef
+		mapData:mapData,
+		setMapData:setMapData,
+		map:map,
+		setMap:setMap,
+		selectedMarkerFeature:selectedMarkerFeature,//TOUFIX TOUCHECK USEFUL ?
+		setSelectedMarkerFeature:setSelectedMarkerFeature,//TOUFIX TOUCHECK USEFUL ?
+		popupMarkerFeature:popupMarkerFeature,
+		setPopupMarkerFeature:setPopupMarkerFeature,
+		popupDrawingFeature:popupDrawingFeature,
+		setPopupDrawingFeature:setPopupDrawingFeature
 	};
 
   return (

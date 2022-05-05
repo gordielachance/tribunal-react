@@ -26,9 +26,8 @@ const FeatureTags = (props) => {
   const formatIcon = props.format ? getFormatIcon(props.format) : undefined;
   const formatText = props.format ? getFormatText(props.format) : undefined;
 
-  //TOUFIX URGENT fucks up with popups
-  //const appContext = useApp();
-  //const appTags = appContext.tags;
+  const appContext = useApp();
+  const appTags = appContext.tags;
 
   return (
     <>
@@ -44,8 +43,7 @@ const FeatureTags = (props) => {
         {
             (props.tags || []).map((slug,k) => {
 
-              //const tag = appTags.find(term => term.slug === slug);
-              const tag = undefined;
+              const tag = appTags.find(term => term.slug === slug);
               const name = tag?.name || slug;
               const desc = tag?.description;
 
@@ -86,21 +84,4 @@ export const FeatureCard = props => {
       }
     </div>
   )
-}
-
-export const FeaturePopup = (props) => {
-
-  const hasMore = props.feature?.properties.has_more;
-
-  return (
-    <div className="feature-popup">
-      <FeatureCard feature={props.feature}/>
-      <div className="feature-actions">
-        {
-          hasMore &&
-          <Button onClick={props.onClick}>Ouvrir</Button>
-        }
-      </div>
-    </div>
-  );
 }

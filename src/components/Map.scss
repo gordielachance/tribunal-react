@@ -23,11 +23,6 @@ $sidebarHandleWidth:25px;
     animation: opacityFadeIn .2s linear; //when inserted
     transition: opacity .2s;//when map moving
   }
-  &.mapMoving{
-    .mapboxgl-popup{
-      opacity:0;
-    }
-  }
 }
 
 .sidebar{
@@ -58,11 +53,18 @@ $sidebarHandleWidth:25px;
       #map-header{
         margin-bottom:2em;
       }
-      .map-content{
-        display:flex;
-        flex-direction: column;
+      #map-sections{
         overflow-y: auto;
+        &.mapTransition{
+          opacity:.5;
+        }
+        .map-section{
+          display:flex;
+          flex-direction: column;
+
+        }
       }
+
     }
   }
 
@@ -78,9 +80,6 @@ $sidebarHandleWidth:25px;
 }
 
 #marker-list{
-  &.mapMoving{
-    opacity:.5;
-  }
   > li{
     @extend .clickable;
     margin:0 1em;

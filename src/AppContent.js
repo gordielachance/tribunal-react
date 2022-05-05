@@ -24,7 +24,7 @@ function Layout() {
   const horizontalPaths = [
     '/',
     '/cartes',
-    '/carte/:mapName'
+    '/carte/:mapPostName'
   ]
   const verticalPaths = [
     '/',
@@ -141,8 +141,8 @@ function Layout() {
             <Route path="/cartes" element={<MapListPage/>} />
             <Route path="/agenda" element={<AgendaPage/>} />
             <Route path="/credits" element={<CreditsPage/>} />
-            <Route path="/carte/:mapId/:mapName" element={<SingleMapPage/>} />
-            <Route path="/carte/:mapId/:mapName/marker/:markerId/:markerName" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapPostId/:mapPostName" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapPostId/:mapPostName/marker/:markerPostId/:markerPostName" element={<SingleMapPage/>} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </CSSTransition>

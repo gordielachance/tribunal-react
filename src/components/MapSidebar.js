@@ -6,11 +6,14 @@ import { Icon,Menu } from 'semantic-ui-react';
 
 import MapSettings from "../components/MapSettings";
 import MarkerList from "../components/MarkerList";
+import { useApp } from '../AppContext';
 
 const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState(props.active);
+  const [mapTransition,setMapTransition] = useState();
   const [section,setSection] = useState('markers');
+  const {map} = useApp();
 
   const toggleSidebar = () => {
     setisActive(!isActive);
@@ -19,6 +22,21 @@ const MapSidebar = (props) => {
       //props.map.resize(); // fit to container
     }, 500);
   }
+
+  useEffect(()=>{
+    if (map===undefined) return;
+
+    //When the map is animated
+    map.on('movestart', (e) => {
+      setMapTransition(true);
+    });
+
+    map.on('moveend', (e) => {
+      setMapTransition(false);
+    });
+
+
+  },[map])
 
   return (
     <div
@@ -29,14 +47,12 @@ const MapSidebar = (props) => {
     >
 
       <div id="sidebar-container">
-
         <div id="sidebar-header">
           <div id="logo">
             <Link to="/">
               <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
             </Link>
           </div>
-
           <Link to="/cartes">Retour aux cartes</Link>
         </div>
         <div id="sidebar-content">
@@ -56,31 +72,34 @@ const MapSidebar = (props) => {
               />
             </Menu>
           </div>
-          {
-            (section === 'settings') &&
-            <MapSettings
-            features={props.features}
-            sortBy={props.sortMarkerBy}
-            onSortBy={props.onSortBy}
-            disabledTags={props.markerTagsDisabled}
-            onDisableTags={props.onDisableTags}
-            disabledFormats={props.markerFormatsDisabled}
-            onDisableFormats={props.onDisableFormats}
-            />
-          }
-          {
-            (section === 'markers') &&
-            <MarkerList
-            mapCenter={props.mapCenter}
-            mapMoving={props.mapMoving}
-            features={props.features}
-            feature_id={props.feature_id}
-            onFeatureClick={props.onFeatureClick}
-            disabledTags={props.markerTagsDisabled}
-            sortBy={props.sortMarkerBy}
-            />
-          }
-          </div>
+          <div
+          id="map-sections"
+          className={classNames({
+            mapTransition: mapTransition
+          })}>
+            {
+              (section === 'settings') &&
+              <MapSettings
+              features={props.features}
+              sortBy={props.sortMarkerBy}
+              onSortBy={props.onSortBy}
+              disabledTags={props.markerTagsDisabled}
+              onDisableTags={props.onDisableTags}
+              disabledFormats={props.markerFormatsDisabled}
+              onDisableFormats={props.onDisableFormats}
+              />
+            }
+            {
+              (section === 'markers') &&
+              <MarkerList
+              features={props.features}
+              onFeatureClick={props.onFeatureClick}
+              disabledTags={props.markerTagsDisabled}
+              sortBy={props.sortMarkerBy}
+              />
+            }
+        </div>
+      </div>
       </div>
       <div className="sidebar-toggle clickable" onClick={toggleSidebar} >
         <span>

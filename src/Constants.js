@@ -118,3 +118,22 @@ export function getFormatIcon(slug){
     break;
   }
 }
+
+// Because features come from tiled vector data,
+// feature geometries may be split
+// or duplicated across tile boundaries.
+// As a result, features may appear
+// multiple times in query results.
+//https://docs.mapbox.com/mapbox-gl-js/example/query-similar-features/
+export function getUniqueMapFeatures(features){
+  const uniqueIds = new Set();
+  const uniqueFeatures = [];
+  for (const feature of features) {
+    const id = feature.id;
+    if (!uniqueIds.has(id)) {
+      uniqueIds.add(id);
+      uniqueFeatures.push(feature);
+    }
+  }
+  return uniqueFeatures;
+}
