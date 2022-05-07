@@ -27,9 +27,13 @@ const MapMarkerPopup = props => {
   const {mapPostName} = useParams();
   const navigate = useNavigate();
 
-  const {popupMarkerFeature} = useApp();
+  const {popupMarkerFeature,setPopupMarkerFeature} = useApp();
   const [location,setLocation] = useState();
   const [content,setContent] = useState();
+
+  const handleClose = () => {
+    setPopupMarkerFeature(undefined);
+  }
 
   const handleClick = () => {
 
@@ -41,24 +45,12 @@ const MapMarkerPopup = props => {
     navigate(url);
   }
 
-  const handleClosePopup = () =>{
-    if (typeof props.onFeatureClick === 'function'){
-      props.onFeatureClick(undefined);
-    }
-  }
-
   useEffect(() => {
 
     if (popupMarkerFeature !== undefined){
 
       const popupCenter = popupMarkerFeature.geometry.coordinates;
-
-      const popupContent =       <PopupContent
-            feature={popupMarkerFeature}
-            onClick={handleClick}
-            onClose={handleClosePopup}
-            />
-
+      const popupContent = <PopupContent feature={popupMarkerFeature} onClick={handleClick}/>
 
       setLocation(popupCenter);
       setContent(popupContent);
@@ -83,8 +75,10 @@ const MapMarkerPopup = props => {
     {
       content &&
       <MapPopup
-      settings={{closeOnMove:true}}
-      lngLat={location}>
+      lngLat={location}
+      onClose={handleClose}
+      settings={{closeOnClick:false,anchor:'bottom'}}
+      >
         {content}
       </MapPopup>
     }

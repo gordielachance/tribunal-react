@@ -13,30 +13,30 @@ const MapSidebar = (props) => {
   const [isActive, setisActive] = useState(props.active);
   const [mapTransition,setMapTransition] = useState();
   const [section,setSection] = useState('markers');
-  const {map} = useApp();
+  const {mapboxMap} = useApp();
 
   const toggleSidebar = () => {
     setisActive(!isActive);
     setTimeout(() => {
       //console.log("sidebar toggled");
-      //props.map.resize(); // fit to container
+      //mapboxMap.resize(); // fit to container
     }, 500);
   }
 
   useEffect(()=>{
-    if (map===undefined) return;
+    if (mapboxMap===undefined) return;
 
     //When the map is animated
-    map.on('movestart', (e) => {
+    mapboxMap.on('movestart', (e) => {
       setMapTransition(true);
     });
 
-    map.on('moveend', (e) => {
+    mapboxMap.on('moveend', (e) => {
       setMapTransition(false);
     });
 
 
-  },[map])
+  },[mapboxMap])
 
   return (
     <div

@@ -16,15 +16,6 @@ $sidebarHandleWidth:25px;
   width:100%;
 }
 
-
-
-#map{
-  .mapboxgl-popup{
-    animation: opacityFadeIn .2s linear; //when inserted
-    transition: opacity .2s;//when map moving
-  }
-}
-
 .sidebar{
   position: absolute;
   z-index: 2;

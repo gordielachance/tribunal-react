@@ -1,81 +1,75 @@
 import React, { useEffect, useState } from "react";
-import { Button } from 'semantic-ui-react';
 
 import MapPopup from "./MapPopup";
 import { useApp } from '../AppContext';
-import { useParams,useNavigate } from 'react-router-dom';
 
 const PopupContent = (props) => {
 
-
   return (
     <div className="feature-popup">
-      COUCOU
+    {props.feature.properties.unique_id}
     </div>
   );
 }
 
 const MapDrawingPopup = props => {
-  const {mapPostName} = useParams();
-  const navigate = useNavigate();
 
-  const {map,popupDrawingFeature} = useApp();
+  const [feature,setFeature] = useState();
+
+  const {mapData,togglePolygon,togglePolygonHandle,getPolygonByHandleFeature,setPopupDrawingFeatureId} = useApp();
+
   const [location,setLocation] = useState();
   const [content,setContent] = useState();
 
-  const handleClosePopup = () =>{
-    if (typeof props.onFeatureClick === 'function'){
-      props.onFeatureClick(undefined);
+  const handleClose = e => {
+
+    const polygon = getPolygonByHandleFeature(feature);
+
+    console.log("DRAWING POPUP CLOSED", props.feature_id);
+    togglePolygonHandle(feature,false);
+    togglePolygon(polygon,false);
+    setPopupDrawingFeatureId();
+
+    /*
+    const isSameFeature = (props.feature_id.properties.unique_id === prevFeature.current?.properties.unique_id);
+
+    if (!isSameFeature){
+      console.log("REMOVE OLD POPUPZZZ");
+      togglePolygonHandle(feature,false);
+      togglePolygon(feature,false);
     }
+    */
   }
 
-  useEffect(()=>{
-    if (map === undefined) return;
-    if (popupDrawingFeature === undefined) return;
-    map.on('mousemove', (e) => {
-      //setLocation(e.lngLat);
-      //console.log("MOUZ POZ",e.lngLat);
-    })
-  },[map,popupDrawingFeature])
-
-
-
+  //get feature based on its ID
   useEffect(() => {
+    if (props.feature_id !== undefined){
+      const sourceCollection = mapData?.sources.polygonHandles.data.features;
+      const sourceFeature = (sourceCollection || []).find(feature => feature.properties.unique_id === props.feature_id);
 
-    if (popupDrawingFeature !== undefined){
-
-      const popupCenter = popupDrawingFeature.geometry.coordinates;
-
-      const popupContent =       <PopupContent
-            feature={popupDrawingFeature}
-            onClose={handleClosePopup}
-            />
+      const popupCenter = sourceFeature.geometry.coordinates;
+      const popupContent = <PopupContent feature={sourceFeature}/>
 
       setLocation(popupCenter);
       setContent(popupContent);
-
-      //get feature on map
-      /*
-      const features = map.querySourceFeatures('markers');
-      const feature = (features || []).find(feature => feature.id === popupDrawingFeature);
-      */
+      setFeature(sourceFeature);
     }else{
-      setLocation();
-      setContent();
+      setFeature();
     }
 
 
 
-  },[popupDrawingFeature])
-
+  },[props.feature_id])
 
   return (
     <>
     {
-      content &&
+      (feature && location && content) &&
       <MapPopup
-      settings={{offset:10}}
-      lngLat={location}>
+      settings={{offset:10,anchor:'left'}}
+      lngLat={location}
+      onClose={handleClose}
+      >
         {content}
       </MapPopup>
     }

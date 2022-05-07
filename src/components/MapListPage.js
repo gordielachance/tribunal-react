@@ -11,12 +11,8 @@ const getMapUrl = post => {
 
 const MapListPage = (props) => {
 
-  const {maps} = useApp();
-
-  const [loading,setLoading] = useState();
-  const [posts,setPosts] = useState();
-
-
+  const {mapPosts} = useApp();
+  const loading = (mapPosts === undefined);
 
   return(
     <Container id="mapListPage" className="page horizontal-page">
@@ -26,22 +22,28 @@ const MapListPage = (props) => {
         <li><Link to="/carte/creations">click to go to "/carte/creations"</Link></li>
       </ul>
       {
-        ( (maps || []).length > 0 ) &&
-        <ul>
-          {
-            maps.map((post,key) => {
-              return(
-                <li key={post.id}>
-                  <h2><Link to={getMapUrl(post)}>{post.title.react}</Link></h2>
-                  <div>
-                    {post.excerpt.react}
-                  </div>
-                </li>
-              )
+      <Dimmer.Dimmable dimmed={loading} id="maps-list-container">
+        <Dimmer active={loading} inverted>
+          <Loader />
+        </Dimmer>
+        {
+          <ul>
+            {
+              (mapPosts || []).map((post,key) => {
+                return(
+                  <li key={post.id}>
+                    <h2><Link to={getMapUrl(post)}>{post.title.react}</Link></h2>
+                    <div>
+                      {post.excerpt.react}
+                    </div>
+                  </li>
+                )
 
-            })
-          }
-        </ul>
+              })
+            }
+          </ul>
+        }
+      </Dimmer.Dimmable>
       }
     </Container>
   )

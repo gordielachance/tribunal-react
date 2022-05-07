@@ -89,9 +89,11 @@ have very specific meanings to <CSSTransition />
   }
   &#mapListPage{
     background-color:#9eff9e;
+    #maps-list-container{
+      overflow:visible;
+    }
   }
   &#singleMapPage{
-    background-color:#c7c2f7;
   }
 }
 

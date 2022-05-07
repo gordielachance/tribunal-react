@@ -18,7 +18,7 @@ const MapPost = (props) => {
   const navigate = useNavigate();
 
   const {mapPostName,markerPostId} = useParams();
-  const {map,mapData,setMapData,selectedMarkerFeature,setSelectedMarkerFeature,setPopupMarkerFeature} = useApp();
+  const {mapboxMap,mapData,setMapData,setSelectedMarkerFeature,setPopupMarkerFeature} = useApp();
 
   const [loading,setLoading] = useState(true);
 
@@ -52,20 +52,20 @@ const MapPost = (props) => {
     //for debug purposes
     if (DEBUG){
 
-      if (map.getLayer("zoomCircleLayer")) {
-        map.removeLayer("zoomCircleLayer");
+      if (mapboxMap.getLayer("zoomCircleLayer")) {
+        mapboxMap.removeLayer("zoomCircleLayer");
       }
 
-      if (map.getSource("zoomCircleSource")) {
-        map.removeSource("zoomCircleSource");
+      if (mapboxMap.getSource("zoomCircleSource")) {
+        mapboxMap.removeSource("zoomCircleSource");
       }
 
-      map.addSource("zoomCircleSource", {
+      mapboxMap.addSource("zoomCircleSource", {
       	type: "geojson",
       	data: circle
       });
 
-      map.addLayer({
+      mapboxMap.addLayer({
         id: 'zoomCircleLayer',
         type: 'fill',
         source: 'zoomCircleSource',
@@ -79,12 +79,17 @@ const MapPost = (props) => {
     //compute a bouding box for this circle
     const bbox = turf.bbox(circle);
 
-    map.fitBounds(bbox, {
+    mapboxMap.fitBounds(bbox, {
       maxZoom:14,
       padding:100//px
     });
 
-  }, [map,mapData?.sources.markers.data.features]);
+  }, [mapboxMap,mapData?.sources.markers.data.features]);
+
+  const setSelectedMarker = feature => {
+    setSelectedMarkerFeature(feature);
+    setPopupMarkerFeature(feature);
+  }
 
   const handleSidebarFeatureClick = feature_id => {
 
@@ -95,13 +100,12 @@ const MapPost = (props) => {
 
     //wait until the map movements stops,
     //so mapbox can handle the feature (it only consider features within the viewport)
-    map.once('idle', () => {
-      setSelectedMarkerFeature(feature);
-      setPopupMarkerFeature(feature);
+    mapboxMap.once('idle', () => {
+      setSelectedMarker(feature);
     });
 
     /*
-    map.easeTo({
+    mapboxMap.easeTo({
       center:feature.geometry.coordinates,
       zoom:14,
       duration: 3000,
@@ -158,10 +162,9 @@ const MapPost = (props) => {
     const sourceCollection = mapData?.sources.markers.data.features;
     const sourceFeature = (sourceCollection || []).find(feature => feature.properties.post_id === markerPostId);
 
-    console.log("FOUND MARKER POST ID",sourceFeature);
+    console.log("POPULATE MARKER FROM URL",sourceFeature);
 
-    setSelectedMarkerFeature(sourceFeature);
-    setPopupMarkerFeature(sourceFeature);
+    setSelectedMarker(sourceFeature);
 
   },[markerPostId])
 
@@ -245,15 +248,15 @@ const MapPost = (props) => {
 
   //set global marker filters
   useEffect(()=>{
-    if (map === undefined) return;
+    if (mapboxMap === undefined) return;
     console.log("RUN GLOBAL FILTER",markersFilter);
-    map.setFilter("markers",markersFilter);
+    mapboxMap.setFilter("markers",markersFilter);
   },[markersFilter])
 
   useEffect(()=>{
-    if (map === undefined) return;
+    if (mapboxMap === undefined) return;
     setLoading(false);
-  },[map]);
+  },[mapboxMap]);
 
   return (
     <Dimmer.Dimmable as={Container} dimmed={loading} id="map-post-container">

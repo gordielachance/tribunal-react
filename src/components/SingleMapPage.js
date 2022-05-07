@@ -13,7 +13,6 @@ const SingleMapPage = (props) => {
 
   const [loading,setLoading] = useState(true);
   const [post,setPost] = useState();
-  const [mapData,setMapData] = useState();
 
 
   //load map post on init
