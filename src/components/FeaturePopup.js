@@ -6,18 +6,16 @@ import { CreationCard } from "./CreationCard";
 import { useMap } from '../MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
+import {getMarkerUrl} from "./../Constants";
+
 const CreationPopupContent = (props) => {
   const navigate = useNavigate();
-  const {mapPostName} = useParams();
+  const {mapPostSlug,mapPostId} = useParams();
   const hasMore = props.feature?.properties.has_more;
 
   const handleClick = () => {
 
-    const getMarkerUrl = feature => {
-      return `/carte/${mapPostName}/marker/${feature.properties.post_id}/${feature.properties.slug}`;
-    }
-
-    const url = getMarkerUrl(props.feature);
+    const url = getMarkerUrl(mapPostId,mapPostSlug,props.feature.properties.post_id,props.feature.properties.slug);
     navigate(url);
   }
 
@@ -48,12 +46,15 @@ const AnnotationPopupContent = (props) => {
 const FeaturePopup = props => {
 
 
-  const {mapData,setShowPopup,getAnnotationPolygonByHandle} = useMap();
+  const {
+    mapData,
+    setShowPopup,
+    getAnnotationPolygonByHandle,
+    setActiveFeatureId
+  } = useMap();
 
   const sourceId = props?.sourceId;
   const featureId = props?.featureId;
-
-  console.log("!!!FEATURE POPUP",sourceId,featureId);
 
   let location = undefined;
   let content = undefined;
@@ -100,7 +101,7 @@ const FeaturePopup = props => {
   }
 
   const handleClose = () => {
-    //setShowPopup(false);
+    //setActiveFeatureId();
   }
 
   return (

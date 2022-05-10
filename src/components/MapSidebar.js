@@ -63,11 +63,7 @@ const MapSidebar = (props) => {
 
       <div id="sidebar-container">
         <div id="sidebar-header">
-          <div id="logo">
-            <Link to="/">
-              <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
-            </Link>
-          </div>
+
           <Link to="/cartes">Retour aux cartes</Link>
         </div>
         <div id="sidebar-content">

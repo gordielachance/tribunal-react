@@ -4,6 +4,7 @@ import {databaseAPI} from "./connect";
 
 export default class DatabaseAPI extends React.Component {
 
+
   static async getTags(){
     const config = {
      method: 'get',

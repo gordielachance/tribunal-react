@@ -23,7 +23,8 @@ const Map = (props) => {
     setMapboxMap,
     popupFeature,
     setShowPopup,
-    togglePolygon
+    togglePolygon,
+    getAnnotationPolygonByHandle
   } = useMap();
 
   const initializeMap = data => {
@@ -82,6 +83,8 @@ const Map = (props) => {
 
       const handlesLayerName = 'annotationsHandles';
       const polygonsLayerName = 'annotationsFill';
+      let activePolygon = undefined;
+
 
       //Update cursors IN
       map.on('mouseenter',handlesLayerName, e => {
@@ -97,15 +100,11 @@ const Map = (props) => {
       // When the user clicks a polygon handle
       map.on('click',handlesLayerName,e=>{
 
-        /*
-        const polygonFeature = getAnnotationPolygonByHandle(sourceFeature);
-        togglePolygon(polygonFeature,true);
-        togglePolygonHandle(sourceFeature,true);
-        */
-
         if (e.features.length > 0) {
 
           const mapPolygonHandle = e.features[0];
+          activePolygon = getAnnotationPolygonByHandle(mapPolygonHandle);
+
           const handleId = mapPolygonHandle?.id;
 
           //set current
@@ -127,22 +126,29 @@ const Map = (props) => {
 
       let hoveredMapPolygon = undefined;
 
+
+
       map.on('mousemove',polygonsLayerName, (e) => {
         if (e.features.length > 0) {
 
           // Use the first found feature.
           hoveredMapPolygon = e.features[0];
 
-          //Set 'selected' polygon
+          //Set 'active' polygon
           togglePolygon(hoveredMapPolygon,true);
         }
       });
+
+
 
       // When the mouse leaves the polygon
       //!!!NOT MOBILE FRIENDLY
       map.on('mouseleave',polygonsLayerName, () => {
 
-        //Unset 'selected' polygon + handle
+        //ignore when  it is the active polygon
+        if (hoveredMapPolygon.properties.id === activePolygon?.properties.id) return;
+
+        //Unset 'active' polygon
         togglePolygon(hoveredMapPolygon,false);
 
         //Unset popup

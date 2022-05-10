@@ -88,6 +88,7 @@ const FeaturesList = props => {
   const featuresRefs = features.map(feature => createRef()); //for LI scrolls
 
   //scroll to list item
+
   const scrollToFeature = feature_id => {
 
     //using a feature ID, get its index in the filtered features array.
@@ -99,14 +100,19 @@ const FeaturesList = props => {
     const index = getListIndex(feature_id);
     if (index === undefined) return;
 
+    console.log("RFZ",featuresRefs);
+
     const ref = featuresRefs[index];
-    console.log("SCROLL TO FEATURE",feature_id,index,ref);
+    console.log("!!!SCROLL TO FEATURE",{id:feature_id,index:index},ref);
     ref.current.scrollIntoView({ behavior: 'smooth'});
   }
 
   useEffect(()=>{
 
     if (mapboxMap===undefined) return;
+
+    //on init
+    setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
 
     //When the map is animated
     mapboxMap.on('moveend', (e) => {
@@ -118,14 +124,19 @@ const FeaturesList = props => {
   //scroll to the list item (if context is 'map')
   useEffect(()=>{
     const context = activeFeatureId?.context;
-    const sourceId = activeFeatureId?.source;
     const featureId = activeFeatureId?.id;
-
-    if (context !== 'map') return;
-    if (sourceId!==props.sourceId) return;
     if (featureId===undefined) return;
+    if (context !== 'map') return;
+
+    const featureSource = activeFeatureId?.source;
+
+    const scrollAnnotation = ( (featureSource === 'annotationsHandles') && (props.sourceId === 'annotations') );
+    const scrollCreation = ( (featureSource === 'creations') && (props.sourceId === 'creations') );
+
+    if (!scrollAnnotation && !scrollCreation) return;
 
     scrollToFeature(featureId);
+    //
 
   },[activeFeatureId])
 
@@ -139,7 +150,7 @@ const FeaturesList = props => {
         return feature.properties.distance ? getHumanDistance(feature.properties.distance) : undefined;
       break;
       default://date
-        return feature.properties.timestamp
+        return feature.properties.date_human
       break;
     }
 
@@ -183,13 +194,15 @@ const FeaturesList = props => {
     <>
     {
       features.length ?
-      <ul id="marker-list" className="map-section">
+      <ul id="features-list" className="map-section">
 
         {
           features.map((feature,k) => {
 
+            const sortValue = getSortByText(feature);
+
             const feature_id = feature.properties.id;
-            const active = ( (activeFeatureId?.id === feature_id) && (activeFeatureId?.source === props.sourceId) );
+            const active = (activeFeatureId?.id === feature_id);
 
             const handleClick = e => {
               gotoFeature(props.sourceId,feature_id);
@@ -204,6 +217,7 @@ const FeaturesList = props => {
                 active:   active
               })}
               >
+                <p className='sorted-value'>{sortValue}</p>
                 <CreationCard feature={feature}/>
               </li>
             )

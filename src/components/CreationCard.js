@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from "react";
 import classNames from "classnames";
 import { Label,Button,Icon } from 'semantic-ui-react';
-import {getHumanDistance,getFormatIcon,getFormatText} from "../Constants";
+import {getFormatIcon,getFormatText} from "../Constants";
 import { useApp } from '../AppContext';
 
 function maybeDecodeJson(value){
@@ -61,7 +61,6 @@ export const CreationCard = props => {
 
   const post_id = props.feature?.properties.post_id;
   const title = props.feature?.properties.title;
-  const date = props.feature?.properties.timestamp;
   const description=  props.feature?.properties.excerpt;
   const format = props.feature?.properties.format;
   const tags = maybeDecodeJson(props.feature?.properties.tag_slugs);
@@ -70,7 +69,6 @@ export const CreationCard = props => {
     <div className="feature-card">
       <div className="feature-header">
         <p className="feature-title">{title}</p>
-        <p className="feature-date feature-meta">{date}</p>
         <FeatureTags tags={tags} format={format}/>
       </div>
       {

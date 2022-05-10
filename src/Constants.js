@@ -5,25 +5,17 @@ const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 export const DEBUG = IS_LOCAL;
 
 export const WP_URL = IS_LOCAL ? 'http://tribunaldp.local' : 'https://www.tribunaldesprejuges.org';
-export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
-
+export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat']
 
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 
+//in meters
 export const setFeatureDistance = (feature,origin) => {
 
   const getDistance = (feature,origin) => {
-    switch(feature.geometry.type){
-      case 'Point':
-        return turf.distance(feature.geometry,origin);//in km
-      break;
-      default:
-        //TOUFIX URGENT
-        //https://github.com/Turfjs/turf/issues/1743
-        const centroid = turf.centroid(feature);
-        return turf.distance(centroid.geometry,origin);//in km
-
-    }
+    const centroid = turf.centroid(feature);
+    const meters = turf.distance(centroid.geometry,origin) * 1000;
+    return meters.toFixed(2);
   }
 
   feature.properties.distance = getDistance(feature,origin);
@@ -37,25 +29,22 @@ export const getDistanceFromFeatureToClosest = (feature_id,features) => {
     throw 'Missing feature parameter.';
   }
 
-  //remove the current feature from the set
-  features = Array.prototype.slice.call(features);
-  const index = features.indexOf(feature);
-  features.splice(index, 1);
-
-  const origin = feature.geometry;
-  return getDistanceFromOriginToClosestFeature(origin,features);
+  return getDistanceFromOriginToClosestFeature(feature,features);
 }
 
-//in km
-//https://gist.github.com/jbranigan/f334f471f954d78880806451eee25bba
-export const getDistanceFromOriginToClosestFeature = (origin,features) => {
-
+export const getClosestFeature = (feature,features)=>{
   if (features === undefined){
     throw 'Missing features parameter.';
   }
 
-  //clone set
+  const origin = feature.geometry.coordinates;
+
+  //clone set, we don't want to alter the original data
   features = Array.prototype.slice.call(features);
+
+  //remove the current feature from the set
+  const index = features.indexOf(feature);
+  features.splice(index, 1);
 
   //add 'distance' prop
   features.forEach(feature => {
@@ -67,12 +56,25 @@ export const getDistanceFromOriginToClosestFeature = (origin,features) => {
     return a.properties.distance - b.properties.distance;
   });
 
-  const match = sorted[0];
+  return sorted[0];
+}
+
+//in km
+//https://gist.github.com/jbranigan/f334f471f954d78880806451eee25bba
+export const getDistanceFromOriginToClosestFeature = (feature,features) => {
+  const match = getClosestFeature(feature,features);
   return match?.properties.distance;
 }
 
-export const getHumanDistance = dist => {
-  return dist.toFixed(2);
+export const getHumanDistance = meters => {
+  if (meters === 0) return;
+  const km = meters / 1000;
+  if (km > 1){
+    return km.toFixed(1) + ' km';
+  }else{
+    return meters.toFixed() + ' m';
+  }
+
 }
 
 export function getFormatText(slug){
@@ -146,4 +148,17 @@ export function getUniqueMapFeatures(features){
     }
   }
   return uniqueFeatures;
+}
+
+export const getMapUrl = (id,slug) => {
+  return `/carte/${id}/${slug}`;
+}
+
+export const getMarkerUrl = (mapId,mapSlug,markerId,markerSlug) => {
+  const mapUrl = getMapUrl(mapId,mapSlug);
+  return mapUrl + `/creation/${markerId}/${markerSlug}`;
+}
+
+export const getIframePostUrl = post_id => {
+  return WP_URL + '/?p=' + post_id + '&iframe';
 }

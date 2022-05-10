@@ -1,7 +1,12 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {DEBUG,getDistanceFromOriginToClosestFeature} from "./Constants";
+import {
+	DEBUG,
+	getDistanceFromOriginToClosestFeature,
+	getDistanceFromFeatureToClosest,
+	getClosestFeature
+} from "./Constants";
 import * as turf from "@turf/turf";
 
 const MapContext = createContext();
@@ -40,7 +45,7 @@ export function MapProvider({children}){
 
 		mapboxMap.setFeatureState(
 			{ source: 'annotationsHandles', id: handleId },
-			{ hover: bool }
+			{ active: bool }
 		);
 	}
 
@@ -49,7 +54,7 @@ export function MapProvider({children}){
 
 		mapboxMap.setFeatureState(
 			{ source: 'creations', id: featureId },
-			{ selected: bool }
+			{ active: bool }
 		);
 	}
 
@@ -59,16 +64,21 @@ export function MapProvider({children}){
 
 		mapboxMap.setFeatureState(
 			{ source: 'annotations', id: polygonId },
-			{ hover: bool }
+			{ active: bool }
 		);
 
 	}
+
+
+
 
 	/*
 	create a circle that extends to the closest marker,
 	and zoom on it.
 	*/
 	const fitToFeature = (source_id,feature_id) => {
+
+		console.log("FIT TO FEATURE SOURCE",source_id);
 
 		const source = mapData?.sources[source_id];
 	  const sourceCollection = source?.data.features;
@@ -77,37 +87,93 @@ export function MapProvider({children}){
 		//get the center no matter the feature type
 		const centroid = turf.centroid(sourceFeature);
 
-		mapboxMap.flyTo({
-			center: centroid.geometry.coordinates
-		});
+		const getZoomForTargetSize = (meters,lat,targetPixels) => {
 
-		return;
+			if (meters === undefined){
+				throw "Missing 'meters' parameter.";
+			}
 
-		//URGENT
+			if (lat === undefined){
+				throw "Missing 'latitude' parameter.";
+			}
+
+			if (targetPixels === undefined){
+				throw "Missing 'targetPixels' parameter.";
+			}
+
+			let currentZoom = 0;
+			const zoomSteps = .5;
+			const maxZoom = 22;
+			let matchZoom = undefined;
+
+			console.log("GET IDEAL ZOOM FOR METERS/PIXELS/LAT",Math.round(meters),targetPixels,lat);
+
+			const getSizeForZoom = (meters,latitude,zoomLevel) => {
+
+				const metersPerPixel = function(latitude, zoomLevel) {
+					const EARTH_RADIUS = 6378137;
+					const TILESIZE = 512;
+					const EARTH_CIRCUMFERENCE = 2 * Math.PI * EARTH_RADIUS;
+					const scale = Math.pow(2,zoomLevel);
+					const worldSize = TILESIZE * scale;
+					var latitudeRadians = latitude * (Math.PI/180);
+					return EARTH_CIRCUMFERENCE * Math.cos(latitudeRadians) / worldSize;
+				};
+
+				return meters / metersPerPixel(latitude, zoomLevel);
+			}
 
 
-	  //get minimum zoom to see clearly this marker
+			while (currentZoom <= maxZoom) {
 
-	  /*
-	  //distance from feature to the nearest point
-	  const distanceToNearest = getDistanceFromFeatureToClosest(feature_id,collection);
-	  console.log("NEAREST MARKER DIST",distanceToNearest);
-	  return;
-	  */
+				const size = getSizeForZoom(meters,lat,currentZoom);
 
+				//console.log("SIZE AT ZOOM",currentZoom,size);
 
+				if (size > targetPixels){
+					matchZoom = currentZoom;
+					break;
+				}
 
+				currentZoom +=zoomSteps;
+			}
 
-	  const radius = getDistanceFromOriginToClosestFeature(origin,sourceCollection);
-	  const circle = turf.circle(origin,radius);
+			return matchZoom;
+		}
 
-	  //compute a bouding box for this circle
-	  const bbox = turf.bbox(circle);
+		let inputMeters = undefined;//distance (in meters) that will be used to compute the target zoom
+		let outputPixels = undefined;//what should be the pixel size of the converted distance
 
-	  mapboxMap.fitBounds(bbox, {
-	    maxZoom:14,
-	    padding:100//px
-	  });
+		switch(source_id){
+			case 'creations':
+				const nearestFeature = getClosestFeature(sourceFeature,sourceCollection);
+				inputMeters = getDistanceFromFeatureToClosest(feature_id,sourceCollection);
+				outputPixels = 25;
+			break;
+			case 'annotations':
+				const bbox = turf.bbox(sourceFeature);
+				const pointA = [bbox[0],bbox[1]];
+				const pointB = [bbox[2],bbox[3]];
+				inputMeters = turf.distance(pointA,pointB) * 1000;
+				outputPixels = 50;
+			break;
+		}
+
+		const cameraSettings = {
+			center: centroid.geometry.coordinates,
+			duration:1000
+		}
+
+		/*TOUFIX URGENT
+		if (inputMeters){
+			const idealZoom = getZoomForTargetSize(inputMeters,centroid.geometry.coordinates[0],outputPixels);
+			if ( idealZoom > mapboxMap.getZoom() ){
+				cameraSettings.zoom = idealZoom;
+			}
+		}
+		*/
+
+		mapboxMap.easeTo(cameraSettings);
 
 	}
 
@@ -116,7 +182,9 @@ export function MapProvider({children}){
 		const sourceCollection = mapData?.sources[source_id].data.features;
     const sourceFeature = (sourceCollection || []).find(feature => feature.properties.id === feature_id);
 
-		console.log("TOGGLE FEATURE",bool,source_id,feature_id);
+		if (bool){
+			console.log("TOGGLE FEATURE",bool,source_id,feature_id,sourceFeature);
+		}
 
 		switch(source_id){
 			case 'annotationsHandles':
@@ -210,13 +278,15 @@ export function MapProvider({children}){
 	  },[markersFilter])
 
 	useEffect(()=>{
-		if (activeFeatureId === undefined) return;
-		if (JSON.stringify(activeFeatureId) === JSON.stringify(prevActiveFeatureId.current) ) return; //reclick
 
 		//hide old
 		if (prevActiveFeatureId.current){
 			toggleFeatureId(prevActiveFeatureId.current.source,prevActiveFeatureId.current.id,false);
 		}
+
+		if (activeFeatureId === undefined) return;
+		if (JSON.stringify(activeFeatureId) === JSON.stringify(prevActiveFeatureId.current) ) return; //reclick
+
 
 		//show new
 		toggleFeatureId(activeFeatureId.source,activeFeatureId.id,true);

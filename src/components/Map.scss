@@ -1,6 +1,5 @@
 @import "../_shared";
 
-$sidebarWidth:275px;
 $sidebarHandleWidth:25px;
 
 .mapboxgl-map{
@@ -31,11 +30,11 @@ $sidebarHandleWidth:25px;
   }
   #sidebar-container {
     padding: 1em;
+    margin-top: $logoContainerHeight;
     width:#{$sidebarWidth};
     display:flex;
     flex-direction: column;
     #sidebar-header{
-      height:20%;
     }
     #sidebar-content{
       display: flex;
@@ -70,7 +69,7 @@ $sidebarHandleWidth:25px;
   }
 }
 
-#marker-list{
+#features-list{
   > li{
     @extend .clickable;
     margin:0 1em;
@@ -81,6 +80,13 @@ $sidebarHandleWidth:25px;
       border-bottom: 1px solid lightgrey;
     }
     transition:background-color .25s;
+
+    .sorted-value{
+      color: grey;
+      text-align:right;
+      font-size:.8em;
+      margin:0;
+    }
 
     .feature-card{
       .feature-description{
@@ -160,13 +166,7 @@ $sidebarHandleWidth:25px;
 
 }
 
-#logo{
-  margin:auto;
-  width:50%;
-  img{
 
-  }
-}
 
 .feature-card{
   .feature-header{

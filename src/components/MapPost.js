@@ -3,7 +3,7 @@ import { useParams,useNavigate } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
 
-import {DEBUG} from "./../Constants";
+import {DEBUG,getMapUrl} from "./../Constants";
 
 import './Map.scss';
 import MarkerPost from "./MarkerPost";
@@ -16,22 +16,24 @@ const MapPost = (props) => {
 
   const navigate = useNavigate();
 
-  const {mapPostName,creationPostId} = useParams();
+  const {mapPostId,mapPostSlug,featurePostId} = useParams();
   const {mapboxMap,setMapData,setActiveFeatureId} = useMap();
 
   const [loading,setLoading] = useState(true);
 
   //marker in URL
   useEffect(()=>{
-    if (creationPostId === undefined) return;
-    console.log("POPULATE CREATION FROM URL",creationPostId);
+    if (featurePostId === undefined) return;
+    console.log("POPULATE CREATION FROM URL",featurePostId);
+    /*
     setActiveFeatureId({
       source:'creations',
-      id:creationPostId,
+      id:featurePostId,
       context:'map'
     });
+    */
 
-  },[creationPostId])
+  },[featurePostId])
 
   //initialize map data
   useEffect(()=>{
@@ -50,8 +52,8 @@ const MapPost = (props) => {
         <Loader />
       </Dimmer>
       <MarkerPost
-      post_id={creationPostId}
-      onClose={()=>navigate(`/carte/${mapPostName}`)}
+      post_id={featurePostId}
+      onClose={()=>navigate(getMapUrl(mapPostId,mapPostSlug))}
       />
       <MapSidebar
       title={props.title}

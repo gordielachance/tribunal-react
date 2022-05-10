@@ -19,7 +19,7 @@ function Layout() {
   const horizontalPaths = [
     '/',
     '/cartes',
-    '/carte/:mapPostName'
+    '/carte/:mapPostSlug'
   ]
   const verticalPaths = [
     '/',
@@ -125,8 +125,13 @@ function Layout() {
 
   return (
     <div id="layout">
-    <TransitionGroup
-    >
+      <div id="site-logo">
+        <Link to="/">
+          <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
+        </Link>
+      </div>
+      <TransitionGroup
+      >
         <CSSTransition
         key={location.key}
         classNames={transitionClass}
@@ -136,8 +141,8 @@ function Layout() {
             <Route path="/cartes" element={<MapListPage/>} />
             <Route path="/agenda" element={<AgendaPage/>} />
             <Route path="/credits" element={<CreditsPage/>} />
-            <Route path="/carte/:mapPostId/:mapPostName" element={<SingleMapPage/>} />
-            <Route path="/carte/:mapPostId/:mapPostName/marker/:postId/:markerPostName" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapPostId/:mapPostSlug/creation/:featurePostId/:featurePostSlug" element={<SingleMapPage/>} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </CSSTransition>

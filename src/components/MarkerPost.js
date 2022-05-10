@@ -1,12 +1,11 @@
 import React, {useState,useEffect,useRef} from 'react';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
-import {WP_URL} from "./../Constants";
+import {getIframePostUrl} from "./../Constants";
 
 const MarkerPost = (props) => {
   const iframeContent = useRef(null);
   const [title,setTitle] = useState('...');
   const [loading,setLoading] = useState(true);
-  const iframeUrl = WP_URL + '/?p=' + props.post_id + '&iframe';
 
   const handleLoaded = () => {
     const iframeItem = iframeContent.current;
@@ -43,7 +42,7 @@ const MarkerPost = (props) => {
             <iframe
             id="marker-iframe"
             ref={iframeContent}
-            src={iframeUrl}
+            src={getIframePostUrl(props.post_id)}
             onLoad={handleLoaded}
             />
           </Modal.Description>

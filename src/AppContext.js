@@ -10,17 +10,13 @@ export function AppProvider({children}){
 	const [tags,setTags] = useState();
   const [mapPosts,setMapPosts] = useState();
 
-	//load data on init
+	//load home on init
   useEffect(() => {
 
-    //LOAD TAGS
-    console.info("GETTING TAGS...");
-    DatabaseAPI.getTags()
-    .then(resp => {
-      console.info("...TAGS LOADED",resp);
-      setTags(resp);
-    })
+  }, []);
 
+	//load maps on init
+  useEffect(() => {
     //LOAD MAPS
     console.info("GETTING MAPS...");
     DatabaseAPI.getMaps()
@@ -28,7 +24,16 @@ export function AppProvider({children}){
       console.info("...MAPS LOADED",resp);
       setMapPosts(resp);
     })
+  }, []);
 
+	//load tags on init
+  useEffect(() => {
+    console.info("GETTING TAGS...");
+    DatabaseAPI.getTags()
+    .then(resp => {
+      console.info("...TAGS LOADED",resp);
+      setTags(resp);
+    })
   }, []);
 
 	// NOTE: you *might* need to memoize this value
