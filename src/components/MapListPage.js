@@ -7,8 +7,6 @@ const getMapUrl = post => {
   return `/carte/${post.id}/${post.slug}`;
 }
 
-
-
 const MapListPage = (props) => {
 
   const {mapPosts} = useApp();

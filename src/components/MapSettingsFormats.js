@@ -1,14 +1,15 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 import {getFormatIcon,getFormatText} from "../Constants";
+import { useMap } from '../MapContext';
 
 const MapSettingsFormats = props => {
 
-  const [disabled,setDisabled] = useState(props.disabled || []);
+  const {markerFormatsDisabled,setMarkerFormatsDisabled} = useMap();
 
   const handleClick = slug => {
 
-    const newDisabled = [...disabled];
+    const newDisabled = [...markerFormatsDisabled];
     const index = newDisabled.indexOf(slug);
 
     if (index > -1) {//exists in array
@@ -17,12 +18,12 @@ const MapSettingsFormats = props => {
       newDisabled.push(slug);
     }
 
-    setDisabled(newDisabled);
+    setMarkerFormatsDisabled(newDisabled);
 
   }
 
   const isDisabled = slug => {
-    return disabled.includes(slug);
+    return markerFormatsDisabled.includes(slug);
   }
 
   //get pairs of layer name => array of post IDs
@@ -58,16 +59,9 @@ const MapSettingsFormats = props => {
 
   const collection = getCollection(props.features);
 
-
-  //pass update to parent
-  useEffect(() => {
-    if (typeof props.onDisable !== 'function') return;
-    props.onDisable(disabled);
-  },[disabled]);
-
   return(
     <div id="map-settings-formats">
-      <h5>Type</h5>
+      <h5>Créations</h5>
       <ul>
         {
           collection.map(function(item) {

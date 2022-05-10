@@ -142,7 +142,7 @@ function Layout() {
             <Route path="/agenda" element={<AgendaPage/>} />
             <Route path="/credits" element={<CreditsPage/>} />
             <Route path="/carte/:mapPostId/:mapPostName" element={<SingleMapPage/>} />
-            <Route path="/carte/:mapPostId/:mapPostName/marker/:markerPostId/:markerPostName" element={<SingleMapPage/>} />
+            <Route path="/carte/:mapPostId/:mapPostName/marker/:creationPostId/:markerPostName" element={<SingleMapPage/>} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </CSSTransition>

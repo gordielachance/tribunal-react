@@ -8,8 +8,6 @@ function maybeDecodeJson(value){
   return (typeof value === 'string') ? JSON.parse(value) : value;
 }
 
-
-
 const TagLabel = props => {
   return(
     <Label title={props.description}>
@@ -26,8 +24,7 @@ const FeatureTags = (props) => {
   const formatIcon = props.format ? getFormatIcon(props.format) : undefined;
   const formatText = props.format ? getFormatText(props.format) : undefined;
 
-  const appContext = useApp();
-  const appTags = appContext.tags;
+  const {tags} = useApp();
 
   return (
     <>
@@ -43,7 +40,7 @@ const FeatureTags = (props) => {
         {
             (props.tags || []).map((slug,k) => {
 
-              const tag = appTags.find(term => term.slug === slug);
+              const tag = tags.find(term => term.slug === slug);
               const name = tag?.name || slug;
               const desc = tag?.description;
 
@@ -60,7 +57,7 @@ const FeatureTags = (props) => {
   )
 }
 
-export const FeatureCard = props => {
+export const CreationCard = props => {
 
   const post_id = props.feature?.properties.post_id;
   const title = props.feature?.properties.title;

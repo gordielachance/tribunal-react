@@ -5,15 +5,15 @@ import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
 
 import MapSettings from "../components/MapSettings";
-import MarkerList from "../components/MarkerList";
-import { useApp } from '../AppContext';
+import FeaturesList from "../components/FeaturesList";
+import { useMap } from '../MapContext';
 
 const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState(props.active);
   const [mapTransition,setMapTransition] = useState();
-  const [section,setSection] = useState('markers');
-  const {mapboxMap} = useApp();
+  const [section,setSection] = useState('creations');
+  const {mapData,mapboxMap,activeFeatureId} = useMap();
 
   const toggleSidebar = () => {
     setisActive(!isActive);
@@ -38,6 +38,21 @@ const MapSidebar = (props) => {
 
   },[mapboxMap])
 
+  //switch section when a feature is clicked
+  useEffect(()=>{
+    const sourceId = activeFeatureId?.source;
+
+    switch(sourceId){
+      case 'creations':
+        setSection('creations');
+      break;
+      case 'annotationsHandles':
+        setSection('annotations');
+      break;
+    }
+
+  },[activeFeatureId?.source])
+
   return (
     <div
     className={classNames({
@@ -61,9 +76,14 @@ const MapSidebar = (props) => {
 
             <Menu pointing secondary>
               <Menu.Item
-                name='Marqueurs'
-                active={section === 'markers'}
-                onClick={e=>setSection('markers')}
+                name='Créations'
+                active={section === 'creations'}
+                onClick={e=>setSection('creations')}
+              />
+              <Menu.Item
+                name='Annotations'
+                active={section === 'annotations'}
+                onClick={e=>setSection('annotations')}
               />
               <Menu.Item
                 name='Filtres'
@@ -80,20 +100,24 @@ const MapSidebar = (props) => {
             {
               (section === 'settings') &&
               <MapSettings
-              features={props.features}
               sortBy={props.sortMarkerBy}
               onSortBy={props.onSortBy}
-              disabledTags={props.markerTagsDisabled}
-              onDisableTags={props.onDisableTags}
               disabledFormats={props.markerFormatsDisabled}
               onDisableFormats={props.onDisableFormats}
               />
             }
             {
-              (section === 'markers') &&
-              <MarkerList
-              features={props.features}
-              onFeatureClick={props.onFeatureClick}
+              (section === 'creations') &&
+              <FeaturesList
+              sourceId='creations'
+              disabledTags={props.markerTagsDisabled}
+              sortBy={props.sortMarkerBy}
+              />
+            }
+            {
+              (section === 'annotations') &&
+              <FeaturesList
+              sourceId='annotations'
               disabledTags={props.markerTagsDisabled}
               sortBy={props.sortMarkerBy}
               />

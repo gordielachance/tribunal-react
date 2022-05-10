@@ -10,18 +10,28 @@ export const WP_FORMATS = ['aside','gallery','link','image','quote','status','vi
 
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 
-
-export const getFeatureById = (features,id) => {
-  return (features || []).find(feature => feature.properties.unique_id === id)
-}
-
 export const setFeatureDistance = (feature,origin) => {
-  feature.properties.distance = turf.distance(feature.geometry,origin);//in km
+
+  const getDistance = (feature,origin) => {
+    switch(feature.geometry.type){
+      case 'Point':
+        return turf.distance(feature.geometry,origin);//in km
+      break;
+      default:
+        //TOUFIX URGENT
+        //https://github.com/Turfjs/turf/issues/1743
+        const centroid = turf.centroid(feature);
+        return turf.distance(centroid.geometry,origin);//in km
+
+    }
+  }
+
+  feature.properties.distance = getDistance(feature,origin);
 }
 
 export const getDistanceFromFeatureToClosest = (feature_id,features) => {
 
-  const feature = getFeatureById(features,feature_id);
+  const feature = (features || []).find(feature => feature.properties.id === feature_id);
 
   if (feature === undefined){
     throw 'Missing feature parameter.';

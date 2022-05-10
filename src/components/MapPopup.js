@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import { useApp } from '../AppContext';
+import { useMap } from '../MapContext';
 
 const MapPopup = (props) => {
-  const {mapboxMap} = useApp();
+  const {mapboxMap} = useMap();
   const popupRef = useRef();
 
   //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup

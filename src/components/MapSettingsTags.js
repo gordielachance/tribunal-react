@@ -1,17 +1,16 @@
 import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
+import { useMap } from '../MapContext';
 
 const MapSettingsTags = props => {
 
-  const appContext = useApp();
-
-
-  const [disabled,setDisabled] = useState(props.disabled || []);
+  const {tags} = useApp();
+  const {markerTagsDisabled,setMarkerTagsDisabled} = useMap();
 
   const handleClick = slug => {
 
-    const newDisabled = [...disabled];
+    const newDisabled = [...markerTagsDisabled];
     const index = newDisabled.indexOf(slug);
 
     if (index > -1) {//exists in array
@@ -20,12 +19,12 @@ const MapSettingsTags = props => {
       newDisabled.push(slug);
     }
 
-    setDisabled(newDisabled);
+    setMarkerTagsDisabled(newDisabled);
 
   }
 
   const isDisabled = slug => {
-    return disabled.includes(slug);
+    return markerTagsDisabled.includes(slug);
   }
 
   //get pairs of layer name => array of post IDs
@@ -53,12 +52,6 @@ const MapSettingsTags = props => {
 
   const collection = getCollection(props.features);
 
-  //pass update to parent
-  useEffect(() => {
-    if (typeof props.onDisable !== 'function') return;
-    props.onDisable(disabled);
-  },[disabled]);
-
   return(
     <div id="map-settings-tags">
       <h5>Tags</h5>
@@ -66,7 +59,7 @@ const MapSettingsTags = props => {
         {
           collection.map(function(item) {
 
-            const wpTag = appContext.tags.find(term=>term.slug===item.slug);
+            const wpTag = tags.find(term=>term.slug===item.slug);
             const count = item.ids.length;
 
             return(

@@ -1,21 +1,30 @@
-import React, { useEffect,useState }  from "react";
+import React, { useEffect }  from "react";
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 import {MAPBOX_TOKEN,DEBUG} from "./../Constants";
 
-import MapMarkerPopup from "./MapMarkerPopup";
-import MapDrawingPopup from "./MapDrawingPopup";
+import FeaturePopup from "./FeaturePopup";
 
 import './Map.scss';
 import * as turf from "@turf/turf";
-import { useApp } from '../AppContext';
-
+import { useMap } from '../MapContext';
 
 const Map = (props) => {
 
-  const {mapContainerRef,mapData,mapboxMap,setMapboxMap,setSelectedMarkerFeature,setPopupMarkerFeature,setPopupDrawingFeatureId,togglePolygon,togglePolygonHandle,popupDrawingFeatureId,getPolygonByHandleFeature} = useApp();
+  const {
+    activeFeatureId,
+    setActiveFeatureId,
+    showPopup,
+    mapContainerRef,
+    mapData,
+    mapboxMap,
+    setMapboxMap,
+    popupFeature,
+    setShowPopup,
+    togglePolygon
+  } = useMap();
 
   const initializeMap = data => {
 
@@ -29,17 +38,13 @@ const Map = (props) => {
     });
 
     setMapboxMap(map);
-
-
-
   }
 
   const initMapListeners = map => {
 
     const initMapMarkersListeners = () => {
 
-      const layerName = 'markers';
-      let selectedFeatureId = undefined;
+      const layerName = 'creations';
 
       //Update cursors IN
       map.on('mouseenter',layerName, e => {
@@ -52,41 +57,6 @@ const Map = (props) => {
         map.getCanvas().style.cursor = '';
       });
 
-      //set 'selected'
-      map.on('click',layerName,e=>{
-
-        if (e.features.length > 0) {
-
-          //unset previous
-          if (selectedFeatureId) {
-            map.setFeatureState(
-              { source: 'markers', id: selectedFeatureId },
-              { selected: false }
-            );
-            selectedFeatureId = undefined;
-          }
-
-          //set current
-
-          // Use the first found feature.
-          const selectedFeature = e.features[0];
-
-
-          if (selectedFeature){
-
-            selectedFeatureId = selectedFeature.id;
-
-            map.setFeatureState(
-              { source: 'markers', id: selectedFeatureId },
-              { selected: true }
-            );
-
-          }
-        }
-
-
-      })
-
       //open (add) popup when clicking marker
       map.on('click',layerName, e => {
 
@@ -94,20 +64,24 @@ const Map = (props) => {
 
         //clicked marker
         const mapFeature = e.features[0];
-        const sourceCollection = mapData?.sources.markers.data.features;
-        const sourceFeature = (sourceCollection || []).find(feature => feature.properties.unique_id === mapFeature.id)
 
-        setSelectedMarkerFeature(sourceFeature);
-        setPopupMarkerFeature(sourceFeature);
+        //set current
+        setActiveFeatureId({
+          source:'creations',
+          id:mapFeature?.id,
+          context:'map'
+        });
+
+        //show popup
+        setShowPopup(true);
 
       });
     }
 
     const initMapPolygonsListeners = () => {
 
-      const handlesLayerName = 'polygonHandles';
-      const polygonsLayerName = 'drawingPolygonsFill';
-
+      const handlesLayerName = 'annotationsHandles';
+      const polygonsLayerName = 'annotationsFill';
 
       //Update cursors IN
       map.on('mouseenter',handlesLayerName, e => {
@@ -121,21 +95,29 @@ const Map = (props) => {
       });
 
       // When the user clicks a polygon handle
-      map.on('click',handlesLayerName, (e) => {
+      map.on('click',handlesLayerName,e=>{
+
+        /*
+        const polygonFeature = getAnnotationPolygonByHandle(sourceFeature);
+        togglePolygon(polygonFeature,true);
+        togglePolygonHandle(sourceFeature,true);
+        */
+
         if (e.features.length > 0) {
 
-          //Get clicked handle
           const mapPolygonHandle = e.features[0];
-          const clickedPolygonHandleId = mapPolygonHandle.id;
-          const newPolygonHandleId = mapPolygonHandle.id;
-          const mapPolygon = getPolygonByHandleFeature(mapPolygonHandle);
+          const handleId = mapPolygonHandle?.id;
 
-          //Set 'selected' polygon + handle
-          togglePolygonHandle(mapPolygonHandle,true);
-          togglePolygon(mapPolygon,true);
+          //set current
+          setActiveFeatureId({
+            source:'annotationsHandles',
+            id:handleId,
+            context:'map'
+          });
 
-          //Set popup
-          setPopupDrawingFeatureId(mapPolygonHandle?.properties.unique_id);
+
+          //show popup
+          setShowPopup(true);
 
         }
       });
@@ -164,7 +146,7 @@ const Map = (props) => {
         togglePolygon(hoveredMapPolygon,false);
 
         //Unset popup
-        setPopupDrawingFeatureId();
+        //setPopupDrawingFeatureId();
 
       });
 
@@ -193,13 +175,13 @@ const Map = (props) => {
     if (map){
       map.on('load', () => {
 
-        if (mapData.sources.drawingPolygons){
+        if (mapData.sources.annotations){
           //TOUFIX TEMPORARY
 
             const toBboxes = () => {
-              const source = JSON.parse(JSON.stringify(mapData.sources.drawingPolygons));
+              const source = JSON.parse(JSON.stringify(mapData.sources.annotations));
 
-              mapData.sources.drawingPolygons.data.features.forEach(feature => {
+              mapData.sources.annotations.data.features.forEach(feature => {
                 const bbox = turf.bbox(feature);
                 //const pixelsBbox = bbox.map()
                 const poly = turf.bboxPolygon(bbox);
@@ -239,40 +221,22 @@ const Map = (props) => {
 
             }
 
-            const addPolygonHandles = () => {
-              const source = JSON.parse(JSON.stringify(mapData.sources.drawingPolygons));
-              console.log("SETUP DRAWING POLYGONS MARKERS",source);
-              source.data.features = source.data.features.map(feature => {
-                const center = turf.center(feature.geometry);
-                return {
-                  ...center,
-                  properties:{
-                    unique_id:feature.properties.unique_id + '-handle',
-                    target_id:feature.properties.unique_id,//link to original polygon
-                    target_group_id:feature.properties.group_id
-                  }
-                }
-              })
-              mapData.sources.polygonHandles = source;
-              console.log("POLYGON HANDLES",mapData.sources.polygonHandles);
-            }
             const addPolygonBboxes = () => {
-              const source = JSON.parse(JSON.stringify(mapData.sources.drawingPolygons));
+              const source = JSON.parse(JSON.stringify(mapData.sources.annotations));
               console.log("SETUP POLYGONS BBOXES",source);
               source.data.features = source.data.features.map(feature => {
                 const center = turf.center(feature.geometry);
                 return {
                   ...center,
                   properties:{
-                    unique_id:feature.properties.unique_id + '-bbox'
+                    id:feature.properties.id + '-bbox'
                   }
                 }
               })
-              mapData.sources.polygonsBbox = source;
-              console.log("POLYGON BBOXES",mapData.sources.polygonsBbox);
+              mapData.sources.annotationsBbox = source;
+              console.log("POLYGON BBOXES",mapData.sources.annotationsBbox);
             }
             toBboxes();
-            addPolygonHandles();
             //addPolygonBboxes();
 
         }
@@ -349,8 +313,13 @@ const Map = (props) => {
 
   return (
     <div id="map-container">
-      <MapDrawingPopup feature_id={popupDrawingFeatureId}/>
-      <MapMarkerPopup/>
+      {
+        showPopup &&
+        <FeaturePopup
+        sourceId={activeFeatureId?.source}
+        featureId={activeFeatureId?.id}
+        />
+      }
       <div
       id="map"
       ref={mapContainerRef}
