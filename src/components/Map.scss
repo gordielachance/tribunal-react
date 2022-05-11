@@ -39,9 +39,24 @@ $sidebarHandleWidth:25px;
     #sidebar-content{
       display: flex;
       flex-direction: column;
-      height:80%;
+      height:95%;//TOUFIX
       #map-header{
         margin-bottom:2em;
+      }
+      #map-menu{
+        > * {
+          padding: 1em 0.5em;
+        }
+        #map-menu-creations{
+          .icon{
+            color:#c6ad09;
+          }
+        }
+        #map-menu-annotations{
+          .icon{
+            color:#0080ff;
+          }
+        }
       }
       #map-sections{
         overflow-y: auto;
@@ -72,11 +87,10 @@ $sidebarHandleWidth:25px;
 #features-list{
   > li{
     @extend .clickable;
-    margin:0 1em;
+
+    padding: 0.5em;
+
     &:not(:last-child){
-      border-bottom:1px solid lightgrey;
-      margin-bottom: 1em;
-      padding-bottom: 1em;
       border-bottom: 1px solid lightgrey;
     }
     transition:background-color .25s;

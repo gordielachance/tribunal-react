@@ -5,26 +5,10 @@ import { useMap } from '../MapContext';
 
 const MapSettingsFormats = props => {
 
-  const {markerFormatsDisabled,setMarkerFormatsDisabled} = useMap();
+  const {mapData,markerFormatsDisabled,setMarkerFormatsDisabled} = useMap();
 
-  const handleClick = slug => {
-
-    const newDisabled = [...markerFormatsDisabled];
-    const index = newDisabled.indexOf(slug);
-
-    if (index > -1) {//exists in array
-      newDisabled.splice(index, 1);
-    }else{
-      newDisabled.push(slug);
-    }
-
-    setMarkerFormatsDisabled(newDisabled);
-
-  }
-
-  const isDisabled = slug => {
-    return markerFormatsDisabled.includes(slug);
-  }
+  const creationFeatures = mapData?.sources.creations?.data.features || [];
+  const allFeatures = creationFeatures;
 
   //get pairs of layer name => array of post IDs
   const getCollection = features => {
@@ -57,7 +41,27 @@ const MapSettingsFormats = props => {
 
   }
 
-  const collection = getCollection(props.features);
+  const collection = getCollection(allFeatures);
+
+  const handleClick = slug => {
+
+    const newDisabled = [...markerFormatsDisabled];
+    const index = newDisabled.indexOf(slug);
+
+    if (index > -1) {//exists in array
+      newDisabled.splice(index, 1);
+    }else{
+      newDisabled.push(slug);
+    }
+
+    setMarkerFormatsDisabled(newDisabled);
+
+  }
+
+  const isDisabled = slug => {
+    return markerFormatsDisabled.includes(slug);
+  }
+
 
   return(
     <div id="map-settings-formats">

@@ -16,8 +16,12 @@ export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2
 export const setFeatureDistance = (feature,origin) => {
 
   const getDistance = (feature,origin) => {
-    const centroid = turf.centroid(feature);
-    const meters = turf.distance(centroid.geometry,origin) * 1000;
+
+    if (!feature.geometry?.type) return;
+
+    feature = turf.centroid(feature);
+
+    const meters = turf.distance(feature.geometry,origin) * 1000;
     return meters.toFixed(2);
   }
 
@@ -97,7 +101,10 @@ export function getFormatText(slug){
     case 'video':
       text='vidéo';
     break;
-    case 'standard':
+    case 'audio':
+      text='audio';
+    break;
+    default:
       text = 'texte';
     break;
   }
@@ -128,7 +135,7 @@ export function getFormatIcon(slug){
     case 'audio':
       return 'volume down';
     break;
-    case 'standard':
+    default:
       return 'bars';
     break;
   }
@@ -164,7 +171,7 @@ export const getMarkerUrl = (mapId,mapSlug,markerId,markerSlug) => {
 
 export const getWpIframeUrl = url => {
   url = new URL(url);
-  url.searchParams.append('iframe',true);
+  url.searchParams.append('context','frontend');
   return url.href;
 }
 

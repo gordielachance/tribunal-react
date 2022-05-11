@@ -2,7 +2,7 @@ import React, { useEffect,useState }  from "react";
 import classNames from "classnames";
 
 import { Link } from "react-router-dom";
-import { Icon,Menu } from 'semantic-ui-react';
+import { Icon,Menu,Label } from 'semantic-ui-react';
 
 import MapSettings from "../components/MapSettings";
 import FeaturesList from "../components/FeaturesList";
@@ -72,29 +72,41 @@ const MapSidebar = (props) => {
           <div id="map-header">
             <h3>{props.title}</h3>
 
-            <Menu pointing secondary>
+            <Menu id="map-menu" pointing secondary>
               {
                 (creationsCount > 0) &&
                 <Menu.Item
+                  id="map-menu-creations"
                   name='Créations'
                   active={section === 'creations'}
                   onClick={e=>setSection('creations')}
-                />
+                >
+                  <Icon name="circle"/>
+                  Créations
+                </Menu.Item>
               }
               {
                 (annotationsCount > 0) &&
                 <Menu.Item
+                  id="map-menu-annotations"
                   name='Annotations'
                   active={section === 'annotations'}
                   onClick={e=>setSection('annotations')}
-                />
+                >
+                <Icon name="circle"/>
+                Annotations
+              </Menu.Item>
               }
 
               <Menu.Item
+                id="map-menu-settings"
                 name='Filtres'
                 active={section === 'settings'}
                 onClick={e=>setSection('settings')}
-              />
+              >
+                <Icon name="setting"/>
+              </Menu.Item>
+
             </Menu>
           </div>
           <div

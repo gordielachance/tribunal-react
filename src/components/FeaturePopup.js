@@ -14,7 +14,6 @@ const CreationPopupContent = (props) => {
   const hasMore = props.feature?.properties.has_more;
 
   const handleClick = () => {
-
     const url = getMarkerUrl(mapPostId,mapPostSlug,props.feature.properties.post_id,props.feature.properties.slug);
     navigate(url);
   }
@@ -69,7 +68,7 @@ const FeaturePopup = props => {
 
       case 'creations':
 
-        var sourceCollection = mapData?.sources.creations.data.features;
+        var sourceCollection = mapData?.sources.creations?.data.features;
         var feature = (sourceCollection || []).find(feature => feature.properties.id === featureId);
 
         if (feature){

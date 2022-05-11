@@ -6,7 +6,12 @@ import { useMap } from '../MapContext';
 const MapSettingsTags = props => {
 
   const {tags} = useApp();
-  const {markerTagsDisabled,setMarkerTagsDisabled} = useMap();
+  const {mapData,markerTagsDisabled,setMarkerTagsDisabled} = useMap();
+
+  const creationFeatures = mapData?.sources.creations?.data.features || [];
+  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+
+  const allFeatures = creationFeatures.concat(annotationFeatures);
 
   const handleClick = slug => {
 
@@ -50,7 +55,7 @@ const MapSettingsTags = props => {
     })
   }
 
-  const collection = getCollection(props.features);
+  const collection = getCollection(allFeatures);
 
   return(
     <div id="map-settings-tags">

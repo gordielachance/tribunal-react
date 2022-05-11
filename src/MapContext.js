@@ -32,10 +32,18 @@ export function MapProvider({children}){
 
 		const sourceCollection = mapData?.sources.annotationsHandles.data.features;
     const sourceFeature = (sourceCollection || []).find(feature => feature.properties.target_id === feature_id);
+
+		console.log("!!!SEARCHING FOR HANDLE BY POLYGON ID",feature_id);
+		console.log("!!!IN COLLECTION",sourceCollection);
+		console.log("!!!MATCH",sourceFeature);
+
 		return sourceFeature?.properties.id;
 	}
 
-	const getAnnotationPolygonByHandle = (handleFeature) => {
+	const getAnnotationPolygonByHandle = handleFeature => {
+		if (!handleFeature){
+			throw "Missing parameter 'handleFeature'."
+		}
 		const sourceCollection = mapData?.sources.annotations?.data.features;
 		const polygonId = handleFeature.properties.target_id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
@@ -180,6 +188,10 @@ export function MapProvider({children}){
 
 	const toggleFeatureId = (source_id,feature_id,bool) => {
 
+		if (feature_id === undefined){
+			throw "Missing 'feature_id' parameter.";
+		}
+
 		const sourceCollection = mapData?.sources[source_id].data.features;
     const sourceFeature = (sourceCollection || []).find(feature => feature.properties.id === feature_id);
 
@@ -280,6 +292,8 @@ export function MapProvider({children}){
 	  },[markersFilter])
 
 	useEffect(()=>{
+
+		console.log("ACTIF FEAT ",activeFeatureId);
 
 		//hide old
 		if (prevActiveFeatureId.current){

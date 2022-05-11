@@ -5,11 +5,9 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import type { FC } from "react";
 import './Layout.scss';
 
-import HomePage from "./components/HomePage";
-import MapListPage from "./components/MapListPage";
+import {HomePage,AgendaPage,CreditsPage,MapListPage} from "./components/IframePages";
+//import MapListPage from "./components/MapListPage";
 import SingleMapPage from "./components/SingleMapPage";
-import AgendaPage from "./components/AgendaPage";
-import CreditsPage from "./components/CreditsPage";
 
 function Layout() {
 
@@ -123,6 +121,8 @@ function Layout() {
 
   },[transitionHorizontal,transitionBackwards])
 
+  /*
+  OLD
   return (
     <div id="layout">
       <div id="site-logo">
@@ -147,6 +147,25 @@ function Layout() {
           </Routes>
         </CSSTransition>
       </TransitionGroup>
+    </div>
+  );
+  */
+
+  return (
+    <div id="layout">
+      <div id="site-logo">
+        <Link to="/">
+          <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
+        </Link>
+      </div>
+      <Routes location={location}>
+        <Route path="/cartes" element={<MapListPage/>} />
+        <Route path="/agenda" element={<AgendaPage/>} />
+        <Route path="/credits" element={<CreditsPage/>} />
+        <Route path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
+        <Route path="/carte/:mapPostId/:mapPostSlug/creation/:featurePostId/:featurePostSlug" element={<SingleMapPage/>} />
+        <Route path="*" element={<HomePage />} />
+      </Routes>
     </div>
   );
 }

@@ -3,10 +3,10 @@ import { useParams,useNavigate } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
 
-import {DEBUG,getMapUrl} from "./../Constants";
+import {DEBUG} from "./../Constants";
 
 import './Map.scss';
-import MarkerPost from "./MarkerPost";
+import CreationModal from "./CreationModal";
 import MapSidebar from "./MapSidebar";
 
 import { useMap } from '../MapContext';
@@ -51,18 +51,11 @@ const MapPost = (props) => {
       <Dimmer active={loading} inverted>
         <Loader />
       </Dimmer>
-      {
-        featurePostId &&
-        <MarkerPost
-        post_id={featurePostId}
-        onClose={()=>navigate(getMapUrl(mapPostId,mapPostSlug))}
-        />
-      }
-
       <MapSidebar
       title={props.title}
       active={true}
       />
+      <CreationModal/>
       <Map/>
     </Dimmer.Dimmable>
   );

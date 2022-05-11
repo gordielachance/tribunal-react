@@ -22,6 +22,8 @@ const FeaturesList = props => {
   const source = mapData?.sources[props.sourceId];
 
   const [mapCenter,setMapCenter] = useState();
+  const [features,setFeatures] = useState();
+  const [featuresRefs,setFeaturesRefs] = useState();
 
   const filterFeaturesByDisabledTags = (features,disabledTags) => {
     if (disabledTags.length !== 0){
@@ -84,8 +86,20 @@ const FeaturesList = props => {
 
   }
 
-  const features = prepareFeatures(source?.data.features);
-  const featuresRefs = features.map(feature => createRef()); //for LI scrolls
+  useEffect(()=>{
+    if (source?.data.features === undefined) return;
+    const data = prepareFeatures(source?.data.features);
+    setFeatures(data);
+
+    const refs = data.map(feature => createRef()); //for LI scrolls
+    setFeaturesRefs(refs);
+  },[source?.data.features,mapCenter,sortMarkerBy])
+
+  useEffect(()=>{
+    if (features === undefined) return;
+    const refs = features.map(feature => createRef()); //for LI scrolls
+    setFeaturesRefs(refs);
+  },[features])
 
   //scroll to list item
 
@@ -93,7 +107,7 @@ const FeaturesList = props => {
 
     //using a feature ID, get its index in the filtered features array.
     const getListIndex = feature_id => {
-      let index = features.findIndex(feature => feature.properties.id === feature_id);
+      let index = (features || []).findIndex(feature => feature.properties.id === feature_id);
       return (index !== -1) ? index : undefined;
     }
 
@@ -165,10 +179,20 @@ const FeaturesList = props => {
     //so mapbox can handle the feature (it only consider features within the viewport)
     mapboxMap.once('idle', () => {
 
+      console.log("!!!YO");
+      console.log("!!!SOURCE:",source_id);
+      console.log("!!!ID:",feature_id);
+
       //for annotations; get the first available handle.
       if (source_id === 'annotations'){
         source_id = 'annotationsHandles';
         feature_id = getHandleIdByAnnotationId(feature_id);
+
+        if (feature_id === undefined){
+          throw "No handle found for this polygon.";
+        }
+
+        console.log("!!!HANDLE ID:",feature_id);
       }
 
       setActiveFeatureId({
@@ -193,7 +217,7 @@ const FeaturesList = props => {
   return(
     <>
     {
-      features.length ?
+      (features || []).length ?
       <ul id="features-list" className="map-section">
 
         {
