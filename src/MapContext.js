@@ -36,8 +36,9 @@ export function MapProvider({children}){
 	}
 
 	const getAnnotationPolygonByHandle = (handleFeature) => {
+		const sourceCollection = mapData?.sources.annotations?.data.features;
 		const polygonId = handleFeature.properties.target_id;
-		return mapData?.sources.annotations.data.features.find(feature => feature.properties.id === polygonId);
+		return sourceCollection.find(feature => feature.properties.id === polygonId);
 	}
 
 	const togglePolygonHandle = (feature,bool) => {
@@ -198,6 +199,7 @@ export function MapProvider({children}){
 		}
 
   }
+
 
 	//set global marker filters
   useEffect(()=>{

@@ -85,24 +85,29 @@ have very specific meanings to <CSSTransition />
   top: 0;
   left: 0;
 
+  &.iframe-page{
+    iframe{
+      display: block;
+      width:100%;
+      height:100%;
+      border:0 none;
+    }
+  }
+
   &:not(#singleMapPage){
 
     > .page-content{
         position:relative;
-        width:75vw;
-        height:75vh;
-        margin-left:calc(#{$sidebarWidth} - 5vw);
-        margin-top::calc(#{$logoContainerHeight} - 5vh);
+        width:75%;
+        height:75%;
+        margin-left:calc(#{$sidebarWidth} - 5%);
+        margin-top::calc(#{$logoContainerHeight} - 5%);
         /*
         margin:auto;
         margin-left:$sidebarWidth;
         margin-top:100px;
         */
-        display: flex;
-        flex-direction: column;
-        >div,>iframe{
-          flex:1;
-        }
+
     }
   }
 

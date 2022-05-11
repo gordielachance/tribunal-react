@@ -5,7 +5,10 @@ const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 export const DEBUG = IS_LOCAL;
 
 export const WP_URL = IS_LOCAL ? 'http://tribunaldp.local' : 'https://www.tribunaldesprejuges.org';
-export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat']
+export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
+export const WP_POST_ID_HOME = 948;
+export const WP_POST_ID_AGENDA = 18;
+export const WP_POST_ID_CONTACT = 20;
 
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 
@@ -159,6 +162,14 @@ export const getMarkerUrl = (mapId,mapSlug,markerId,markerSlug) => {
   return mapUrl + `/creation/${markerId}/${markerSlug}`;
 }
 
-export const getIframePostUrl = post_id => {
-  return WP_URL + '/?p=' + post_id + '&iframe';
+export const getWpIframeUrl = url => {
+  url = new URL(url);
+  url.searchParams.append('iframe',true);
+  return url.href;
+}
+
+export const getWpIframePostUrl = post_id => {
+  if (post_id === undefined) return;
+  const url = getWpIframeUrl(WP_URL + '/?p=' + post_id);
+  return url;
 }

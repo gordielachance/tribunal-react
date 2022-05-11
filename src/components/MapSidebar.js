@@ -14,6 +14,8 @@ const MapSidebar = (props) => {
   const [mapTransition,setMapTransition] = useState();
   const [section,setSection] = useState('creations');
   const {mapData,mapboxMap,activeFeatureId} = useMap();
+  const annotationsCount = (mapData?.sources.annotations?.data.features || []).length;
+  const creationsCount = (mapData?.sources.creations?.data.features || []).length;
 
   const toggleSidebar = () => {
     setisActive(!isActive);
@@ -71,16 +73,23 @@ const MapSidebar = (props) => {
             <h3>{props.title}</h3>
 
             <Menu pointing secondary>
-              <Menu.Item
-                name='Créations'
-                active={section === 'creations'}
-                onClick={e=>setSection('creations')}
-              />
-              <Menu.Item
-                name='Annotations'
-                active={section === 'annotations'}
-                onClick={e=>setSection('annotations')}
-              />
+              {
+                (creationsCount > 0) &&
+                <Menu.Item
+                  name='Créations'
+                  active={section === 'creations'}
+                  onClick={e=>setSection('creations')}
+                />
+              }
+              {
+                (annotationsCount > 0) &&
+                <Menu.Item
+                  name='Annotations'
+                  active={section === 'annotations'}
+                  onClick={e=>setSection('annotations')}
+                />
+              }
+
               <Menu.Item
                 name='Filtres'
                 active={section === 'settings'}

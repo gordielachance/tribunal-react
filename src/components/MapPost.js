@@ -51,10 +51,14 @@ const MapPost = (props) => {
       <Dimmer active={loading} inverted>
         <Loader />
       </Dimmer>
-      <MarkerPost
-      post_id={featurePostId}
-      onClose={()=>navigate(getMapUrl(mapPostId,mapPostSlug))}
-      />
+      {
+        featurePostId &&
+        <MarkerPost
+        post_id={featurePostId}
+        onClose={()=>navigate(getMapUrl(mapPostId,mapPostSlug))}
+        />
+      }
+
       <MapSidebar
       title={props.title}
       active={true}

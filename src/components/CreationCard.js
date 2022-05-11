@@ -40,7 +40,7 @@ const FeatureTags = (props) => {
         {
             (props.tags || []).map((slug,k) => {
 
-              const tag = tags.find(term => term.slug === slug);
+              const tag = (tags || []).find(term => term.slug === slug);
               const name = tag?.name || slug;
               const desc = tag?.description;
 

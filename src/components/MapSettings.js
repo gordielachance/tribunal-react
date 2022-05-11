@@ -9,7 +9,10 @@ const MapSettings = (props) => {
   const {mapData} = useMap();
 
 
-  const allFeatures = mapData?.sources.creations.data.features;
+  const creationFeatures = mapData?.sources.creations?.data.features || [];
+  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+
+  const allFeatures = creationFeatures.concat(annotationFeatures);
 
   return (
     <div id="map-settings" className="map-section">
