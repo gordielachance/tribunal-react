@@ -23,7 +23,9 @@ const Map = (props) => {
     setMapboxMap,
     popupFeature,
     setShowPopup,
-    togglePolygon,
+    setCreationFeatureState,
+    setPolygonFeatureState,
+    setPolygonHandleFeatureState,
     getAnnotationPolygonByHandle
   } = useMap();
 
@@ -45,21 +47,32 @@ const Map = (props) => {
 
     const initMapMarkersListeners = () => {
 
-      const layerName = 'creations';
+      let hoveredFeature = undefined;
 
       //Update cursors IN
-      map.on('mouseenter',layerName, e => {
+      map.on('mousemove','creations', e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
+
+        //Toggle 'hover'
+        hoveredFeature = e.features[0];//first found feature.
+        if(hoveredFeature){
+          setCreationFeatureState(hoveredFeature,'hover',true);
+        }
+
       });
 
       //Update cursors OUT
-      map.on('mouseleave',layerName, e => {
+      map.on('mouseleave','creations', e => {
         map.getCanvas().style.cursor = '';
+        //Toggle 'hover'
+        if(hoveredFeature){
+          setCreationFeatureState(hoveredFeature,'hover',false);
+        }
       });
 
       //open (add) popup when clicking marker
-      map.on('click',layerName, e => {
+      map.on('click','creations', e => {
 
         if (e.features.length === 0) return;
 
@@ -81,24 +94,34 @@ const Map = (props) => {
 
     const initMapPolygonsListeners = () => {
 
-      const handlesLayerName = 'annotationsHandles';
-      const polygonsLayerName = 'annotationsFill';
+      let hoveredHandle = undefined;
+      let hoveredPolygon = undefined;
       let activePolygon = undefined;
 
 
       //Update cursors IN
-      map.on('mouseenter',handlesLayerName, e => {
+      map.on('mousemove','annotationsHandles', e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
+
+        //Toggle 'hover'
+        hoveredHandle = e.features[0];//first found feature.
+        if(hoveredHandle){
+          setPolygonHandleFeatureState(hoveredHandle,'hover',true);
+        }
+
       });
 
       //Update cursors OUT
-      map.on('mouseleave',handlesLayerName, e => {
+      map.on('mouseleave','annotationsHandles', e => {
         map.getCanvas().style.cursor = '';
+        if(hoveredHandle){
+          setPolygonHandleFeatureState(hoveredHandle,'hover',false);
+        }
       });
 
       // When the user clicks a polygon handle
-      map.on('click',handlesLayerName,e=>{
+      map.on('click','annotationsHandles',e=>{
 
         if (e.features.length > 0) {
 
@@ -126,16 +149,14 @@ const Map = (props) => {
 
       let hoveredMapPolygon = undefined;
 
-
-
-      map.on('mousemove',polygonsLayerName, (e) => {
+      map.on('mousemove','annotationsFill', (e) => {
         if (e.features.length > 0) {
 
           // Use the first found feature.
           hoveredMapPolygon = e.features[0];
 
           //Set 'active' polygon
-          togglePolygon(hoveredMapPolygon,true);
+          setPolygonFeatureState(hoveredMapPolygon,'hover',true);
         }
       });
 
@@ -143,13 +164,13 @@ const Map = (props) => {
 
       // When the mouse leaves the polygon
       //!!!NOT MOBILE FRIENDLY
-      map.on('mouseleave',polygonsLayerName, () => {
+      map.on('mouseleave','annotationsFill', () => {
 
         //ignore when  it is the active polygon
         if (hoveredMapPolygon.properties.id === activePolygon?.properties.id) return;
 
         //Unset 'active' polygon
-        togglePolygon(hoveredMapPolygon,false);
+        setPolygonFeatureState(hoveredMapPolygon,'hover',false);
 
         //Unset popup
         //setPopupDrawingFeatureId();

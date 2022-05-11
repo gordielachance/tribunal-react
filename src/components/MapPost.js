@@ -17,7 +17,7 @@ const MapPost = (props) => {
   const navigate = useNavigate();
 
   const {mapPostId,mapPostSlug,featurePostId} = useParams();
-  const {mapboxMap,setMapData,setActiveFeatureId} = useMap();
+  const {mapboxMap,setRawMapData,setActiveFeatureId} = useMap();
 
   const [loading,setLoading] = useState(true);
 
@@ -38,7 +38,7 @@ const MapPost = (props) => {
   //initialize map data
   useEffect(()=>{
     if (props.mapData === undefined) return;
-    setMapData(props.mapData);
+    setRawMapData(props.mapData);
   },[props.mapData]);
 
   useEffect(()=>{

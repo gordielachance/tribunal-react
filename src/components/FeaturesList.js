@@ -2,10 +2,12 @@ import React, { useEffect,useState,useRef,createRef }  from "react";
 import classNames from "classnames";
 
 import { CreationCard } from "./CreationCard";
-import {setFeatureDistance,getHumanDistance} from "../Constants";
+import {setFeatureDistance,getHumanDistance,getFeaturesTags} from "../Constants";
+import { useApp } from '../AppContext';
 import { useMap } from '../MapContext';
 
 const FeaturesList = props => {
+
   const {
     mapData,
     mapboxMap,
@@ -13,10 +15,13 @@ const FeaturesList = props => {
     fitToFeature,
     setActiveFeatureId,
     setShowPopup,
-    getHandleIdByAnnotationId,
     sortMarkerBy,
     markerTagsDisabled,
-    markerFormatsDisabled
+    markerFormatsDisabled,
+    getHandleIdByAnnotationId,
+    setCreationFeatureState,
+    setPolygonFeatureState,
+    getHandlesByAnnotationId
   } = useMap();
 
   const source = mapData?.sources[props.sourceId];
@@ -26,13 +31,16 @@ const FeaturesList = props => {
   const [featuresRefs,setFeaturesRefs] = useState();
 
   const filterFeaturesByDisabledTags = (features,disabledTags) => {
+
     if (disabledTags.length !== 0){
+
+      const allTags = getFeaturesTags(features);
+      const enabledTags = allTags.filter(x => !disabledTags.includes(x));
+
       features = features.filter(feature =>{
         const featureTags = feature.properties.tag_slugs;
-        const featureDisabledTags = featureTags.filter(x => disabledTags.includes(x));
-        const hasDisabledTags = (featureDisabledTags.length > 0);
-        console.log("HAS DISABLED TAGS ?",hasDisabledTags,featureDisabledTags,featureTags);
-        return !hasDisabledTags;
+        const hasTags = featureTags.filter(x => enabledTags.includes(x));
+        return (hasTags.length > 0)
       })
     }
 
@@ -161,7 +169,7 @@ const FeaturesList = props => {
     //sort markers
     switch(sortMarkerBy){
       case 'distance':
-        return feature.properties.distance ? getHumanDistance(feature.properties.distance) : undefined;
+        return feature.properties?.distance ? getHumanDistance(feature.properties.distance) : undefined;
       break;
       default://date
         return feature.properties.date_human
@@ -179,28 +187,28 @@ const FeaturesList = props => {
     //so mapbox can handle the feature (it only consider features within the viewport)
     mapboxMap.once('idle', () => {
 
-      console.log("!!!YO");
-      console.log("!!!SOURCE:",source_id);
-      console.log("!!!ID:",feature_id);
+      switch(props.sourceId){
 
-      //for annotations; get the first available handle.
-      if (source_id === 'annotations'){
-        source_id = 'annotationsHandles';
-        feature_id = getHandleIdByAnnotationId(feature_id);
+        case 'annotations':
 
-        if (feature_id === undefined){
-          throw "No handle found for this polygon.";
-        }
+          //target first available handle
+          const handles = getHandlesByAnnotationId(feature_id);
+          const firstHandle = handles[0] ?? undefined;
+          feature_id = firstHandle?.properties.id;
+          source_id = 'annotationsHandles';
 
-        console.log("!!!HANDLE ID:",feature_id);
+          console.log("!!!ANNOTATION FIRST HANDLE:",feature_id,handles);
+        break;
       }
 
-      setActiveFeatureId({
-        source:source_id,
-        id:feature_id,
-        context:'sidebar'
-      });
-      setShowPopup(true);
+      if (feature_id){
+        setActiveFeatureId({
+          source:source_id,
+          id:feature_id,
+          context:'sidebar'
+        });
+        setShowPopup(true);
+      }
 
     });
 
@@ -228,6 +236,17 @@ const FeaturesList = props => {
             const feature_id = feature.properties.id;
             const active = (activeFeatureId?.id === feature_id);
 
+            const toggleHover = bool => {
+              switch(props.sourceId){
+                case 'creations':
+                  setCreationFeatureState(feature,'hover',bool);
+                break;
+                case 'annotations':
+                  setPolygonFeatureState(feature,'hover',bool);
+                break;
+              }
+            }
+
             const handleClick = e => {
               gotoFeature(props.sourceId,feature_id);
             }
@@ -236,6 +255,8 @@ const FeaturesList = props => {
               <li
               ref={featuresRefs[k]}
               key={"feature-card-"+k}
+              onMouseEnter={e=>toggleHover(true)}
+              onMouseLeave={e=>toggleHover(false)}
               onClick={handleClick}
               className={classNames({
                 active:   active
@@ -249,7 +270,7 @@ const FeaturesList = props => {
         }
       </ul>
       :
-      <span>Pas de marqueurs</span>
+      <span>Pas de marqueurs trouvés.</span>
     }
 
     </>

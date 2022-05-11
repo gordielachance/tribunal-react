@@ -74,7 +74,9 @@ export const getDistanceFromOriginToClosestFeature = (feature,features) => {
 }
 
 export const getHumanDistance = meters => {
+  meters = parseInt(meters);//force integer
   if (meters === 0) return;
+
   const km = meters / 1000;
   if (km > 1){
     return km.toFixed(1) + ' km';
@@ -179,4 +181,45 @@ export const getWpIframePostUrl = post_id => {
   if (post_id === undefined) return;
   const url = getWpIframeUrl(WP_URL + '/?p=' + post_id);
   return url;
+}
+
+export const getFeaturesTags = features => {
+  let arr = [];
+
+  (features || []).forEach(feature => {
+    const tags = feature.properties.tag_slugs || [];
+    arr = arr.concat(tags);
+  });
+
+  return [...new Set(arr)];
+}
+
+export const getIdsForTag = (tag,features) => {
+  features = (features || []).filter(feature => (feature.properties.tag_slugs || []).includes(tag));
+  return features.map(feature=>feature.properties.id);
+}
+
+export const getFeaturesFormats = features => {
+  let arr = [];
+
+  (features || []).forEach(feature => {
+    const format = feature.properties.format;
+    arr.push(format);
+  });
+  arr = [...new Set(arr)];
+
+  //move standard at the end
+  const standardFormatIndex = arr.findIndex(format => format.slug === 'standard');
+
+  if (standardFormatIndex !== -1) {
+    arr.push(arr.splice(standardFormatIndex, 1)[0]);
+  }
+
+  return arr;
+
+}
+
+export const getIdsForFormat = (format,features) => {
+  features = (features || []).filter(feature => format === feature.properties.format);
+  return features.map(feature=>feature.properties.id);
 }

@@ -2,6 +2,7 @@ import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
 import { useMap } from '../MapContext';
+import {getFeaturesTags,getIdsForTag} from "./../Constants";
 
 const MapSettingsTags = props => {
 
@@ -32,46 +33,21 @@ const MapSettingsTags = props => {
     return markerTagsDisabled.includes(slug);
   }
 
-  //get pairs of layer name => array of post IDs
-  const getCollection = features => {
-    const output = {};
-
-    (features || []).forEach(feature => {
-      const slugs = feature.properties.tag_slugs;
-
-      (slugs || []).forEach(slug => {
-        if ( !output.hasOwnProperty(slug) ){
-          output[slug] = []
-        }
-        output[slug].push(feature.properties.post_id);
-      })
-    });
-    return Object.keys(output).map(function(slug) {
-      const item = output[slug];
-      return {
-        slug:slug,
-        ids:item
-      }
-    })
-  }
-
-  const collection = getCollection(allFeatures);
-
   return(
     <div id="map-settings-tags">
       <h5>Tags</h5>
       <ul>
         {
-          collection.map(function(item) {
+          getFeaturesTags(allFeatures).map(function(slug) {
 
-            const wpTag = tags.find(term=>term.slug===item.slug);
-            const count = item.ids.length;
+            const wpTag = tags.find(term=>term.slug===slug);
+            const count = getIdsForTag(slug,allFeatures).length;
 
             return(
               <li
-              key={item.slug}
-              className={!isDisabled(item.slug) ? 'active' : ''}
-              onClick={e=>{handleClick(item.slug)}}
+              key={slug}
+              className={!isDisabled(slug) ? 'active' : ''}
+              onClick={e=>{handleClick(slug)}}
               >
                 <span><Icon name="check"/></span>
                 <span title={wpTag.description}>{wpTag.name}</span>

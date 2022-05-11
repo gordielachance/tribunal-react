@@ -8,7 +8,7 @@ import { useParams,useNavigate } from 'react-router-dom';
 
 import {getMarkerUrl} from "./../Constants";
 
-const CreationPopupContent = (props) => {
+const FeaturePopupContent = (props) => {
   const navigate = useNavigate();
   const {mapPostSlug,mapPostId} = useParams();
   const hasMore = props.feature?.properties.has_more;
@@ -27,17 +27,6 @@ const CreationPopupContent = (props) => {
           <Button onClick={handleClick}>Ouvrir</Button>
         }
       </div>
-    </div>
-  );
-}
-
-const AnnotationPopupContent = (props) => {
-
-  const title = props.feature.properties.title;
-
-  return (
-    <div className="feature-popup">
-      {title}
     </div>
   );
 }
@@ -73,7 +62,7 @@ const FeaturePopup = props => {
 
         if (feature){
           location =  feature.geometry.coordinates;
-          content = <CreationPopupContent feature={feature}/>
+          content = <FeaturePopupContent feature={feature}/>
         }
 
       break;
@@ -90,7 +79,7 @@ const FeaturePopup = props => {
         if (handleFeature && polygonFeature){
           //get popup content
           location = handleFeature.geometry.coordinates;
-          content = <AnnotationPopupContent feature={polygonFeature}/>
+          content = <FeaturePopupContent feature={polygonFeature}/>
         }
 
       break;
