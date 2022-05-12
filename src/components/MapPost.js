@@ -16,7 +16,7 @@ const MapPost = (props) => {
 
   const navigate = useNavigate();
 
-  const {mapPostId,mapPostSlug,featurePostId} = useParams();
+  const {featurePostId} = useParams();
   const {mapboxMap,setRawMapData,setActiveFeatureId} = useMap();
 
   const [loading,setLoading] = useState(true);

@@ -5,7 +5,12 @@ import { useMap } from '../MapContext';
 
 const MapSettingsFormats = props => {
 
-  const {mapData,markerFormatsDisabled,setMarkerFormatsDisabled} = useMap();
+  const {
+    mapData,
+    markerFormatsDisabled,
+    setMarkerFormatsDisabled,
+    toggleHoverFormat
+  } = useMap();
 
   const creationFeatures = mapData?.sources.creations?.data.features || [];
   const allFeatures = creationFeatures;
@@ -32,7 +37,7 @@ const MapSettingsFormats = props => {
   return(
     <div id="map-settings-formats">
       <h5>Créations</h5>
-      <ul>
+      <ul id="formats-list" className="features-selection">
         {
           getFeaturesFormats(allFeatures).map(function(slug) {
             const count = getIdsForFormat(slug,allFeatures).length;
@@ -45,6 +50,8 @@ const MapSettingsFormats = props => {
               key={slug}
               className={!isDisabled(slug) ? 'active' : ''}
               onClick={e=>{handleClick(slug)}}
+              onMouseEnter={e=>toggleHoverFormat(slug,true)}
+              onMouseLeave={e=>toggleHoverFormat(slug,false)}
               >
                 <span><Icon name="check"/></span>
                 <span>

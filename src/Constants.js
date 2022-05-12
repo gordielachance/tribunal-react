@@ -39,6 +39,31 @@ export const getDistanceFromFeatureToClosest = (feature_id,features) => {
   return getDistanceFromOriginToClosestFeature(feature,features);
 }
 
+export const sortFeaturesByDistance = (origin,features) => {
+
+  if (origin === undefined){
+    throw "Missing 'origin' parameter.";
+  }
+
+  if (features === undefined){
+    throw "Missing 'features' parameter.";
+  }
+
+  return features.map(feature=>{
+
+    const featureCenter = turf.centroid(feature);
+
+    const distance = turf.distance(origin,featureCenter);//km
+
+    return {
+      distance:distance,
+      feature:feature
+    }
+  }).sort((a, b) => {
+    return a.distance - b.distance;
+  });
+}
+
 export const getClosestFeature = (feature,features)=>{
   if (features === undefined){
     throw 'Missing features parameter.';
@@ -47,23 +72,29 @@ export const getClosestFeature = (feature,features)=>{
   const origin = feature.geometry.coordinates;
 
   //clone set, we don't want to alter the original data
-  features = Array.prototype.slice.call(features);
+  const distanceFeatures =  JSON.parse(JSON.stringify(features || []));
 
-  //remove the current feature from the set
-  const index = features.indexOf(feature);
-  features.splice(index, 1);
+  //remove the current feature from the set (using its UNIQUE id)
+  const featureIndex = feature.properties.id;
+  const collectionIndex = distanceFeatures.findIndex(feature=>feature.properties.id === featureIndex);
+  distanceFeatures.splice(collectionIndex, 1);
 
   //add 'distance' prop
-  features.forEach(feature => {
+  distanceFeatures.forEach(feature => {
     setFeatureDistance(feature,origin);
   });
 
   //sort by distance
-  const sorted = features.sort((a, b) => {
+  const sorted = [...distanceFeatures].sort((a, b) => {
     return a.properties.distance - b.properties.distance;
   });
 
-  return sorted[0];
+  //return the original feature
+  const closestFeature = sorted[0];
+  const preSortedIndex = distanceFeatures.indexOf(closestFeature);
+  const initialFeature = features[preSortedIndex];
+
+  return initialFeature;
 }
 
 //in km
@@ -194,6 +225,11 @@ export const getFeaturesTags = features => {
   return [...new Set(arr)];
 }
 
+//checks if a source contains features
+export const isFeaturesSource = source => {
+  return (source.data?.type === 'FeatureCollection');
+}
+
 export const getIdsForTag = (tag,features) => {
   features = (features || []).filter(feature => (feature.properties.tag_slugs || []).includes(tag));
   return features.map(feature=>feature.properties.id);
@@ -222,4 +258,22 @@ export const getFeaturesFormats = features => {
 export const getIdsForFormat = (format,features) => {
   features = (features || []).filter(feature => format === feature.properties.format);
   return features.map(feature=>feature.properties.id);
+}
+
+export const bboxToCircle = bbox => {
+
+  //bbox to polygon
+  const polygon = turf.bboxPolygon(bbox);
+
+  //polygon center
+  const polygonCenter = turf.centroid(polygon);
+
+  //from the bbox; get the distance to the farest corner
+  const diag = [[bbox[0],bbox[1]],[bbox[2],bbox[3]]];
+  const diagDistances = diag.map(point => turf.distance(polygonCenter,point) ).sort((a, b) => {
+    return b - a;
+  });
+
+  const radius = diagDistances[0];
+  return turf.circle(polygonCenter, radius);
 }

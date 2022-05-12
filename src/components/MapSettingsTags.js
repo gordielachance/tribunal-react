@@ -7,11 +7,15 @@ import {getFeaturesTags,getIdsForTag} from "./../Constants";
 const MapSettingsTags = props => {
 
   const {tags} = useApp();
-  const {mapData,markerTagsDisabled,setMarkerTagsDisabled} = useMap();
+  const {
+    mapData,
+    markerTagsDisabled,
+    setMarkerTagsDisabled,
+    toggleHoverTag
+  } = useMap();
 
   const creationFeatures = mapData?.sources.creations?.data.features || [];
   const annotationFeatures = mapData?.sources.annotations?.data.features || [];
-
   const allFeatures = creationFeatures.concat(annotationFeatures);
 
   const handleClick = slug => {
@@ -29,6 +33,7 @@ const MapSettingsTags = props => {
 
   }
 
+
   const isDisabled = slug => {
     return markerTagsDisabled.includes(slug);
   }
@@ -36,7 +41,7 @@ const MapSettingsTags = props => {
   return(
     <div id="map-settings-tags">
       <h5>Tags</h5>
-      <ul>
+      <ul id="tags-list" className="features-selection">
         {
           getFeaturesTags(allFeatures).map(function(slug) {
 
@@ -48,6 +53,8 @@ const MapSettingsTags = props => {
               key={slug}
               className={!isDisabled(slug) ? 'active' : ''}
               onClick={e=>{handleClick(slug)}}
+              onMouseEnter={e=>toggleHoverTag(slug,true)}
+              onMouseLeave={e=>toggleHoverTag(slug,false)}
               >
                 <span><Icon name="check"/></span>
                 <span title={wpTag.description}>{wpTag.name}</span>

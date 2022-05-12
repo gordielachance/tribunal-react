@@ -14,19 +14,14 @@ import { useMap } from '../MapContext';
 const Map = (props) => {
 
   const {
-    activeFeatureId,
     setActiveFeatureId,
-    showPopup,
     mapContainerRef,
     mapData,
     mapboxMap,
     setMapboxMap,
-    popupFeature,
+    showPopup,
     setShowPopup,
-    setCreationFeatureState,
-    setPolygonFeatureState,
-    setPolygonHandleFeatureState,
-    getAnnotationPolygonByHandle
+    setMapFeatureState
   } = useMap();
 
   const initializeMap = data => {
@@ -57,7 +52,7 @@ const Map = (props) => {
         //Toggle 'hover'
         hoveredFeature = e.features[0];//first found feature.
         if(hoveredFeature){
-          setCreationFeatureState(hoveredFeature,'hover',true);
+          setMapFeatureState(hoveredFeature,'hover',true);
         }
 
       });
@@ -67,7 +62,7 @@ const Map = (props) => {
         map.getCanvas().style.cursor = '';
         //Toggle 'hover'
         if(hoveredFeature){
-          setCreationFeatureState(hoveredFeature,'hover',false);
+          setMapFeatureState(hoveredFeature,'hover',false);
         }
       });
 
@@ -76,15 +71,8 @@ const Map = (props) => {
 
         if (e.features.length === 0) return;
 
-        //clicked marker
-        const mapFeature = e.features[0];
-
-        //set current
-        setActiveFeatureId({
-          source:'creations',
-          id:mapFeature?.id,
-          context:'map'
-        });
+        const feature = e.features[0];
+        setActiveFeatureId(feature.properties.id);
 
         //show popup
         setShowPopup(true);
@@ -95,11 +83,10 @@ const Map = (props) => {
     const initMapPolygonsListeners = () => {
 
       let hoveredHandle = undefined;
-      let hoveredPolygon = undefined;
-      let activePolygon = undefined;
 
 
       //Update cursors IN
+
       map.on('mousemove','annotationsHandles', e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
@@ -107,7 +94,7 @@ const Map = (props) => {
         //Toggle 'hover'
         hoveredHandle = e.features[0];//first found feature.
         if(hoveredHandle){
-          setPolygonHandleFeatureState(hoveredHandle,'hover',true);
+          setMapFeatureState(hoveredHandle,'hover',true);
         }
 
       });
@@ -116,27 +103,19 @@ const Map = (props) => {
       map.on('mouseleave','annotationsHandles', e => {
         map.getCanvas().style.cursor = '';
         if(hoveredHandle){
-          setPolygonHandleFeatureState(hoveredHandle,'hover',false);
+          setMapFeatureState(hoveredHandle,'hover',false);
         }
       });
+
 
       // When the user clicks a polygon handle
       map.on('click','annotationsHandles',e=>{
 
+
         if (e.features.length > 0) {
 
-          const mapPolygonHandle = e.features[0];
-          activePolygon = getAnnotationPolygonByHandle(mapPolygonHandle);
-
-          const handleId = mapPolygonHandle?.id;
-
-          //set current
-          setActiveFeatureId({
-            source:'annotationsHandles',
-            id:handleId,
-            context:'map'
-          });
-
+          const feature = e.features[0];
+          setActiveFeatureId(feature.properties.id);
 
           //show popup
           setShowPopup(true);
@@ -156,27 +135,21 @@ const Map = (props) => {
           hoveredMapPolygon = e.features[0];
 
           //Set 'active' polygon
-          setPolygonFeatureState(hoveredMapPolygon,'hover',true);
+          setMapFeatureState(hoveredMapPolygon,'hover',true);
         }
       });
-
-
 
       // When the mouse leaves the polygon
       //!!!NOT MOBILE FRIENDLY
       map.on('mouseleave','annotationsFill', () => {
 
-        //ignore when  it is the active polygon
-        if (hoveredMapPolygon.properties.id === activePolygon?.properties.id) return;
-
         //Unset 'active' polygon
-        setPolygonFeatureState(hoveredMapPolygon,'hover',false);
+        setMapFeatureState(hoveredMapPolygon,'hover',false);
 
         //Unset popup
         //setPopupDrawingFeatureId();
 
       });
-
     }
 
     initMapMarkersListeners();
@@ -206,12 +179,10 @@ const Map = (props) => {
           //TOUFIX TEMPORARY
 
             const toBboxes = () => {
-              const source = JSON.parse(JSON.stringify(mapData.sources.annotations));
 
               mapData.sources.annotations.data.features.forEach(feature => {
                 const bbox = turf.bbox(feature);
                 //const pixelsBbox = bbox.map()
-                const poly = turf.bboxPolygon(bbox);
 
                 //feature.geometry = poly.geometry;
 
@@ -342,10 +313,7 @@ const Map = (props) => {
     <div id="map-container">
       {
         showPopup &&
-        <FeaturePopup
-        sourceId={activeFeatureId?.source}
-        featureId={activeFeatureId?.id}
-        />
+        <FeaturePopup/>
       }
       <div
       id="map"

@@ -2,7 +2,7 @@ import React, { useEffect,useState }  from "react";
 import classNames from "classnames";
 
 import { Link } from "react-router-dom";
-import { Icon,Menu,Label } from 'semantic-ui-react';
+import { Icon,Menu } from 'semantic-ui-react';
 
 import MapSettings from "../components/MapSettings";
 import FeaturesList from "../components/FeaturesList";

@@ -1,16 +1,37 @@
-import React,{useState,useEffect} from "react";
-import classNames from "classnames";
-import { Label,Button,Icon } from 'semantic-ui-react';
+import React from "react";
+import { Label,Icon } from 'semantic-ui-react';
 import {getFormatIcon,getFormatText} from "../Constants";
 import { useApp } from '../AppContext';
+import { useMap } from '../MapContext';
 
 function maybeDecodeJson(value){
   return (typeof value === 'string') ? JSON.parse(value) : value;
 }
 
 const TagLabel = props => {
+
+  const {
+    toggleHoverTag
+  } = useMap();
+
+  const handleHover = e => {
+    if (!props.highlightTags) return;
+    toggleHoverTag(props.slug,true);
+  }
+
+  const handleOut = e => {
+    if (!props.highlightTags) return;
+    toggleHoverTag(props.slug,false);
+  }
+
+
   return(
-    <Label title={props.description}>
+    <Label
+    title={props.description}
+    onMouseEnter={handleHover}
+    onMouseLeave={handleOut}
+    className={props.highlightTags ? 'clickable' : ''}
+    >
       {props.icon &&
         <Icon name={props.icon}/>
       }
@@ -34,7 +55,7 @@ const FeatureTags = (props) => {
         {
           formatText &&
           <li>
-            <TagLabel label={formatText} icon={formatIcon}/>
+            <TagLabel highlightTags={props.highlightTags} label={formatText} icon={formatIcon}/>
           </li>
         }
         {
@@ -46,7 +67,7 @@ const FeatureTags = (props) => {
 
               return(
                 <li key={k}>
-                  <TagLabel label={name} description={desc}/>
+                  <TagLabel highlightTags={props.highlightTags} slug={slug} label={name} description={desc}/>
                 </li>
               )
             })
@@ -59,7 +80,7 @@ const FeatureTags = (props) => {
 
 export const CreationCard = props => {
 
-  const post_id = props.feature?.properties.post_id;
+
   const title = props.feature?.properties.title;
   const description=  props.feature?.properties.excerpt;
   const format = props.feature?.properties.format;
@@ -69,7 +90,11 @@ export const CreationCard = props => {
     <div className="feature-card">
       <div className="feature-header">
         <p className="feature-title">{title}</p>
-        <FeatureTags tags={tags} format={format}/>
+        <FeatureTags
+        tags={tags}
+        format={format}
+        highlightTags={props.highlightTags}
+        />
       </div>
       {
         description &&

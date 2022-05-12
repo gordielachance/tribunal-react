@@ -3,8 +3,10 @@ import { Icon } from 'semantic-ui-react';
 import { useMap } from '../MapContext';
 
 const MapSettingsSort = props => {
-  const {mapData,sortMarkerBy,setSortMarkerBy} = useMap();
-  const [sortBy,setSortBy] = useState(props.sortBy);
+  const {
+    sortMarkerBy,
+    setSortMarkerBy
+  } = useMap();
 
   const sortByList = {
     date:{
@@ -20,14 +22,14 @@ const MapSettingsSort = props => {
       <h5>Tri</h5>
       <ul>
         {
-          Object.keys(sortByList).map(function(key) {
-            const item = sortByList[key];
-            const active = (sortMarkerBy === key);
+          Object.keys(sortByList).map(function(slug) {
+            const item = sortByList[slug];
+            const active = (sortMarkerBy === slug);
             return(
               <li
-              key={key}
+              key={slug}
               className={active ? 'active' : ''}
-              onClick={e=>{setSortMarkerBy(key)}}
+              onClick={e=>{setSortMarkerBy(slug)}}
               >
                 <span><Icon name="check"/></span>
                 <span>{item.name}</span>

@@ -1,9 +1,8 @@
-import React, { useEffect,useState,useRef,createRef }  from "react";
+import React, { useEffect,useState,createRef }  from "react";
 import classNames from "classnames";
 
 import { CreationCard } from "./CreationCard";
 import {setFeatureDistance,getHumanDistance,getFeaturesTags} from "../Constants";
-import { useApp } from '../AppContext';
 import { useMap } from '../MapContext';
 
 const FeaturesList = props => {
@@ -11,17 +10,14 @@ const FeaturesList = props => {
   const {
     mapData,
     mapboxMap,
-    activeFeatureId,
-    fitToFeature,
-    setActiveFeatureId,
     setShowPopup,
     sortMarkerBy,
     markerTagsDisabled,
     markerFormatsDisabled,
-    getHandleIdByAnnotationId,
-    setCreationFeatureState,
-    setPolygonFeatureState,
-    getHandlesByAnnotationId
+    setMapFeatureState,
+    zoomOnFeatures,
+    activeFeatureId,
+    setActiveFeatureId
   } = useMap();
 
   const source = mapData?.sources[props.sourceId];
@@ -109,25 +105,7 @@ const FeaturesList = props => {
     setFeaturesRefs(refs);
   },[features])
 
-  //scroll to list item
 
-  const scrollToFeature = feature_id => {
-
-    //using a feature ID, get its index in the filtered features array.
-    const getListIndex = feature_id => {
-      let index = (features || []).findIndex(feature => feature.properties.id === feature_id);
-      return (index !== -1) ? index : undefined;
-    }
-
-    const index = getListIndex(feature_id);
-    if (index === undefined) return;
-
-    console.log("RFZ",featuresRefs);
-
-    const ref = featuresRefs[index];
-    console.log("!!!SCROLL TO FEATURE",{id:feature_id,index:index},ref);
-    ref.current.scrollIntoView({ behavior: 'smooth'});
-  }
 
   useEffect(()=>{
 
@@ -143,22 +121,30 @@ const FeaturesList = props => {
 
   },[mapboxMap])
 
-  //scroll to the list item (if context is 'map')
+  //scroll to the list item
   useEffect(()=>{
-    const context = activeFeatureId?.context;
-    const featureId = activeFeatureId?.id;
-    if (featureId===undefined) return;
-    if (context !== 'map') return;
+    if (activeFeatureId===undefined) return;
 
-    const featureSource = activeFeatureId?.source;
+    //scroll to list item
+    const scrollToFeature = feature_id => {
 
-    const scrollAnnotation = ( (featureSource === 'annotationsHandles') && (props.sourceId === 'annotations') );
-    const scrollCreation = ( (featureSource === 'creations') && (props.sourceId === 'creations') );
+      console.log("SCROLL TO FEATURE",feature_id);
 
-    if (!scrollAnnotation && !scrollCreation) return;
+      //using a feature ID, get its index in the filtered features array.
+      const getListIndex = feature_id => {
+        let index = (features || []).findIndex(feature => feature.properties.id === feature_id);
+        return (index !== -1) ? index : undefined;
+      }
 
-    scrollToFeature(featureId);
-    //
+      const index = getListIndex(feature_id);
+      if (index === undefined) return;
+
+      const ref = featuresRefs[index];
+      console.log("!!!SCROLL TO FEATURE",{id:feature_id,index:index},ref);
+      ref.current.scrollIntoView({ behavior: 'smooth'});
+    }
+
+    scrollToFeature(activeFeatureId);
 
   },[activeFeatureId])
 
@@ -178,86 +164,52 @@ const FeaturesList = props => {
 
   }
 
-  const gotoFeature = (source_id,feature_id) => {
+  const handleClick = feature => {
+
+    //we've altered the features (by setting a distance, etc.) - so retrieve the original feature
+    const sourceCollection = source?.data.features || [];
+    const sourceFeature = sourceCollection.find(sourceFeature => sourceFeature.properties.id === feature.properties.id);
 
     //center/zoom on feature
-    fitToFeature(source_id,feature_id);
+    zoomOnFeatures(sourceFeature);
+
+    //unset current feature
+    setActiveFeatureId();
+    setShowPopup();
 
     //wait until the map movements stops,
     //so mapbox can handle the feature (it only consider features within the viewport)
     mapboxMap.once('idle', () => {
-
-      switch(props.sourceId){
-
-        case 'annotations':
-
-          //target first available handle
-          const handles = getHandlesByAnnotationId(feature_id);
-          const firstHandle = handles[0] ?? undefined;
-          feature_id = firstHandle?.properties.id;
-          source_id = 'annotationsHandles';
-
-          console.log("!!!ANNOTATION FIRST HANDLE:",feature_id,handles);
-        break;
-      }
-
-      if (feature_id){
-        setActiveFeatureId({
-          source:source_id,
-          id:feature_id,
-          context:'sidebar'
-        });
-        setShowPopup(true);
-      }
-
+      //set active feature
+      setActiveFeatureId(feature.properties.id);
+      setShowPopup(true);
     });
 
-    /*
-    mapboxMap.easeTo({
-      center:sourceFeature.geometry.coordinates,
-      zoom:14,
-      duration: 3000,
-    })
-    */
+  }
 
+  const toggleHoverFeature = (feature,bool) => {
+    setMapFeatureState(feature,'hover',bool);
   }
 
   return(
     <>
     {
       (features || []).length ?
-      <ul id="features-list" className="map-section">
+      <ul id="features-list" className="map-section features-selection">
 
         {
           features.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
-
-            const feature_id = feature.properties.id;
-            const active = (activeFeatureId?.id === feature_id);
-
-            const toggleHover = bool => {
-              switch(props.sourceId){
-                case 'creations':
-                  setCreationFeatureState(feature,'hover',bool);
-                break;
-                case 'annotations':
-                  setPolygonFeatureState(feature,'hover',bool);
-                break;
-              }
-            }
-
-            const handleClick = e => {
-              gotoFeature(props.sourceId,feature_id);
-            }
+            const active = (activeFeatureId === feature.properties.id);
 
             return (
               <li
               ref={featuresRefs[k]}
               key={"feature-card-"+k}
-              onMouseEnter={e=>toggleHover(true)}
-              onMouseLeave={e=>toggleHover(false)}
-              onClick={handleClick}
+              onMouseEnter={e=>toggleHoverFeature(feature,true)}
+              onMouseLeave={e=>toggleHoverFeature(feature,false)}
+              onClick={e=>{handleClick(feature)}}
               className={classNames({
                 active:   active
               })}

@@ -3,9 +3,9 @@
 import React, { useState,useEffect,createContext,useRef } from 'react';
 import {
 	DEBUG,
-	getDistanceFromOriginToClosestFeature,
-	getDistanceFromFeatureToClosest,
-	getClosestFeature
+	isFeaturesSource,
+	sortFeaturesByDistance,
+	bboxToCircle
 } from "./Constants";
 import * as turf from "@turf/turf";
 
@@ -21,7 +21,7 @@ export function MapProvider({children}){
 	const [showPopup,setShowPopup] = useState();
 	const prevActiveFeatureId = useRef();
 
-	const [sortMarkerBy,setSortMarkerBy] = useState('date');
+	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
   const [tagsFilter,setTagsFilter] = useState();
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
@@ -30,189 +30,282 @@ export function MapProvider({children}){
 
 	const getHandlesByAnnotationId = feature_id => {
 		const sourceCollection = mapData?.sources.annotationsHandles.data.features || [];
-    const handleFeatures = sourceCollection.filter(feature => feature.properties.target_id === feature_id);
+		const realId = parseInt(feature_id.replace("annotations-", ""));
+
+    const handleFeatures = sourceCollection.filter(feature => feature.properties.target_id === realId);
 		return handleFeatures;
 	}
 
 	const getAnnotationPolygonByHandle = handleFeature => {
 		if (!handleFeature){
-			throw "Missing parameter 'handleFeature'."
+			throw "Missing 'handleFeature' parameter.";
 		}
 		const sourceCollection = mapData?.sources.annotations?.data.features;
-		const polygonId = handleFeature.properties.target_id;
+		const polygonId = 'annotations-' + handleFeature.properties.target_id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
 	}
 
-	const setPolygonHandleFeatureState = (feature,key,value) => {
-		const handleId = feature.properties.id;
+	const getFeatureById = id => {
 
-		mapboxMap.setFeatureState(
-			{ source: 'annotationsHandles', id: handleId },
-			{ [key]: value }
-		);
+		if (!id){
+			throw "Missing 'id' parameter.";
+		}
+
+		const sources = mapData?.sources || {};
+		const featureSourceKeys = Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
+
+		let allFeatures = [];
+
+		featureSourceKeys.forEach(sourceKey => {
+			const source = sources[sourceKey];
+			const sourceFeatures = source.data.features || [];
+			allFeatures = allFeatures.concat(sourceFeatures);
+		})
+
+		return allFeatures.find(feature => feature.properties.id === id);
+
 	}
 
-	const setPolygonFeatureState = (polygon,key,value) => {
+	//find the ID of the source for a feature
+	const getFeatureSourceKey = feature => {
 
-		const polygonId = polygon.properties.id;
+		if (!feature){
+			throw "Missing 'feature' parameter .";
+		}
+
+		const sources = mapData?.sources || {};
+		const featureSourceKeys = Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
+
+		return featureSourceKeys.find(sourceKey => {
+			const source = sources[sourceKey];
+			const sourceFeatures = source.data.features || [];
+			return sourceFeatures.find(sourceFeature => sourceFeature.properties.id === feature.properties.id);
+		})
+	}
+
+	const setMapFeatureState = (feature,key,value) => {
+
+		if (!feature) return;
+
+		const sourceKey = getFeatureSourceKey(feature);
+		const featureId = feature.properties.id;
+
+		if (sourceKey === undefined) return;
+		if (featureId === undefined) return;
 
 		mapboxMap.setFeatureState(
-			{ source: 'annotations', id: polygonId },
+			{ source: sourceKey, id: featureId },
 			{ [key]: value }
 		);
 
-		if(key==='hover'){
-			const handles = getHandlesByAnnotationId(polygonId);
-			handles.forEach(feature => {
-				setPolygonHandleFeatureState(feature,'side-hover',value);
-			})
+		switch(sourceKey){
+			case 'annotations':
+
+				const polygonSideEffects = (feature,key,value) => {
+					const polygonId = feature.properties.id;
+					const handles = getHandlesByAnnotationId(polygonId);
+
+					//for hovered annotations, toggle handles too.
+					if(key === 'hover'){
+						handles.forEach(handle => {
+							mapboxMap.setFeatureState(
+								{ source: 'annotationsHandles', id: handle.properties.id },
+								{ 'side-hover': value }
+							);
+						})
+					}
+
+					if (key === 'active'){
+						const firstHandle = handles[0];
+
+						console.log("FIRST HANDLE YO",firstHandle);
+
+						mapboxMap.setFeatureState(
+							{ source: 'annotationsHandles', id: firstHandle.properties.id },
+							{ [key]: value }
+						);
+					}
+
+				}
+
+				polygonSideEffects(feature,key,value);
+
+			break;
+			case 'annotationsHandles':
+
+				const handleSideEffects = (feature,key,value) => {
+					const polygon = getAnnotationPolygonByHandle(feature);
+
+					mapboxMap.setFeatureState(
+						{ source: 'annotations', id: polygon.properties.id },
+						{ [key]: value }
+					);
+				}
+
+				handleSideEffects(feature,key,value);
+
+			break;
 		}
 
 
 	}
 
-	const setCreationFeatureState = (feature,key,value) => {
-		const featureId = feature.properties.id;
-
-		mapboxMap.setFeatureState(
-			{ source: 'creations', id: featureId },
-			{ [key]: value }
-		);
+	const filterFeaturesByTag = (features,slug) => {
+		return (features || []).filter(feature=>{
+			const tags = feature.properties.tag_slugs || [];
+			return tags.includes(slug);
+		})
 	}
 
+	//hover features  matching this tag
+  const toggleHoverTag = (slug,bool) => {
+
+		const creationFeatures = mapData?.sources.creations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const allFeatures = creationFeatures.concat(annotationFeatures);
+
+    const matches = filterFeaturesByTag(allFeatures,slug);
+
+    matches.forEach(feature=>{
+      setMapFeatureState(feature,'hover',bool);
+    })
+
+  }
 
 
+	const filterFeaturesByFormat = (features,slug) => {
+		return (features || []).filter(feature=>{
+			const format = feature.properties?.format;
+			return format === slug;
+		})
+	}
 
-	/*
-	create a circle that extends to the closest marker,
-	and zoom on it.
-	*/
-	const fitToFeature = (source_id,feature_id) => {
+	//hover features matching this format
+	const toggleHoverFormat = (slug,bool) => {
 
-		console.log("FIT TO FEATURE SOURCE",source_id);
+		const creationFeatures = mapData?.sources.creations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
-		const source = mapData?.sources[source_id];
-	  const sourceCollection = source?.data.features;
-    const sourceFeature = (sourceCollection || []).find(feature => feature.properties.id === feature_id);
+    const matches = filterFeaturesByFormat(allFeatures,slug);
 
-		//get the center no matter the feature type
-		const centroid = turf.centroid(sourceFeature);
+    matches.forEach(feature=>{
+      setMapFeatureState(feature,'hover',bool);
+    })
 
-		const getZoomForTargetSize = (meters,lat,targetPixels) => {
+  }
 
-			if (meters === undefined){
-				throw "Missing 'meters' parameter.";
+	const zoomOnFeatures = features => {
+
+		//get the area to zoom to; given a set (or a single) feature.
+		const getZoomCircle = features => {
+
+			let selectionBbox = undefined;
+			let selectionPolygon = undefined;
+
+			//force array
+			if ( !Array.isArray(features) ){
+				features = [features];
 			}
 
-			if (lat === undefined){
-				throw "Missing 'latitude' parameter.";
-			}
-
-			if (targetPixels === undefined){
-				throw "Missing 'targetPixels' parameter.";
-			}
-
-			let currentZoom = 0;
-			const zoomSteps = .5;
-			const maxZoom = 22;
-			let matchZoom = undefined;
-
-			console.log("GET IDEAL ZOOM FOR METERS/PIXELS/LAT",Math.round(meters),targetPixels,lat);
-
-			const getSizeForZoom = (meters,latitude,zoomLevel) => {
-
-				const metersPerPixel = function(latitude, zoomLevel) {
-					const EARTH_RADIUS = 6378137;
-					const TILESIZE = 512;
-					const EARTH_CIRCUMFERENCE = 2 * Math.PI * EARTH_RADIUS;
-					const scale = Math.pow(2,zoomLevel);
-					const worldSize = TILESIZE * scale;
-					var latitudeRadians = latitude * (Math.PI/180);
-					return EARTH_CIRCUMFERENCE * Math.cos(latitudeRadians) / worldSize;
+			//multiple features
+			if ( features.length > 1 ){
+				console.log("MARK MULTIPLE-FEATURE SELECTION",features);
+				const collection = {
+			    "type": "FeatureCollection",
+			    "features":features
 				};
+				selectionBbox = turf.bbox(collection);
+				selectionPolygon = turf.bboxPolygon(selectionBbox);
+				selectionPolygon = bboxToCircle(selectionBbox);
+			}else{
+				const feature = features[0];
+				const type = feature.geometry?.type;
 
-				return meters / metersPerPixel(latitude, zoomLevel);
-			}
+				switch(type){
+					case 'Point':
 
+						//TOUFIX URGENT ONLY VISIBLE FEATURES
+						const creationFeatures = mapData?.sources.creations?.data.features || [];
+					  const handlesFeatures = mapData?.sources.annotationsHandles?.data.features || [];
+					  const allPoints = creationFeatures.concat(handlesFeatures);
 
-			while (currentZoom <= maxZoom) {
+						//get this feature within the new array
 
-				const size = getSizeForZoom(meters,lat,currentZoom);
+						const sortedByDistance = sortFeaturesByDistance(feature.geometry,allPoints)
+						.filter(obj=>obj.distance!==0) //remove current point
+						.map(obj=>obj.feature)
 
-				//console.log("SIZE AT ZOOM",currentZoom,size);
+						//get closest feature
+						const closestFeature = sortedByDistance[0];
 
-				if (size > targetPixels){
-					matchZoom = currentZoom;
+						//get radius (distance between the closest features)
+						var radius = turf.distance(feature.geometry,closestFeature.geometry);
+
+						const collection = {
+					    "type": "FeatureCollection",
+					    "features":[feature,closestFeature]
+						};
+						selectionBbox = turf.bbox(collection);
+						selectionPolygon = turf.circle(feature.geometry, radius);
+
+					break;
+					case 'Polygon':
+
+						selectionBbox = turf.bbox(feature);
+						selectionPolygon = bboxToCircle(selectionBbox);
+
 					break;
 				}
 
-				currentZoom +=zoomSteps;
 			}
 
-			return matchZoom;
+			return selectionPolygon;
+
 		}
 
-		let inputMeters = undefined;//distance (in meters) that will be used to compute the target zoom
-		let outputPixels = undefined;//what should be the pixel size of the converted distance
+		const zoomCircle = getZoomCircle(features);
 
-		switch(source_id){
-			case 'creations':
-				const nearestFeature = getClosestFeature(sourceFeature,sourceCollection);
-				inputMeters = getDistanceFromFeatureToClosest(feature_id,sourceCollection);
-				outputPixels = 25;
-			break;
-			case 'annotations':
-				const bbox = turf.bbox(sourceFeature);
-				const pointA = [bbox[0],bbox[1]];
-				const pointB = [bbox[2],bbox[3]];
-				inputMeters = turf.distance(pointA,pointB) * 1000;
-				outputPixels = 50;
-			break;
-		}
-
-		const cameraSettings = {
-			center: centroid.geometry.coordinates,
-			duration:1000
-		}
-
-		/*TOUFIX URGENT
-		if (inputMeters){
-			const idealZoom = getZoomForTargetSize(inputMeters,centroid.geometry.coordinates[0],outputPixels);
-			if ( idealZoom > mapboxMap.getZoom() ){
-				cameraSettings.zoom = idealZoom;
+		const showSelectionPolygon = selectionPolygon => {
+			try {
+				mapboxMap.removeLayer("selectionBox");
+				mapboxMap.removeSource("selectionFeatures");
 			}
-		}
-		*/
+			catch(err) {
+				//alert("Error!");
+			}
 
-		mapboxMap.easeTo(cameraSettings);
+			mapboxMap.addSource('selectionFeatures',{
+				'type': 'geojson',
+				'data': selectionPolygon
+			})
+
+			mapboxMap.addLayer({
+				'id': 'selectionBox',
+				'type': 'fill',
+				'source': 'selectionFeatures', // reference the data source
+				'layout': {},
+				'paint': {
+					'fill-color': '#FF0000', // blue color fill
+					'fill-opacity': 0.1
+				}
+			});
+		}
+
+		if (DEBUG){
+			showSelectionPolygon(zoomCircle);
+		}
+
+		//https://docs.mapbox.com/mapbox-gl-js/api/map/#map#fitbounds
+		mapboxMap.fitBounds(
+			turf.bbox(zoomCircle),
+			{
+				padding:50,
+				maxZoom:16
+			}
+		);
 
 	}
-
-	const toggleFeatureId = (source_id,feature_id,bool) => {
-
-		if (feature_id === undefined){
-			throw "Missing 'feature_id' parameter.";
-		}
-
-		const sourceCollection = mapData?.sources[source_id].data.features;
-    const sourceFeature = (sourceCollection || []).find(feature => feature.properties.id === feature_id);
-
-		if (bool){
-			console.log("TOGGLE FEATURE",bool,source_id,feature_id,sourceFeature);
-		}
-
-		switch(source_id){
-			case 'annotationsHandles':
-				const polygonFeature = getAnnotationPolygonByHandle(sourceFeature);
-				setPolygonFeatureState(polygonFeature,'active',bool);
-				setPolygonHandleFeatureState(sourceFeature,'active',bool);
-			break;
-			case 'creations':
-				setCreationFeatureState(sourceFeature,'active',bool);
-			break;
-		}
-
-  }
 
 	//clean map data input
 	useEffect(()=>{
@@ -220,43 +313,44 @@ export function MapProvider({children}){
 
 		let newMapData = {...rawMapData};
 
+		const sources = newMapData.sources || {};
+		const featureSourceKeys = Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
+
     //clean sources
-    for (const [sourceKey, source] of Object.entries(newMapData.sources)) {
-      if (source.type === 'geojson'){
-        if (source.data.type === 'FeatureCollection'){
+		featureSourceKeys.forEach(sourceKey => {
 
-					const sourceFeatures = source.data.features;
+			//remove features that do not have geometry
+			const filterFeaturesWithGeometry = features => {
+				features = (features || []);
+				const noGeometryFeatures = features.filter(feature => !feature?.geometry);
+				if (noGeometryFeatures.length){
+					console.log("removing "+noGeometryFeatures.length+"/"+features.length+" source features that have no geometry",sourceKey,noGeometryFeatures);
+					features = features.filter(x => !noGeometryFeatures.includes(x));
+				}
+				return features;
+			}
 
-					//remove features that have no IDs
-					const filterFeaturesWithIDs = features => {
-            const noIDfeatures = (features || []).filter(feature => (feature?.id !== undefined));
-            if (noIDfeatures.length){
-              console.log("removing "+noIDfeatures.length+"/"+sourceFeatures.length+" source features that have no IDs",sourceKey,noIDfeatures);
-              features = features.filter(x => !noIDfeatures.includes(x));
-            }
-            return features;
-          }
+			newMapData.sources[sourceKey].data.features = filterFeaturesWithGeometry(newMapData.sources[sourceKey].data.features);
 
-          newMapData.sources[sourceKey].data.features = filterFeaturesWithIDs(sourceFeatures);
+			//remove features that have no IDs
+			const filterFeaturesWithIDs = features => {
+				features = (features || []);
+				const noIDfeatures = features.filter(feature => (feature?.id !== undefined));
+				if (noIDfeatures.length){
+					console.log("removing "+noIDfeatures.length+"/"+features.length+" source features that have no IDs",sourceKey,noIDfeatures);
+					features = features.filter(x => !noIDfeatures.includes(x));
+				}
+				return features;
+			}
 
-          //remove features that do not have geometry
-          const filterFeaturesWithGeometry = features => {
-            const noGeometryFeatures = (features || []).filter(feature => !feature?.geometry);
-            if (noGeometryFeatures.length){
-              console.log("removing "+noGeometryFeatures.length+"/"+sourceFeatures.length+" source features that have no geometry",sourceKey,noGeometryFeatures);
-              features = features.filter(x => !noGeometryFeatures.includes(x));
-            }
-            return features;
-          }
+			newMapData.sources[sourceKey].data.features = filterFeaturesWithIDs(newMapData.sources[sourceKey].data.features);
 
-          newMapData.sources[sourceKey].data.features = filterFeaturesWithGeometry(sourceFeatures);
 
-        }
-      }
-    }
+		})
+
 
     //add polygon handles automatically
-		/*
+
     if (newMapData.sources['annotations'] && newMapData.sources['annotationsHandles'] ){
 			const createAnnotationHandles = polygonFeatures => {
 				let collection = [];
@@ -270,17 +364,12 @@ export function MapProvider({children}){
 			}
 			newMapData.sources['annotationsHandles'].data.features = createAnnotationHandles(newMapData.sources['annotations'].data.features);
 		}
-		*/
 
 
 		if (newMapData.sources['annotations'] && newMapData.sources['annotationsHandles'] ){
 
 			const allPolygons = newMapData.sources['annotations'].data.features || [];
 			const allHandles = newMapData.sources['annotationsHandles'].data.features || [];
-
-			const allPolygonIds = allPolygons.map(feature => feature.properties.id);
-			const allHandleTargets = allHandles.map(feature => feature.properties.target_id);
-			const noHandlePolygonIds = allPolygonIds.filter(x => !allHandleTargets.includes(x));
 
 			//remove polygons that does not have handles
 			const filterPolygonsWithHandles = (polygons,handles) => {
@@ -320,6 +409,26 @@ export function MapProvider({children}){
 
 
 		}
+
+		//set really unique IDs for each feature
+
+		featureSourceKeys.forEach(sourceKey => {
+
+			const setSourcePrefixes = features => {
+				features = (features || []);
+				const newFeatures = [...features];
+				newFeatures.forEach(feature =>{
+					feature.properties.id = sourceKey + "-" + feature.properties.id;
+				})
+				return newFeatures;
+			}
+
+			newMapData.sources[sourceKey].data.features = setSourcePrefixes(newMapData.sources[sourceKey].data.features);
+
+
+		})
+
+
 
 		console.log("NEWMAPDATA",newMapData);
 
@@ -399,7 +508,7 @@ export function MapProvider({children}){
 	  //set global marker filters
 	  useEffect(()=>{
 	    if (mapboxMap === undefined) return;
-	    console.log("RUN GLOBAL FILTER",markersFilter);
+	    console.log("RUN GLOBAL FILTER",markersFilter,mapboxMap);
 	    mapboxMap.setFilter("creations",markersFilter);
 	    mapboxMap.setFilter("annotationsHandles",markersFilter);
 			mapboxMap.setFilter("annotationsFill",markersFilter);
@@ -408,22 +517,26 @@ export function MapProvider({children}){
 
 	useEffect(()=>{
 
-		console.log("ACTIF FEAT ",activeFeatureId);
+
+		console.log("ACTIF FEAT ID",activeFeatureId);
 
 		//hide old
 		if (prevActiveFeatureId.current){
-			toggleFeatureId(prevActiveFeatureId.current.source,prevActiveFeatureId.current.id,false);
+			const prevFeature = getFeatureById(prevActiveFeatureId.current);
+			setMapFeatureState(prevFeature,'active',false);
 		}
 
-		if (activeFeatureId === undefined) return;
-		if (JSON.stringify(activeFeatureId) === JSON.stringify(prevActiveFeatureId.current) ) return; //reclick
-
-
 		//show new
-		toggleFeatureId(activeFeatureId.source,activeFeatureId.id,true);
+		if (activeFeatureId !== undefined){
+			const activeFeature = getFeatureById(activeFeatureId);
+			console.log("ACTIF FEAT",activeFeature);
+			setMapFeatureState(activeFeature,'active',true);
+		}
+
 		prevActiveFeatureId.current = activeFeatureId;
 
 	},[activeFeatureId])
+
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -433,7 +546,6 @@ export function MapProvider({children}){
 		setRawMapData:setRawMapData,
 		mapboxMap:mapboxMap,
 		setMapboxMap:setMapboxMap,
-		fitToFeature:fitToFeature,
 		getAnnotationPolygonByHandle:getAnnotationPolygonByHandle,
 		activeFeatureId:activeFeatureId,
 		setActiveFeatureId:setActiveFeatureId,
@@ -445,10 +557,15 @@ export function MapProvider({children}){
 		setMarkerTagsDisabled:setMarkerTagsDisabled,
 		markerFormatsDisabled:markerFormatsDisabled,
 		setMarkerFormatsDisabled:setMarkerFormatsDisabled,
-		setPolygonFeatureState:setPolygonFeatureState,
-		setCreationFeatureState:setCreationFeatureState,
-		setPolygonHandleFeatureState:setPolygonHandleFeatureState,
-		getHandlesByAnnotationId:getHandlesByAnnotationId
+		setMapFeatureState:setMapFeatureState,
+		getHandlesByAnnotationId:getHandlesByAnnotationId,
+		filterFeaturesByTag:filterFeaturesByTag,
+		filterFeaturesByFormat:filterFeaturesByFormat,
+		toggleHoverTag:toggleHoverTag,
+		toggleHoverFormat:toggleHoverFormat,
+		zoomOnFeatures:zoomOnFeatures,
+		getFeatureSourceKey:getFeatureSourceKey,
+		getFeatureById:getFeatureById
 	};
 
   return (

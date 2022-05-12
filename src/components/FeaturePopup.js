@@ -9,99 +9,130 @@ import { useParams,useNavigate } from 'react-router-dom';
 import {getMarkerUrl} from "./../Constants";
 
 const FeaturePopupContent = (props) => {
+
+  const {
+    getFeatureById
+  } = useMap();
+
   const navigate = useNavigate();
+  const feature = getFeatureById(props.featureId);
+
   const {mapPostSlug,mapPostId} = useParams();
-  const hasMore = props.feature?.properties.has_more;
+
+  const hasMore = feature?.properties.has_more;
 
   const handleClick = () => {
-    const url = getMarkerUrl(mapPostId,mapPostSlug,props.feature.properties.post_id,props.feature.properties.slug);
+    const url = getMarkerUrl(mapPostId,mapPostSlug,feature.properties.post_id,feature.properties.slug);
     navigate(url);
   }
 
   return (
     <div className="feature-popup">
-      <CreationCard feature={props.feature}/>
-      <div className="feature-actions">
-        {
-          hasMore &&
+      <CreationCard
+      feature={feature}
+      highlightTags={true}
+      />
+      {
+        hasMore &&
+        <div className="popup-actions">
           <Button onClick={handleClick}>Ouvrir</Button>
-        }
-      </div>
+        </div>
+      }
+
     </div>
   );
 }
 
 const FeaturePopup = props => {
 
-
   const {
-    mapData,
-    setShowPopup,
     getAnnotationPolygonByHandle,
-    setActiveFeatureId
+    getFeatureSourceKey,
+    getFeatureById,
+    getHandlesByAnnotationId,
+    activeFeatureId,
+    setShowPopup
   } = useMap();
 
-  const sourceId = props?.sourceId;
-  const featureId = props?.featureId;
+  const [latLng,setLatLng] = useState();
+  const [featureId,setFeatureId] = useState();
 
-  let location = undefined;
-  let content = undefined;
   let popupSettings = {
     closeOnClick:false,
     anchor:'bottom'
   }
 
-  if (featureId && sourceId){
+  //populate some data required for the popup.
+	useEffect(()=>{
+		if (!activeFeatureId) return;
 
-    switch(sourceId){
+		//get the data needed to display the popup
+		const getPopupData = feature => {
 
-      case 'creations':
+	    const sourceKey = getFeatureSourceKey(feature);
+	    let location;
+	    let feature_id;
 
-        var sourceCollection = mapData?.sources.creations?.data.features;
-        var feature = (sourceCollection || []).find(feature => feature.properties.id === featureId);
+	    switch(sourceKey){
+	      case 'creations':
+	        location = feature.geometry.coordinates;
+	        feature_id = feature.properties.id;
+	      break;
+	      case 'annotations':
 
-        if (feature){
-          location =  feature.geometry.coordinates;
-          content = <FeaturePopupContent feature={feature}/>
-        }
+	        //get first handle
+	        const handles = getHandlesByAnnotationId(feature.properties.id);
+	        const handleFeature = handles[0];
 
-      break;
+	        if (handleFeature){
+	          //get popup content
+	          location = handleFeature.geometry.coordinates;
+	          feature_id = feature.properties.id;
+	        }
 
-      case 'annotationsHandles':
+	      break;
+	      case 'annotationsHandles':
 
-        //get handle
-        var sourceCollection = mapData?.sources.annotationsHandles.data.features;
-        var handleFeature = (sourceCollection || []).find(feature => feature.properties.id === featureId);
+	        location = feature.geometry.coordinates;
 
-        //get polygon
-        var polygonFeature = getAnnotationPolygonByHandle(handleFeature);
+	        //get polygon
+	        const polygonFeature = getAnnotationPolygonByHandle(feature);
 
-        if (handleFeature && polygonFeature){
-          //get popup content
-          location = handleFeature.geometry.coordinates;
-          content = <FeaturePopupContent feature={polygonFeature}/>
-        }
+	        if (polygonFeature){
+	          feature_id = polygonFeature.properties.id;
+	        }
 
-      break;
-    }
+	      break;
+	    }
 
+	    return {
+	      latlng:location,
+	      feature_id:feature_id
+	    }
+	  }
 
-  }
+		const feature = getFeatureById(activeFeatureId);
+		const data = getPopupData(feature);
+
+    setLatLng(data.latlng);
+    setFeatureId(data.feature_id);
+
+	},[activeFeatureId])
 
   const handleClose = () => {
-    //setActiveFeatureId();
+    setShowPopup(false);
   }
 
   return (
     <>
     {
-      (location && content) &&
+      (latLng && (featureId !== undefined) ) &&
       <MapPopup
-      lngLat={location}
+      lngLat={latLng}
       onClose={handleClose}
       settings={popupSettings}
       >
-        {content}
+        <FeaturePopupContent featureId={featureId}/>
       </MapPopup>
     }
     </>
