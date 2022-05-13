@@ -4,7 +4,7 @@ export const APP_VERSION = '113';//when updated, the local data will be cleared
 const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 export const DEBUG = IS_LOCAL;
 
-export const WP_URL = IS_LOCAL ? 'http://tribunaldp.local' : 'https://www.tribunaldesprejuges.org';
+export const WP_URL = IS_LOCAL ? 'http://tribunaldp.local' : 'https://tdpdatas.cargoculte.be';
 export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_AGENDA = 18;
