@@ -13,7 +13,13 @@ const MapSidebar = (props) => {
   const [isActive, setisActive] = useState(props.active);
   const [mapTransition,setMapTransition] = useState();
   const [section,setSection] = useState('creations');
-  const {mapData,mapboxMap,activeFeatureId} = useMap();
+  const {
+    mapData,
+    mapboxMap,
+    activeFeatureId,
+    getFeatureById,
+    getFeatureSourceKey,
+  } = useMap();
   const annotationsCount = (mapData?.sources.annotations?.data.features || []).length;
   const creationsCount = (mapData?.sources.creations?.data.features || []).length;
 
@@ -42,18 +48,22 @@ const MapSidebar = (props) => {
 
   //switch section when a feature is clicked
   useEffect(()=>{
-    const sourceId = activeFeatureId?.source;
+    if (activeFeatureId === undefined) return;
 
-    switch(sourceId){
+    const feature = getFeatureById(activeFeatureId);
+    const sourceKey = getFeatureSourceKey(feature);
+
+    switch(sourceKey){
       case 'creations':
         setSection('creations');
       break;
       case 'annotationsHandles':
+      case 'annotations':
         setSection('annotations');
       break;
     }
 
-  },[activeFeatureId?.source])
+  },[activeFeatureId])
 
   return (
     <div
