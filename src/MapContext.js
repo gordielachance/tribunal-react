@@ -355,7 +355,7 @@ export function MapProvider({children}){
 			const createAnnotationHandles = polygonFeatures => {
 				let collection = [];
 	      (polygonFeatures || []).forEach((polygonFeature,index) => {
-	        const handleFeature = turf.centroid(polygonFeature);
+	        const handleFeature = turf.pointOnFeature(polygonFeature);
 					handleFeature.properties.id = index + 1;
 	        handleFeature.properties.target_id = polygonFeature.properties.id;
 					collection.push(handleFeature);
