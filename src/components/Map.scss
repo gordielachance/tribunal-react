@@ -5,6 +5,23 @@ $sidebarHandleWidth:25px;
 .mapboxgl-map{
   width:100%;
   height:100%;
+  .mapboxgl-popup-close-button{
+    font-size: 2em;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    opacity:.25;
+    &:hover{
+      background-color:inherit;
+      opacity:1;
+    }
+  }
+  .feature-popup{
+    margin-top:1em;
+  }
+  .mapboxgl-popup-content{
+    background:rgba(255,255,255,0.9);
+  }
 }
 
 #map-container{
