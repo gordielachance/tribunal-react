@@ -28,9 +28,9 @@ export function MapProvider({children}){
   const [formatsFilter,setFormatsFilter] = useState();
   const [markersFilter,setMarkersFilter] = useState();
 
-	const getHandlesByAnnotationId = feature_id => {
+	const getHandlesByAnnotationPolygonId = feature_id => {
 		const sourceCollection = mapData?.sources.annotationsHandles.data.features || [];
-		const realId = parseInt(feature_id.replace("annotations-", ""));
+		const realId = parseInt(feature_id.replace("annotationsPolygons-", ""));
 
     const handleFeatures = sourceCollection.filter(feature => feature.properties.target_id === realId);
 		return handleFeatures;
@@ -40,8 +40,9 @@ export function MapProvider({children}){
 		if (!handleFeature){
 			throw "Missing 'handleFeature' parameter.";
 		}
-		const sourceCollection = mapData?.sources.annotations?.data.features;
-		const polygonId = 'annotations-' + handleFeature.properties.target_id;
+		const sourceCollection = mapData?.sources.annotationsPolygons?.data.features;
+
+		const polygonId = 'annotationsPolygons-' + handleFeature.properties.target_id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
 	}
 
@@ -99,11 +100,11 @@ export function MapProvider({children}){
 		);
 
 		switch(sourceKey){
-			case 'annotations':
+			case 'annotationsPolygons':
 
 				const polygonSideEffects = (feature,key,value) => {
 					const polygonId = feature.properties.id;
-					const handles = getHandlesByAnnotationId(polygonId);
+					const handles = getHandlesByAnnotationPolygonId(polygonId);
 
 					//for hovered annotations, toggle handles too.
 					if(key === 'hover'){
@@ -137,7 +138,7 @@ export function MapProvider({children}){
 					const polygon = getAnnotationPolygonByHandle(feature);
 
 					mapboxMap.setFeatureState(
-						{ source: 'annotations', id: polygon.properties.id },
+						{ source: 'annotationsPolygons', id: polygon.properties.id },
 						{ [key]: value }
 					);
 				}
@@ -161,7 +162,7 @@ export function MapProvider({children}){
   const toggleHoverTag = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotationsPolygons?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByTag(allFeatures,slug);
@@ -184,7 +185,7 @@ export function MapProvider({children}){
 	const toggleHoverFormat = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotationsPolygons?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByFormat(allFeatures,slug);
@@ -351,7 +352,7 @@ export function MapProvider({children}){
 
     //add polygon handles automatically
 
-    if (newMapData.sources['annotations'] && newMapData.sources['annotationsHandles'] ){
+    if (newMapData.sources['annotationsPolygons'] && newMapData.sources['annotationsHandles'] ){
 			const createAnnotationHandles = polygonFeatures => {
 				let collection = [];
 	      (polygonFeatures || []).forEach((polygonFeature,index) => {
@@ -362,13 +363,13 @@ export function MapProvider({children}){
 	      })
 				return collection;
 			}
-			newMapData.sources['annotationsHandles'].data.features = createAnnotationHandles(newMapData.sources['annotations'].data.features);
+			newMapData.sources['annotationsHandles'].data.features = createAnnotationHandles(newMapData.sources['annotationsPolygons'].data.features);
 		}
 
 
-		if (newMapData.sources['annotations'] && newMapData.sources['annotationsHandles'] ){
+		if (newMapData.sources['annotationsPolygons'] && newMapData.sources['annotationsHandles'] ){
 
-			const allPolygons = newMapData.sources['annotations'].data.features || [];
+			const allPolygons = newMapData.sources['annotationsPolygons'].data.features || [];
 			const allHandles = newMapData.sources['annotationsHandles'].data.features || [];
 
 			//remove polygons that does not have handles
@@ -387,7 +388,7 @@ export function MapProvider({children}){
 				return polygons;
 			}
 
-			newMapData.sources['annotations'].data.features = filterPolygonsWithHandles(allPolygons,allHandles);
+			newMapData.sources['annotationsPolygons'].data.features = filterPolygonsWithHandles(allPolygons,allHandles);
 
 			//remove handles that does not have polygons
 			const filterHandlesWithPolygons = (handles,polygons) => {
@@ -558,7 +559,7 @@ export function MapProvider({children}){
 		markerFormatsDisabled:markerFormatsDisabled,
 		setMarkerFormatsDisabled:setMarkerFormatsDisabled,
 		setMapFeatureState:setMapFeatureState,
-		getHandlesByAnnotationId:getHandlesByAnnotationId,
+		getHandlesByAnnotationPolygonId:getHandlesByAnnotationPolygonId,
 		filterFeaturesByTag:filterFeaturesByTag,
 		filterFeaturesByFormat:filterFeaturesByFormat,
 		toggleHoverTag:toggleHoverTag,

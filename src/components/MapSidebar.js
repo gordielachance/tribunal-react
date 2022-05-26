@@ -20,7 +20,7 @@ const MapSidebar = (props) => {
     getFeatureById,
     getFeatureSourceKey,
   } = useMap();
-  const annotationsCount = (mapData?.sources.annotations?.data.features || []).length;
+  const annotationsCount = (mapData?.sources.annotationsPolygons?.data.features || []).length;
   const creationsCount = (mapData?.sources.creations?.data.features || []).length;
 
   const toggleSidebar = () => {
@@ -58,8 +58,8 @@ const MapSidebar = (props) => {
         setSection('creations');
       break;
       case 'annotationsHandles':
-      case 'annotations':
-        setSection('annotations');
+      case 'annotationsPolygons':
+        setSection('annotationsPolygons');
       break;
     }
 
@@ -100,8 +100,8 @@ const MapSidebar = (props) => {
                 <Menu.Item
                   id="map-menu-annotations"
                   name='Annotations'
-                  active={section === 'annotations'}
-                  onClick={e=>setSection('annotations')}
+                  active={section === 'annotationsPolygons'}
+                  onClick={e=>setSection('annotationsPolygons')}
                 >
                 <Icon name="circle"/>
                 Annotations
@@ -142,9 +142,9 @@ const MapSidebar = (props) => {
               />
             }
             {
-              (section === 'annotations') &&
+              (section === 'annotationsPolygons') &&
               <FeaturesList
-              sourceId='annotations'
+              sourceId='annotationsPolygons'
               disabledTags={props.markerTagsDisabled}
               sortBy={props.sortMarkerBy}
               />

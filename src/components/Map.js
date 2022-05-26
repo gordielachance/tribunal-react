@@ -180,7 +180,7 @@ const Map = (props) => {
 
             const toBboxes = () => {
 
-              mapData.sources.annotations.data.features.forEach(feature => {
+              mapData.sources.annotationsPolygons.data.features.forEach(feature => {
                 const bbox = turf.bbox(feature);
                 //const pixelsBbox = bbox.map()
 

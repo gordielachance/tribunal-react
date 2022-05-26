@@ -49,7 +49,7 @@ const FeaturePopup = props => {
     getAnnotationPolygonByHandle,
     getFeatureSourceKey,
     getFeatureById,
-    getHandlesByAnnotationId,
+    getHandlesByAnnotationPolygonId,
     activeFeatureId,
     setShowPopup
   } = useMap();
@@ -78,10 +78,10 @@ const FeaturePopup = props => {
 	        location = feature.geometry.coordinates;
 	        feature_id = feature.properties.id;
 	      break;
-	      case 'annotations':
+	      case 'annotationsPolygons':
 
 	        //get first handle
-	        const handles = getHandlesByAnnotationId(feature.properties.id);
+	        const handles = getHandlesByAnnotationPolygonId(feature.properties.id);
 	        const handleFeature = handles[0];
 
 	        if (handleFeature){
