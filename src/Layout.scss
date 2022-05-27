@@ -1,75 +1,141 @@
 @import "./_shared";
 
+.slideDown-enter {
+  transform: translateY(100%);
+}
+.slideDown-enter-active {
+  transform: translateY(0%);
+  transition: transform 500ms;
+}
+.slideDown-exit {
+  transform: translateY(0%);
+}
+.slideDown-exit-active {
+  transform: translateY(-100%);
+  transition: transform 500ms;
+}
+
+.slideUp-enter {
+  transform: translateY(-100%);
+}
+.slideUp-enter-active {
+  transform: translateY(0%);
+  transition: transform 500ms;
+}
+.slideUp-exit {
+  transform: translateY(0%);
+}
+.slideUp-exit-active {
+  transform: translateY(100%);
+  transition: transform 500ms;
+}
+
 /*
 The following class-endings: *-enter, *-enter-active, *-exit, *-exit-active,
 have very specific meanings to <CSSTransition />
 (see more: https://reactcommunity.org/react-transition-group/css-transition)
 */
+@mixin pageTransitionEnter($horizontal,$backwards,$steps) {
+  //steps
+  $value : $steps;
 
-//horizontal
-.slideHorizontalNext-enter {
-  transform: translateX(100%);
-}
-.slideHorizontalNext-enter-active {
-  transform: translateX(0%);
-  transition: transform 1000ms ease-in-out;
-}
-.slideHorizontalNext-exit {
-  transform: translateX(0%);
-}
-.slideHorizontalNext-exit-active {
-  transform: translateX(-100%);
-  transition: transform 1000ms ease-in-out;
-}
+  //reverse value
+  @if $backwards {
+    $value : (-$value);
+  }
 
-//horizontal backwards
-.slideHorizontalPrevious-enter {
-  transform: translateX(-100%);
-}
-.slideHorizontalPrevious-enter-active {
-  transform: translateX(0%);
-  transition: transform 1000ms ease-in-out;
-}
-.slideHorizontalPrevious-exit {
-  transform: translateX(0%);
-}
-.slideHorizontalPrevious-exit-active {
-  transform: translateX(100%);
-  transition: transform 1000ms ease-in-out;
+  @if $horizontal {
+    transform: translateX(percentage($value));
+  } @else {
+    transform:  translateY(percentage($value));
+  }
 }
 
-//vertical
-.slideVerticalNext-enter {
-  transform: translateY(100%);
+@mixin pageTransitionEnterActive($horizontal,$steps) {
+
+  @if $horizontal {
+    transform: translateX(0%);
+  } @else {
+    transform:  translateY(0%);
+  }
+
+  transition: transform 500ms * $steps;
 }
-.slideVerticalNext-enter-active {
-  transform: translateY(0%);
-  transition: transform 1000ms ease-in-out;
+
+@mixin pageTransitionExit($horizontal) {
+
+  @if $horizontal {
+    transform: translateX(0%);
+  } @else {
+    transform:  translateY(0%);
+  }
+
 }
-.slideVerticalNext-exit {
-  transform: translateY(0%);
+
+@mixin pageTransitionExitActive($horizontal,$backwards,$steps) {
+  //steps
+  $value : $steps;
+
+  @if not $backwards {
+    $value : (-$value);
+  }
+
+  @if $horizontal {
+    transform: translateX(percentage($value));
+  } @else {
+    transform:  translateY(percentage($value));
+  }
+
+  transition: transform 500ms * $steps;
 }
-.slideVerticalNext-exit-active {
-  transform: translateY(-100%);
-  transition: transform 1000ms ease-in-out;
+
+@mixin pageTransition($horizontal,$backwards,$steps){
+  $name: 'pageTransition';
+
+  @if $horizontal {
+    $name: #{$name}-horizontal;
+  } @else {
+    $name: #{$name}-vertical;
+  }
+
+  @if $backwards {
+    $name: #{$name}-prev;
+  }@else {
+    $name: #{$name}-next;
+  }
+
+  $name: #{$name}-#{$steps};
+
+  .#{$name}-enter{
+    @include pageTransitionEnter($horizontal,$backwards,$steps);
+  }
+
+  .#{$name}-enter-active{
+    @include pageTransitionEnterActive($horizontal,$steps);
+  }
+
+  .#{$name}-exit{
+    @include pageTransitionExit($horizontal);
+  }
+
+  .#{$name}-exit-active{
+    @include pageTransitionExitActive($horizontal,$backwards,$steps);
+  }
+
 }
 
 
-//vertical backwards
-.slideVerticalPrevious-enter {
-  transform: translateY(-100%);
-}
-.slideVerticalPrevious-enter-active {
-  transform: translateY(0%);
-  transition: transform 1000ms ease-in-out;
-}
-.slideVerticalPrevious-exit {
-  transform: translateY(0%);
-}
-.slideVerticalPrevious-exit-active {
-  transform: translateY(100%);
-  transition: transform 1000ms ease-in-out;
-}
+@include pageTransition(true,false,1);//.pageTransition-horizontal-next-1
+@include pageTransition(true,true,1);//.pageTransition-horizontal-prev-1
+@include pageTransition(false,false,1);//.pageTransition-vertical-next-1
+@include pageTransition(false,true,1);//.pageTransition-vertical-prev-1
+
+@include pageTransition(true,false,2);
+@include pageTransition(true,true,2);
+@include pageTransition(false,false,2);
+@include pageTransition(false,true,2);
+
+
 
 //////////////////////
 
@@ -112,8 +178,17 @@ have very specific meanings to <CSSTransition />
   }
 
   &#homePage{
+
+  }
+
+  &#agendaPage{
+    background-color:#b9dfff;
+  }
+
+  &#creditsPage{
     background-color:#ffb9b9;
   }
+
   &#mapListPage{
     background-color:#9eff9e;
     #maps-list-container{

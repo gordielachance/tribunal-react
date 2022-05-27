@@ -8,12 +8,12 @@ const IframePage = (props) => {
   const [loading,setLoading] = useState(true);
 
   return(
-    <Container id={props.post_id} className="page horizontal-page iframe-page">
+    <Container id={props.id} className="page horizontal-page iframe-page">
       <div className="page-content">
         <h1>{props.title}</h1>
         {props.before}
         <iframe
-        id={"iframe-" + props.post_id}
+        id={"iframe-" + props.id}
         src={props.url}
         onLoad={()=>setLoading(false)}
         />
@@ -34,6 +34,7 @@ export const HomePage = (props) => {
 
   return (
     <IframePage
+      id="homePage"
       title="Présentation"
       url={getWpIframePostUrl(WP_POST_ID_HOME)}
       before={before}
@@ -45,12 +46,12 @@ export const HomePage = (props) => {
 export const AgendaPage = (props) => {
 
   const before = <ul>
-    <li><Link to="/">Click to go to "/"</Link></li>
     <li><Link to="/credits">Click to go to "/credits"</Link></li>
   </ul>
 
   return (
     <IframePage
+      id="agendaPage"
       title="AGENDA PAGE"
       url={getWpIframePostUrl(WP_POST_ID_AGENDA)}
       before={before}
@@ -61,14 +62,14 @@ export const AgendaPage = (props) => {
 export const CreditsPage = (props) => {
 
   const before = <ul>
-            <li><Link to="/">Click to go to "/"</Link></li>
-            <li><Link to="/agenda">Click to go to "/agenda"</Link></li>
-          </ul>
+    <li><Link to="/agenda">Click to go to "/agenda"</Link></li>
+  </ul>
 
   const after = undefined;
 
   return (
     <IframePage
+      id="creditsPage"
       title="CREDITS PAGE"
       url={getWpIframePostUrl(WP_POST_ID_CONTACT)}
       before={before}
