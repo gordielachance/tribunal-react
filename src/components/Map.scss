@@ -135,6 +135,16 @@ ul.features-selection{
       .feature-description{
         display:none;
       }
+      &.annotation{
+        .feature-icon{
+          color: #0080ff;
+        }
+      }
+      &.creation{
+        .feature-icon{
+          color: #c6ad09;
+        }
+      }
     }
 
 

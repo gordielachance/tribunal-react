@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import { Label,Icon } from 'semantic-ui-react';
 import {getFormatIcon,getFormatText} from "../Constants";
 import { useApp } from '../AppContext';
@@ -85,11 +86,23 @@ export const CreationCard = props => {
   const description=  props.feature?.properties.excerpt;
   const format = props.feature?.properties.format;
   const tags = maybeDecodeJson(props.feature?.properties.tag_slugs);
+  const post_type = props.feature?.properties.post_type;
 
   return(
-    <div className="feature-card">
+    <div
+    className={classNames({
+      'feature-card':  true,
+      creation:   (post_type==='tdp_creation'),
+      annotation:   (post_type==='tdp_annotation')
+    })}
+    >
       <div className="feature-header">
-        <p className="feature-title">{title}</p>
+        <p className="feature-title">
+          <span class="feature-icon">
+            <Icon name="circle"/>
+          </span>
+          {title}
+        </p>
         <FeatureTags
         tags={tags}
         format={format}
