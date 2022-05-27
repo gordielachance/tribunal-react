@@ -1,4 +1,4 @@
-import { Route, Link } from 'react-router-dom';
+import { Routes,Route, Link,useLocation } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
@@ -7,6 +7,8 @@ import MapListPage from "./components/MapListPage";
 import SingleMapPage from "./components/SingleMapPage";
 
 function Layout() {
+
+  const location = useLocation();
 
   const NotFound = () => (
     <h2>404 Page Not Found</h2>
@@ -19,7 +21,7 @@ function Layout() {
           <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
         </Link>
       </div>
-     <AnimatedRoutes>
+     <AnimatedRoutes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/cartes" element={<MapListPage/>} />
         <Route path="/agenda" element={<AgendaPage/>} />

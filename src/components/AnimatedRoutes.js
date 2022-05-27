@@ -1,4 +1,4 @@
-import { Routes,useLocation } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import React, { useRef } from "react";
 
@@ -10,7 +10,8 @@ export const AnimatedRoutes = props => {
   const horizontalPaths = [
     '/',
     '/cartes',
-    '/carte/:mapPostSlug'
+    '/carte/:mapPostId/:mapPostSlug',
+    '/carte/:mapPostId/:mapPostSlug/creation/:featurePostId/:featurePostSlug',
   ]
   const verticalPaths = [
     '/',
@@ -18,7 +19,8 @@ export const AnimatedRoutes = props => {
     '/credits'
   ]
 
-  const location = useLocation();
+  const location = props.location;
+
   const previousPagePath = useRef();
   const transitionClass = useRef();
 
