@@ -19,7 +19,6 @@ export function MapProvider({children}){
 	const [mapData,setMapData] = useState();
 
 	const [activeFeatureId,setActiveFeatureId] = useState();
-	const [showPopup,setShowPopup] = useState();
 	const prevActiveFeatureId = useRef();
 
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
@@ -663,8 +662,6 @@ export function MapProvider({children}){
 		getAnnotationPolygonByHandle:getAnnotationPolygonByHandle,
 		activeFeatureId:activeFeatureId,
 		setActiveFeatureId:setActiveFeatureId,
-		showPopup:showPopup,
-		setShowPopup:setShowPopup,
 		sortMarkerBy:sortMarkerBy,
 		setSortMarkerBy:setSortMarkerBy,
 		markerTagsDisabled:markerTagsDisabled,

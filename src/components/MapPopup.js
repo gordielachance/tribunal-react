@@ -6,18 +6,15 @@ const MapPopup = (props) => {
   const {mapboxMap} = useMap();
   const popupRef = useRef();
 
-  //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
-  const popup = new mapboxgl.Popup(props.settings)
-  .on('close', function(e) {
-    if (typeof props.onClose === 'function'){
-      props.onClose(e);
-    }
-  })
+
 
 
   //on init
   useEffect(() => {
     if (mapboxMap === undefined) return;
+
+    //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
+    const popup = new mapboxgl.Popup(props.settings)
 
     popup
     .setLngLat(props.lngLat)
@@ -25,6 +22,7 @@ const MapPopup = (props) => {
     .addTo(mapboxMap)
 
     return popup.remove;
+
   }, [props.lngLat,props.children]);
 
   return (

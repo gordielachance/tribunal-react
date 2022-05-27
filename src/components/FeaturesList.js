@@ -10,7 +10,6 @@ const FeaturesList = props => {
   const {
     mapData,
     mapboxMap,
-    setShowPopup,
     sortMarkerBy,
     getFilteredFeatures,
     setMapFeatureState,
@@ -140,14 +139,12 @@ const FeaturesList = props => {
 
     //unset current feature
     setActiveFeatureId();
-    setShowPopup();
 
     //wait until the map movements stops,
     //so mapbox can handle the feature (it only consider features within the viewport)
     mapboxMap.once('idle', () => {
       //set active feature
       setActiveFeatureId(feature.properties.id);
-      setShowPopup(true);
     });
 
   }

@@ -19,8 +19,6 @@ const Map = (props) => {
     mapData,
     mapboxMap,
     setMapboxMap,
-    showPopup,
-    setShowPopup,
     setMapFeatureState
   } = useMap();
 
@@ -74,9 +72,6 @@ const Map = (props) => {
         const feature = e.features[0];
         setActiveFeatureId(feature.properties.id);
 
-        //show popup
-        setShowPopup(true);
-
       });
     }
 
@@ -117,8 +112,6 @@ const Map = (props) => {
           const feature = e.features[0];
           setActiveFeatureId(feature.properties.id);
 
-          //show popup
-          setShowPopup(true);
 
         }
       });
@@ -370,7 +363,6 @@ const Map = (props) => {
   return (
     <div id="map-container">
       {
-        showPopup &&
         <FeaturePopup/>
       }
       <div

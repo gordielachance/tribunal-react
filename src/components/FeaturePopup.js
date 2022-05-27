@@ -50,8 +50,7 @@ const FeaturePopup = props => {
     getFeatureSourceKey,
     getFeatureById,
     getHandlesByAnnotationPolygonId,
-    activeFeatureId,
-    setShowPopup
+    activeFeatureId
   } = useMap();
 
   const [latLng,setLatLng] = useState();
@@ -119,17 +118,12 @@ const FeaturePopup = props => {
 
 	},[activeFeatureId])
 
-  const handleClose = () => {
-    setShowPopup(false);
-  }
-
   return (
     <>
     {
       (latLng && (featureId !== undefined) ) &&
       <MapPopup
       lngLat={latLng}
-      onClose={handleClose}
       settings={popupSettings}
       >
         <FeaturePopupContent featureId={featureId}/>
