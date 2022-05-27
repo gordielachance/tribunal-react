@@ -558,6 +558,31 @@ export function MapProvider({children}){
 
 	  },[markersFilter])
 
+		//toggle annotation rasters (layers) based on filtered polygons.
+	  useEffect(()=>{
+	    if (mapboxMap === undefined) return;
+
+			const allPolygons = mapData.sources['annotationsPolygons'].data.features || [];
+			const visiblePolygons = getFilteredFeatures(allPolygons);
+
+			allPolygons.forEach(feature => {
+
+				const layerId = feature.properties.image_layer;
+
+				if (!mapboxMap.getLayer(layerId)) {
+				    return;//continue
+				}
+
+				const isVisible = visiblePolygons.includes(feature);
+				const visibilityValue = isVisible ? 'visible' : 'none';
+
+				mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
+
+		  });
+
+
+	  },[markersFilter])
+
 	useEffect(()=>{
 
 

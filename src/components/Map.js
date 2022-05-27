@@ -257,6 +257,64 @@ const Map = (props) => {
           map.addLayer(layerData);
         }
 
+        //init mapbox annotation images
+        const addRaster = (feature) => {
+
+          const postId = feature.properties.post_id;
+
+
+          const imageUrl = feature.properties.image_url;
+          const imageBounds = feature.properties.image_bounds;
+          //const bbox = Object.values(imageBounds);
+          const bbox = [imageBounds.west,imageBounds.north,imageBounds.east,imageBounds.south];
+
+          const imagePolygon = turf.bboxPolygon(bbox);
+          let coordinates = imagePolygon.geometry.coordinates[0];
+          coordinates.pop();//remove last item of the polygon (the closing vertex)
+
+          const sourceId = "annotation-raster-source-"+postId;
+          const layerId = "annotation-raster-layer-"+postId;
+
+          feature.properties.image_layer = layerId;//store reference to the layer ID in the polygon properties
+
+          //add source for this image
+          if (map.getSource(sourceId)) {
+            throw `Source "${sourceId}" already exists.`
+          }
+
+          map.addSource(
+            sourceId,
+            {
+              'type': 'image',
+              'url': imageUrl,
+              'coordinates': coordinates
+            }
+         )
+
+
+         //add image
+         if (map.getLayer(layerId)) {
+           throw `Layer "${layerId}" already exists.`
+         }
+
+
+         map.addLayer({
+           "id": layerId,
+           "source": sourceId,
+           "type": "raster",
+           "paint": {"raster-opacity": 0.85}
+         })
+
+        }
+
+        mapData.sources?.annotationsPolygons.data.features.forEach((feature,index) => {
+          try{
+            addRaster(feature);
+          }catch(e){
+            console.log(e);
+          }
+        })
+
         //list all layers
         console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
 
