@@ -202,7 +202,7 @@ export const getMarkerUrl = (mapId,mapSlug,markerId,markerSlug) => {
   return mapUrl + `/creation/${markerId}/${markerSlug}`;
 }
 
-export const getWpIframeUrl = url => {
+const getWpIframeUrl = url => {
   url = new URL(url);
   url.searchParams.append('context','frontend');
   return url.href;

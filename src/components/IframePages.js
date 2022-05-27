@@ -1,7 +1,7 @@
-import React,{useState,useEffect} from "react";
+import React,{useState} from "react";
 import { Link } from 'react-router-dom';
 import { Container } from 'semantic-ui-react';
-import {getWpIframeUrl,getWpIframePostUrl,WP_URL,WP_POST_ID_HOME,WP_POST_ID_AGENDA,WP_POST_ID_CONTACT} from "./../Constants";
+import {getWpIframePostUrl,WP_POST_ID_HOME,WP_POST_ID_AGENDA,WP_POST_ID_CONTACT} from "./../Constants";
 
 const IframePage = (props) => {
 
@@ -14,10 +14,10 @@ const IframePage = (props) => {
         {props.before}
         <iframe
         id={"iframe-" + props.id}
+        title={props.title}
         src={props.url}
         onLoad={()=>setLoading(false)}
         />
-        {props.after}
       </div>
     </Container>
 
@@ -64,8 +64,6 @@ export const CreditsPage = (props) => {
   const before = <ul>
     <li><Link to="/agenda">Click to go to "/agenda"</Link></li>
   </ul>
-
-  const after = undefined;
 
   return (
     <IframePage

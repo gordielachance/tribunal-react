@@ -1,5 +1,5 @@
 import React, { useEffect,useState }  from "react";
-import { useParams,useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Loader,Dimmer,Container } from 'semantic-ui-react';
 
@@ -13,8 +13,6 @@ import { useMap } from '../MapContext';
 import Map from "./Map";
 
 const MapPost = (props) => {
-
-  const navigate = useNavigate();
 
   const {featurePostId} = useParams();
   const {mapboxMap,setRawMapData} = useMap();

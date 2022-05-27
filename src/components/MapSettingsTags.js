@@ -1,4 +1,3 @@
-import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
 import { useMap } from '../MapContext';

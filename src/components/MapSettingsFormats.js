@@ -1,4 +1,3 @@
-import React, { useEffect,useState }  from "react";
 import { Icon } from 'semantic-ui-react';
 import {getFormatIcon,getFormatText,getFeaturesFormats,getIdsForFormat} from "../Constants";
 import { useMap } from '../MapContext';

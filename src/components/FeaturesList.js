@@ -2,7 +2,7 @@ import React, { useEffect,useState,createRef }  from "react";
 import classNames from "classnames";
 
 import { CreationCard } from "./CreationCard";
-import {setFeatureDistance,getHumanDistance,getFeaturesTags,filterFeatures} from "../Constants";
+import {setFeatureDistance,getHumanDistance} from "../Constants";
 import { useMap } from '../MapContext';
 
 const FeaturesList = props => {

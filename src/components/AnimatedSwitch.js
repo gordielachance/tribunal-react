@@ -1,6 +1,6 @@
 import { Routes,useLocation } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import React, { useEffect,useRef } from "react";
+import React, { useRef } from "react";
 
 const dynamicChildFactory = classNames => child => React.cloneElement(child, { classNames });
 
