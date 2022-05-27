@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 
 const dynamicChildFactory = classNames => child => React.cloneElement(child, { classNames });
 
-export const AnimatedSwitch = props => {
+export const AnimatedRoutes = props => {
 
   //arrays of pages on the two axis
   const horizontalPaths = [
@@ -66,35 +66,19 @@ export const AnimatedSwitch = props => {
     const transition = getTransitionData(oldPath,newPath);
     if (!transition) return;
 
-    let transitionClass = 'pageTransition';//default
-
     if (transition.horizontal){
-      transitionClass = transitionClass + '-horizontal';
+      if (transition.backwards){
+        return 'slideLeft';
+      }else{
+        return 'slideRight';
+      }
     }else{
-      transitionClass = transitionClass + '-vertical';
+      if (transition.backwards){
+        return 'slideUp';
+      }else{
+        return 'slideDown';
+      }
     }
-
-    if (transition.backwards){
-      transitionClass = transitionClass + '-prev';
-    }else{
-      transitionClass = transitionClass + '-next';
-    }
-
-    transitionClass = transitionClass + '-' + transition.steps;
-
-    /*
-    if (transition.backwards){
-      transitionClass = 'slideUp';
-    }else{
-      transitionClass = 'slideDown';
-    }
-    */
-
-    if (transitionClass){
-      console.log("!!!TRANSITION",transitionClass,oldPath+" --> "+newPath);
-    }
-
-    return transitionClass;
 
   }
 
@@ -103,8 +87,6 @@ export const AnimatedSwitch = props => {
     transitionClass.current = newClass;
     console.log("!!!TRANSITION CLASS",transitionClass.current);
   }
-
-
 
   //store last visited page for further use
   previousPagePath.current = location.pathname;
@@ -124,4 +106,4 @@ export const AnimatedSwitch = props => {
 }
 
 
-export default AnimatedSwitch
+export default AnimatedRoutes

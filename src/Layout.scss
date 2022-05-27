@@ -1,5 +1,35 @@
 @import "./_shared";
 
+.slideRight-enter {
+  transform: translateX(100%);
+}
+.slideRight-enter-active {
+  transform: translateX(0%);
+  transition: transform 500ms;
+}
+.slideRight-exit {
+  transform: translateX(0%);
+}
+.slideRight-exit-active {
+  transform: translateX(-100%);
+  transition: transform 500ms;
+}
+
+.slideLeft-enter {
+  transform: translateX(-100%);
+}
+.slideLeft-enter-active {
+  transform: translateX(0%);
+  transition: transform 500ms;
+}
+.slideLeft-exit {
+  transform: translateX(0%);
+}
+.slideLeft-exit-active {
+  transform: translateX(100%);
+  transition: transform 500ms;
+}
+
 .slideDown-enter {
   transform: translateY(100%);
 }
@@ -29,113 +59,6 @@
   transform: translateY(100%);
   transition: transform 500ms;
 }
-
-/*
-The following class-endings: *-enter, *-enter-active, *-exit, *-exit-active,
-have very specific meanings to <CSSTransition />
-(see more: https://reactcommunity.org/react-transition-group/css-transition)
-*/
-@mixin pageTransitionEnter($horizontal,$backwards,$steps) {
-  //steps
-  $value : $steps;
-
-  //reverse value
-  @if $backwards {
-    $value : (-$value);
-  }
-
-  @if $horizontal {
-    transform: translateX(percentage($value));
-  } @else {
-    transform:  translateY(percentage($value));
-  }
-}
-
-@mixin pageTransitionEnterActive($horizontal,$steps) {
-
-  @if $horizontal {
-    transform: translateX(0%);
-  } @else {
-    transform:  translateY(0%);
-  }
-
-  transition: transform 500ms * $steps;
-}
-
-@mixin pageTransitionExit($horizontal) {
-
-  @if $horizontal {
-    transform: translateX(0%);
-  } @else {
-    transform:  translateY(0%);
-  }
-
-}
-
-@mixin pageTransitionExitActive($horizontal,$backwards,$steps) {
-  //steps
-  $value : $steps;
-
-  @if not $backwards {
-    $value : (-$value);
-  }
-
-  @if $horizontal {
-    transform: translateX(percentage($value));
-  } @else {
-    transform:  translateY(percentage($value));
-  }
-
-  transition: transform 500ms * $steps;
-}
-
-@mixin pageTransition($horizontal,$backwards,$steps){
-  $name: 'pageTransition';
-
-  @if $horizontal {
-    $name: #{$name}-horizontal;
-  } @else {
-    $name: #{$name}-vertical;
-  }
-
-  @if $backwards {
-    $name: #{$name}-prev;
-  }@else {
-    $name: #{$name}-next;
-  }
-
-  $name: #{$name}-#{$steps};
-
-  .#{$name}-enter{
-    @include pageTransitionEnter($horizontal,$backwards,$steps);
-  }
-
-  .#{$name}-enter-active{
-    @include pageTransitionEnterActive($horizontal,$steps);
-  }
-
-  .#{$name}-exit{
-    @include pageTransitionExit($horizontal);
-  }
-
-  .#{$name}-exit-active{
-    @include pageTransitionExitActive($horizontal,$backwards,$steps);
-  }
-
-}
-
-
-@include pageTransition(true,false,1);//.pageTransition-horizontal-next-1
-@include pageTransition(true,true,1);//.pageTransition-horizontal-prev-1
-@include pageTransition(false,false,1);//.pageTransition-vertical-next-1
-@include pageTransition(false,true,1);//.pageTransition-vertical-prev-1
-
-@include pageTransition(true,false,2);
-@include pageTransition(true,true,2);
-@include pageTransition(false,false,2);
-@include pageTransition(false,true,2);
-
-
 
 //////////////////////
 

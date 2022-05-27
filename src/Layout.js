@@ -1,5 +1,5 @@
 import { Route, Link } from 'react-router-dom';
-import AnimatedSwitch from "./components/AnimatedSwitch";
+import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
 import {HomePage,AgendaPage,CreditsPage} from "./components/IframePages";
@@ -19,7 +19,7 @@ function Layout() {
           <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
         </Link>
       </div>
-     <AnimatedSwitch>
+     <AnimatedRoutes>
         <Route path="/" element={<HomePage />} />
         <Route path="/cartes" element={<MapListPage/>} />
         <Route path="/agenda" element={<AgendaPage/>} />
@@ -27,7 +27,7 @@ function Layout() {
         <Route path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
         <Route path="/carte/:mapPostId/:mapPostSlug/creation/:featurePostId/:featurePostSlug" element={<SingleMapPage/>} />
         <Route path='*' component={NotFound} />
-      </AnimatedSwitch>
+      </AnimatedRoutes>
     </div>
   );
 }
