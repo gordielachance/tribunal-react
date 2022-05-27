@@ -290,8 +290,7 @@ const Map = (props) => {
            "id": layerId,
            "source": sourceId,
            "type": "raster",
-           "minzoom":feature.properties.minzoom,
-           "paint": {"raster-opacity": 0.85}
+           "minzoom":feature.properties.minzoom
          };
 
 

@@ -583,7 +583,7 @@ export function MapProvider({children}){
 
 				const layerId = feature.properties.image_layer;
 
-				if (!mapboxMap.getLayer(layerId)) {
+				if (!layerId || !mapboxMap.getLayer(layerId)) {
 				    return;//continue
 				}
 
