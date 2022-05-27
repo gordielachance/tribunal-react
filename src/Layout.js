@@ -21,15 +21,15 @@ function Layout() {
           <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
         </Link>
       </div>
-     <AnimatedRoutes location={location}>
+     <Routes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/cartes" element={<MapListPage/>} />
         <Route path="/agenda" element={<AgendaPage/>} />
         <Route path="/credits" element={<CreditsPage/>} />
-        <Route path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
+        <Route exact path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
         <Route path="/carte/:mapPostId/:mapPostSlug/creation/:featurePostId/:featurePostSlug" element={<SingleMapPage/>} />
         <Route path='*' component={NotFound} />
-      </AnimatedRoutes>
+      </Routes>
     </div>
   );
 }
