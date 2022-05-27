@@ -5,8 +5,8 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import type { FC } from "react";
 import './Layout.scss';
 
-import {HomePage,AgendaPage,CreditsPage,MapListPage} from "./components/IframePages";
-//import MapListPage from "./components/MapListPage";
+import {HomePage,AgendaPage,CreditsPage} from "./components/IframePages";
+import MapListPage from "./components/MapListPage";
 import SingleMapPage from "./components/SingleMapPage";
 
 function Layout() {

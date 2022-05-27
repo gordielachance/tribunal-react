@@ -42,24 +42,6 @@ export const HomePage = (props) => {
 
 }
 
-export const MapListPage = (props) => {
-
-  const before =         <ul>
-            <li><Link to="/">click to go to "/"</Link></li>
-            <li><Link to="/carte/creations">click to go to "/carte/creations"</Link></li>
-          </ul>
-
-  return (
-    <IframePage
-      id="mapListPage"
-      title="Liste des cartes"
-      url={getWpIframeUrl( WP_URL + '/?post_type=tdp_map')}
-      before={before}
-    />
-  )
-
-}
-
 export const AgendaPage = (props) => {
 
   const before = <ul>
