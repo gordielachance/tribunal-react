@@ -399,6 +399,7 @@ export function MapProvider({children}){
 	        const handleFeature = turf.pointOnFeature(polygonFeature);
 					handleFeature.properties.id = index + 1;
 	        handleFeature.properties.target_id = polygonFeature.properties.id;
+					handleFeature.properties.tag_slugs = polygonFeature.properties.tag_slugs;
 					collection.push(handleFeature);
 	      })
 				return collection;
