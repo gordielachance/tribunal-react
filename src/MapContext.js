@@ -25,6 +25,7 @@ export function MapProvider({children}){
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
   const [tagsFilter,setTagsFilter] = useState();
+	const [zoomFilter,setZoomFilter] = useState();
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
   const [formatsFilter,setFormatsFilter] = useState();
   const [markersFilter,setMarkersFilter] = useState();
@@ -399,12 +400,23 @@ export function MapProvider({children}){
 	        const handleFeature = turf.pointOnFeature(polygonFeature);
 					handleFeature.properties.id = index + 1;
 	        handleFeature.properties.target_id = polygonFeature.properties.id;
-					handleFeature.properties.tag_slugs = polygonFeature.properties.tag_slugs;
+
+					//clone tags prop if any
+					if (polygonFeature.properties?.tag_slugs){
+						handleFeature.properties.tag_slugs = polygonFeature.properties.tag_slugs;
+					}
+
+					//clone minzoom prop if any
+					if (polygonFeature.properties?.minzoom){
+						handleFeature.properties.minzoom = polygonFeature.properties.minzoom;
+					}
+
 					collection.push(handleFeature);
 	      })
 				return collection;
 			}
 			newMapData.sources['annotationsHandles'].data.features = createAnnotationHandles(newMapData.sources['annotationsPolygons'].data.features);
+
 		}
 
 
@@ -484,7 +496,8 @@ export function MapProvider({children}){
 
     const filters = [
       tagsFilter,
-      formatsFilter
+      formatsFilter,
+			zoomFilter
     ]
 
     const buildFilter = filters => {
@@ -501,7 +514,7 @@ export function MapProvider({children}){
     const filter = buildFilter(filters);
     setMarkersFilter(filter);
 
-  },[tagsFilter,formatsFilter])
+  },[tagsFilter,formatsFilter,zoomFilter])
 
 
 		//build features tags filter
@@ -551,6 +564,7 @@ export function MapProvider({children}){
 	  useEffect(()=>{
 	    if (mapboxMap === undefined) return;
 	    console.log("RUN GLOBAL FILTER",markersFilter,mapboxMap);
+
 	    mapboxMap.setFilter("creations",markersFilter);
 	    mapboxMap.setFilter("annotationsHandles",markersFilter);
 			mapboxMap.setFilter("annotationsFill",markersFilter);
@@ -604,6 +618,38 @@ export function MapProvider({children}){
 		prevActiveFeatureId.current = activeFeatureId;
 
 	},[activeFeatureId])
+
+	//filter features that have a minzoom property
+	/*
+	useEffect(()=>{
+    if (mapboxMap===undefined) return;
+
+		const computeZoomFilter = () => {
+			const currentZoom = Math.floor(mapboxMap.getZoom());
+			//const zoomFilter = ["==", ["number",["get", "minzoom"]], 10];
+			const zoomFilter = ["has",["get", "minzoom"]];
+			setZoomFilter(zoomFilter);
+		}
+
+		computeZoomFilter();
+
+		//update zoom filter
+    mapboxMap.on('moveend', (e) => {
+			computeZoomFilter();
+    });
+
+
+  },[mapboxMap])
+
+
+	useEffect(()=>{
+    if (zoomFilter===undefined) return;
+
+		console.log("ZOOM FILTER",zoomFilter);
+
+  },[zoomFilter])
+
+	*/
 
 
 	// NOTE: you *might* need to memoize this value

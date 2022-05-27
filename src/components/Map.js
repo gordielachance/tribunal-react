@@ -175,70 +175,6 @@ const Map = (props) => {
     if (map){
       map.on('load', () => {
 
-        if (mapData.sources.annotations){
-          //TOUFIX TEMPORARY
-
-            const toBboxes = () => {
-
-              mapData.sources.annotationsPolygons.data.features.forEach(feature => {
-                const bbox = turf.bbox(feature);
-                //const pixelsBbox = bbox.map()
-
-                //feature.geometry = poly.geometry;
-
-                //convert bbox to pixels
-                /*
-                const bboxCoordz = poly.geometry.coordinates[0];
-                bboxCoordz.pop();//remove last item (loop)
-                const bboxPixels = bboxCoordz.map(point=>map.project(point));
-                */
-
-                const getBboxDimensions = bbox => {
-                  //convert bbox to pxiels
-                  const diag = [
-                    [bbox[0],bbox[1]],//lng+lat
-                    [bbox[2],bbox[3]]//lng+lat
-                  ]
-
-                  const bboxPixels = diag.map(point=>map.project(point));
-                  const width = bboxPixels[1].x - bboxPixels[0].x;
-                  const height = bboxPixels[0].y - bboxPixels[1].y;
-                  return {w:width,h:height};
-                }
-
-                if (feature.properties.media_id === 555) {
-                  const dimensions = getBboxDimensions(bbox);
-                  const longestSide = Math.max(dimensions.w,dimensions.h);
-                  console.log("BBOX FEATURE",bbox,dimensions,longestSide);
-                }
-
-
-
-
-              })
-
-            }
-
-            const addPolygonBboxes = () => {
-              const source = JSON.parse(JSON.stringify(mapData.sources.annotations));
-              console.log("SETUP POLYGONS BBOXES",source);
-              source.data.features = source.data.features.map(feature => {
-                const center = turf.center(feature.geometry);
-                return {
-                  ...center,
-                  properties:{
-                    id:feature.properties.id + '-bbox'
-                  }
-                }
-              })
-              mapData.sources.annotationsBbox = source;
-              console.log("POLYGON BBOXES",mapData.sources.annotationsBbox);
-            }
-            toBboxes();
-            //addPolygonBboxes();
-
-        }
-
         //init mapbox sources
         for (var key in mapData.sources) {
           const sourceData = mapData.sources[key];
@@ -257,6 +193,63 @@ const Map = (props) => {
           map.addLayer(layerData);
         }
 
+        /*
+        set polygon minzoom properties
+        */
+
+        //get size of the polygon at the current zoom
+        const getPolygonSize = polygon => {
+          const bbox = turf.bbox(polygon);
+          const bboxPolygon = turf.bboxPolygon(bbox);
+
+          const p1 = [bbox[0],bbox[3]];
+          const p2 = [bbox[2],bbox[1]];
+
+          const p1Pixels = mapboxMap.project(p1);
+          const p2Pixels = mapboxMap.project(p2);
+
+          const pixelWidth = (p2Pixels.x - p1Pixels.x);
+          const pixelHeight = (p2Pixels.y - p1Pixels.y);
+
+          const zoomLevel = mapboxMap.getZoom();
+
+          return {
+            x:pixelWidth,
+            y:pixelHeight,
+            zoomLevel:zoomLevel
+          }
+
+        }
+
+        const getPolygonSizeForZoomlevel = (polygon,zoomLevel) => {
+
+          const polygonSize = getPolygonSize(polygon);
+
+          const currentZoom = polygonSize.zoomLevel;
+          const zoomCorrection = Math.pow(2, currentZoom) / Math.pow(2, zoomLevel);
+          return {x:polygonSize.x/zoomCorrection,y:polygonSize.y/zoomCorrection,zoomLevel:zoomLevel};
+
+        }
+
+        //get the minimum zoom level for a polygon, based on a minimum size (in pixels) of the polygon's bounding box.
+        const getPolygonMinimumZoom = polygon => {
+          const polygonSize = getPolygonSize(polygon);
+          const minPixels = 15;
+          let targetZoom = undefined;
+          for (let zoomLevel = 0; zoomLevel < 23; zoomLevel++) {
+            const size = getPolygonSizeForZoomlevel(polygon,zoomLevel);
+            if ( (size.x > minPixels) || (size.y > minPixels) ){
+              targetZoom = zoomLevel;
+              break;
+            }
+
+          }
+          const size = getPolygonSizeForZoomlevel(polygon,targetZoom);
+          return targetZoom;
+
+        }
+
+
         //init mapbox annotation images
         const addRaster = (feature) => {
 
@@ -264,18 +257,14 @@ const Map = (props) => {
 
 
           const imageUrl = feature.properties.image_url;
-          const imageBounds = feature.properties.image_bounds;
-          //const bbox = Object.values(imageBounds);
-          const bbox = [imageBounds.west,imageBounds.north,imageBounds.east,imageBounds.south];
+          const imageBbox = feature.properties.image_bbox;
 
-          const imagePolygon = turf.bboxPolygon(bbox);
+          const imagePolygon = turf.bboxPolygon(imageBbox);
           let coordinates = imagePolygon.geometry.coordinates[0];
           coordinates.pop();//remove last item of the polygon (the closing vertex)
 
           const sourceId = "annotation-raster-source-"+postId;
           const layerId = "annotation-raster-layer-"+postId;
-
-          feature.properties.image_layer = layerId;//store reference to the layer ID in the polygon properties
 
           //add source for this image
           if (map.getSource(sourceId)) {
@@ -297,19 +286,31 @@ const Map = (props) => {
            throw `Layer "${layerId}" already exists.`
          }
 
-
-         map.addLayer({
+         const settings = {
            "id": layerId,
            "source": sourceId,
            "type": "raster",
+           "minzoom":feature.properties.minzoom,
            "paint": {"raster-opacity": 0.85}
-         })
+         };
+
+
+         map.addLayer(settings);
+
+         return layerId;
 
         }
 
         mapData.sources?.annotationsPolygons.data.features.forEach((feature,index) => {
+
+          //compute minimum zoom and store as a prop
+          const minzoom = getPolygonMinimumZoom(feature);
+          feature.properties.minzoom = minzoom;
+
+          //set raster and store its ID in the polygon's properties
           try{
-            addRaster(feature);
+            const layerId = addRaster(feature);
+            feature.properties.image_layer = layerId;
           }catch(e){
             console.log(e);
           }
