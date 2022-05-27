@@ -1,11 +1,12 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
-import React, { useState,useEffect,createContext,useRef } from 'react';
+import React, { useState,useEffect,useCallback,createContext,useRef } from 'react';
 import {
 	DEBUG,
 	isFeaturesSource,
 	sortFeaturesByDistance,
-	bboxToCircle
+	bboxToCircle,
+	getFeaturesTags
 } from "./Constants";
 import * as turf from "@turf/turf";
 
@@ -308,6 +309,44 @@ export function MapProvider({children}){
 
 	}
 
+	//returns features after they have been filtered by disabled tags / formats.
+	const getFilteredFeatures = useCallback((features) => {
+	  const filterFeaturesByDisabledTags = (features,disabledTags) => {
+
+	    if (disabledTags.length !== 0){
+
+	      const allTags = getFeaturesTags(features);
+	      const enabledTags = allTags.filter(x => !disabledTags.includes(x));
+
+	      features = features.filter(feature =>{
+	        const featureTags = feature.properties.tag_slugs;
+	        const hasDisabledTags = featureTags.filter(x => disabledTags.includes(x));
+	        return (hasDisabledTags.length === 0)
+	      })
+	    }
+
+	    return features;
+
+	  }
+	  const filterFeaturesByDisabledFormats = (features,disabledFormats) => {
+	    if (disabledFormats.length !== 0){
+	      features = features.filter(feature =>{
+	        const featureFormat = feature.properties.format;
+	        return !disabledFormats.includes(featureFormat);
+	      })
+	    }
+
+	    return features;
+
+	  }
+
+	  //filters
+	  features = filterFeaturesByDisabledTags(features,markerTagsDisabled);
+	  features = filterFeaturesByDisabledFormats(features,markerFormatsDisabled);
+	  return features;
+
+	}, [markerTagsDisabled,markerFormatsDisabled]);
+
 	//clean map data input
 	useEffect(()=>{
 		if (rawMapData === undefined) return;
@@ -353,6 +392,7 @@ export function MapProvider({children}){
     //add polygon handles automatically
 
     if (newMapData.sources['annotationsPolygons'] && newMapData.sources['annotationsHandles'] ){
+
 			const createAnnotationHandles = polygonFeatures => {
 				let collection = [];
 	      (polygonFeatures || []).forEach((polygonFeature,index) => {
@@ -514,6 +554,7 @@ export function MapProvider({children}){
 	    mapboxMap.setFilter("annotationsHandles",markersFilter);
 			mapboxMap.setFilter("annotationsFill",markersFilter);
 			mapboxMap.setFilter("annotationsStroke",markersFilter);
+
 	  },[markersFilter])
 
 	useEffect(()=>{
@@ -566,7 +607,8 @@ export function MapProvider({children}){
 		toggleHoverFormat:toggleHoverFormat,
 		zoomOnFeatures:zoomOnFeatures,
 		getFeatureSourceKey:getFeatureSourceKey,
-		getFeatureById:getFeatureById
+		getFeatureById:getFeatureById,
+		getFilteredFeatures:getFilteredFeatures
 	};
 
   return (

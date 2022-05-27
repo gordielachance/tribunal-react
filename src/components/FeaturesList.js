@@ -2,7 +2,7 @@ import React, { useEffect,useState,createRef }  from "react";
 import classNames from "classnames";
 
 import { CreationCard } from "./CreationCard";
-import {setFeatureDistance,getHumanDistance,getFeaturesTags} from "../Constants";
+import {setFeatureDistance,getHumanDistance,getFeaturesTags,filterFeatures} from "../Constants";
 import { useMap } from '../MapContext';
 
 const FeaturesList = props => {
@@ -12,8 +12,7 @@ const FeaturesList = props => {
     mapboxMap,
     setShowPopup,
     sortMarkerBy,
-    markerTagsDisabled,
-    markerFormatsDisabled,
+    getFilteredFeatures,
     setMapFeatureState,
     zoomOnFeatures,
     activeFeatureId,
@@ -26,45 +25,11 @@ const FeaturesList = props => {
   const [features,setFeatures] = useState();
   const [featuresRefs,setFeaturesRefs] = useState();
 
-  const filterFeaturesByDisabledTags = (features,disabledTags) => {
-
-    if (disabledTags.length !== 0){
-
-      const allTags = getFeaturesTags(features);
-      const enabledTags = allTags.filter(x => !disabledTags.includes(x));
-
-      features = features.filter(feature =>{
-        const featureTags = feature.properties.tag_slugs;
-        const hasTags = featureTags.filter(x => enabledTags.includes(x));
-        return (hasTags.length > 0)
-      })
-    }
-
-    return features;
-
-  }
-
-  const filterFeaturesByDisabledFormats = (features,disabledFormats) => {
-    if (disabledFormats.length !== 0){
-      console.log("FILTER FEATURES BY DISABLED FORMATS",disabledFormats);
-      features = features.filter(feature =>{
-        const featureFormat = feature.properties.format;
-        return !disabledFormats.includes(featureFormat);
-      })
-    }
-
-    return features;
-
-  }
-
   const prepareFeatures = features => {
 
     //clone array; we don't want to alter the original data
     let newFeatures = JSON.parse(JSON.stringify(features || []));
-
-    //filters
-    newFeatures = filterFeaturesByDisabledTags(newFeatures,markerTagsDisabled);
-    newFeatures = filterFeaturesByDisabledFormats(newFeatures,markerFormatsDisabled);
+    newFeatures = getFilteredFeatures(newFeatures);
 
     //compute distance
     if (mapCenter){
