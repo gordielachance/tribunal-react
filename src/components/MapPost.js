@@ -23,13 +23,6 @@ const MapPost = (props) => {
   useEffect(()=>{
     if (featurePostId === undefined) return;
     console.log("POPULATE CREATION FROM URL",featurePostId);
-    /*
-    setActiveFeatureId({
-      source:'creations',
-      id:featurePostId,
-      context:'map'
-    });
-    */
 
   },[featurePostId])
 

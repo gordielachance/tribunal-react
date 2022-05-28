@@ -98,7 +98,7 @@ export const CreationCard = props => {
     >
       <div className="feature-header">
         <p className="feature-title">
-          <span class="feature-icon">
+          <span className="feature-icon">
             <Icon name="circle"/>
           </span>
           {title}
