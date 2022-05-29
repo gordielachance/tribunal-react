@@ -1,4 +1,4 @@
-import React, { useEffect,useState,createRef }  from "react";
+import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 
 import { CreationCard } from "./CreationCard";
@@ -19,7 +19,7 @@ const FeaturesList = props => {
 
   const [mapCenter,setMapCenter] = useState();
   const [features,setFeatures] = useState();
-  const [featuresRefs,setFeaturesRefs] = useState();
+  const scrollRefs = useRef([]);
 
   const prepareFeatures = features => {
 
@@ -53,12 +53,20 @@ const FeaturesList = props => {
   useEffect(()=>{
     if (props.features === undefined) return;
     const data = prepareFeatures(props.features);
-    const refs = data.map(feature => createRef()); //for LI scrolls
-
     setFeatures(data);
-    setFeaturesRefs(refs);
-
   },[props.features,mapCenter,sortMarkerBy])
+
+
+  useEffect(()=>{
+    if (features === undefined) return;
+    // Populate scrollable refs
+    scrollRefs.current = [...Array(features.length).keys()].map(
+      (_, i) => scrollRefs.current[i] ?? createRef()
+    );
+
+    console.log("!!!SCROLL REFS",scrollRefs);
+
+  },[features])
 
   useEffect(()=>{
 
@@ -92,7 +100,7 @@ const FeaturesList = props => {
       const index = getListIndex(feature_id);
       if (index === undefined) return;
 
-      const ref = featuresRefs[index];
+      const ref = scrollRefs.current[index];
       console.log("!!!SCROLL TO FEATURE",{id:feature_id,index:index},ref);
       ref.current.scrollIntoView({ behavior: 'smooth'});
     }
@@ -141,17 +149,20 @@ const FeaturesList = props => {
           features.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
-            const active = (activeFeatureId === feature.properties.id);
+
+            let active = (activeFeatureId === feature.properties.id);
+
+            console.log("YO VS",active,feature,activeFeatureId,feature.properties.id);
 
             return (
               <li
-              ref={featuresRefs[k]}
+              ref={scrollRefs.current[k]}
               key={"feature-card-"+k}
               onMouseEnter={e=>toggleHoverFeature(feature,true)}
               onMouseLeave={e=>toggleHoverFeature(feature,false)}
               onClick={e=>{handleClick(feature)}}
               className={classNames({
-                //active:   active
+                active:   active
               })}
               >
                 <p className='sorted-value'>{sortValue}</p>

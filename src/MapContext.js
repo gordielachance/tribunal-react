@@ -352,7 +352,7 @@ export function MapProvider({children}){
 
     //add polygon handles automatically
 
-    if (newMapData.sources['annotationsPolygons'] && newMapData.sources['annotationsHandles'] ){
+    if (newMapData.sources['annotationsPolygons'] ){
 
 			const createAnnotationHandles = polygonFeatures => {
 				let collection = [];
@@ -370,6 +370,8 @@ export function MapProvider({children}){
 					if (polygonFeature.properties?.minzoom){
 						handleFeature.properties.minzoom = polygonFeature.properties.minzoom;
 					}
+
+					console.log("HANDLE FEAT",handleFeature);
 
 					collection.push(handleFeature);
 	      })
