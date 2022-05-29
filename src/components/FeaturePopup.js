@@ -50,85 +50,78 @@ const FeaturePopup = props => {
     getFeatureSourceKey,
     getFeatureById,
     getHandlesByAnnotationPolygonId,
-    activeFeatureId
   } = useMap();
 
   const [latLng,setLatLng] = useState();
-  const [featureId,setFeatureId] = useState();
+  const [dataFeatureId,setDataFeatureId] = useState();
 
   let popupSettings = {
     closeOnClick:false,
     anchor:'bottom'
   }
 
-  //populate some data required for the popup.
-	useEffect(()=>{
-		if (!activeFeatureId) return;
+  if (!props.featureId) return;
 
-		//get the data needed to display the popup
-		const getPopupData = feature => {
+  //get the data needed to display the popup
+  const getPopupData = feature => {
 
-	    const sourceKey = getFeatureSourceKey(feature);
-	    let location;
-	    let feature_id;
+    const sourceKey = getFeatureSourceKey(feature);
+    let location;
+    let feature_id;
 
-	    switch(sourceKey){
-	      case 'creations':
-	        location = feature.geometry.coordinates;
-	        feature_id = feature.properties.id;
-	      break;
-	      case 'annotationsPolygons':
+    switch(sourceKey){
+      case 'creations':
+        location = feature.geometry.coordinates;
+        feature_id = feature.properties.id;
+      break;
+      case 'annotationsPolygons':
 
-	        //get first handle
-	        const handles = getHandlesByAnnotationPolygonId(feature.properties.id);
-	        const handleFeature = handles[0];
+        //get first handle
+        const handles = getHandlesByAnnotationPolygonId(feature.properties.id);
+        const handleFeature = handles[0];
 
-	        if (handleFeature){
-	          //get popup content
-	          location = handleFeature.geometry.coordinates;
-	          feature_id = feature.properties.id;
-	        }
+        if (handleFeature){
+          //get popup content
+          location = handleFeature.geometry.coordinates;
+          feature_id = feature.properties.id;
+        }
 
-	      break;
-	      case 'annotationsHandles':
+      break;
+      case 'annotationsHandles':
 
-	        location = feature.geometry.coordinates;
+        location = feature.geometry.coordinates;
 
-	        //get polygon
-	        const polygonFeature = getAnnotationPolygonByHandle(feature);
+        //get polygon
+        const polygonFeature = getAnnotationPolygonByHandle(feature);
 
-	        if (polygonFeature){
-	          feature_id = polygonFeature.properties.id;
-	        }
+        if (polygonFeature){
+          feature_id = polygonFeature.properties.id;
+        }
 
-	      break;
-	    }
+      break;
+    }
 
-	    return {
-	      latlng:location,
-	      feature_id:feature_id
-	    }
-	  }
+    return {
+      latlng:location,
+      feature_id:feature_id
+    }
+  }
 
-		const feature = getFeatureById(activeFeatureId);
-		const data = getPopupData(feature);
-
-    setLatLng(data.latlng);
-    setFeatureId(data.feature_id);
-
-	},[activeFeatureId])
+  const feature = getFeatureById(props.featureId);
+  const data = getPopupData(feature);
 
   return (
     <>
-    {
-      (latLng && (featureId !== undefined) ) &&
-      <MapPopup
-      lngLat={latLng}
-      settings={popupSettings}
-      >
-        <FeaturePopupContent featureId={featureId}/>
-      </MapPopup>
-    }
+      {
+        data &&
+        <MapPopup
+        lngLat={data.latlng}
+        settings={popupSettings}
+        >
+          <FeaturePopupContent featureId={data.feature_id}/>
+        </MapPopup>
+      }
+
     </>
   );
 };

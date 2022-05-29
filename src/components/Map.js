@@ -14,6 +14,7 @@ import { useMap } from '../MapContext';
 const Map = (props) => {
 
   const {
+    activeFeatureId,
     setActiveFeatureId,
     mapContainerRef,
     mapData,
@@ -363,7 +364,8 @@ const Map = (props) => {
   return (
     <div id="map-container">
       {
-        <FeaturePopup/>
+        activeFeatureId &&
+        <FeaturePopup featureId={activeFeatureId}/>
       }
       <div
       id="map"
