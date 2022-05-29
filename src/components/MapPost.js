@@ -46,7 +46,6 @@ const MapPost = (props) => {
       </Dimmer>
       <MapSidebar
       title={props.title}
-      active={true}
       />
       <CreationModal/>
       <Map/>

@@ -12,7 +12,7 @@ import { useMap } from '../MapContext';
 
 const MapSidebar = (props) => {
 
-  const [isActive, setisActive] = useState(props.active);
+  const [isActive, setisActive] = useState(false);
   const [mapTransition,setMapTransition] = useState();
   const [section,setSection] = useState('features');
   const [sidebarFeatures,setSidebarFeatures] = useState();
@@ -28,16 +28,35 @@ const MapSidebar = (props) => {
   const annotationsCount = (mapData?.sources.annotationsPolygons?.data.features || []).length;
   const creationsCount = (mapData?.sources.creations?.data.features || []).length;
 
-  const toggleSidebar = () => {
-    setisActive(!isActive);
-    setTimeout(() => {
-      //console.log("sidebar toggled");
-      //mapboxMap.resize(); // fit to container
-    }, 500);
+  const toggleSidebar = (bool) => {
+
+    if (bool === undefined){
+      bool = !isActive;
+    }
+
+    setisActive(bool);
+
+    console.log("TOGGLE",bool);
+
+    //https://docs.mapbox.com/mapbox-gl-js/example/offset-vanishing-point-with-padding/
+    const collapsed = !bool;
+    // 'id' is 'right' or 'left'. When run at start, this object looks like: '{left: 300}';
+    // Use `map.easeTo()` with a padding option to adjust the map's center accounting for the position of sidebars.
+    mapboxMap.easeTo({
+      padding: {
+        left:collapsed ? 0 : 300
+      },
+      duration: 1000 // In ms. This matches the CSS transition duration property.
+    });
+
   }
 
   useEffect(()=>{
     if (mapboxMap===undefined) return;
+
+    mapboxMap.on('load', (e) => {
+      toggleSidebar(true);
+    });
 
     //When the map is animated
     mapboxMap.on('movestart', (e) => {
@@ -149,7 +168,7 @@ const MapSidebar = (props) => {
         </div>
       </div>
       </div>
-      <div className="sidebar-toggle clickable" onClick={toggleSidebar} >
+      <div className="sidebar-toggle clickable" onClick={e=>{toggleSidebar()}} >
         <span>
         {
           isActive ? <Icon name='chevron left' /> : <Icon name='chevron right' />
