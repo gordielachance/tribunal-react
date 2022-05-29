@@ -174,7 +174,6 @@ export function MapProvider({children}){
 
   }
 
-
 	const filterFeaturesByFormat = (features,slug) => {
 		return (features || []).filter(feature=>{
 			const format = feature.properties?.format;
@@ -308,44 +307,6 @@ export function MapProvider({children}){
 		);
 
 	}
-
-	//returns features after they have been filtered by disabled tags / formats.
-	const getFilteredFeatures = useCallback((features) => {
-	  const filterFeaturesByDisabledTags = (features,disabledTags) => {
-
-	    if (disabledTags.length !== 0){
-
-	      const allTags = getFeaturesTags(features);
-	      const enabledTags = allTags.filter(x => !disabledTags.includes(x));
-
-	      features = features.filter(feature =>{
-	        const featureTags = feature.properties.tag_slugs;
-	        const hasDisabledTags = featureTags.filter(x => disabledTags.includes(x));
-	        return (hasDisabledTags.length === 0)
-	      })
-	    }
-
-	    return features;
-
-	  }
-	  const filterFeaturesByDisabledFormats = (features,disabledFormats) => {
-	    if (disabledFormats.length !== 0){
-	      features = features.filter(feature =>{
-	        const featureFormat = feature.properties.format;
-	        return !disabledFormats.includes(featureFormat);
-	      })
-	    }
-
-	    return features;
-
-	  }
-
-	  //filters
-	  features = filterFeaturesByDisabledTags(features,markerTagsDisabled);
-	  features = filterFeaturesByDisabledFormats(features,markerFormatsDisabled);
-	  return features;
-
-	}, [markerTagsDisabled,markerFormatsDisabled]);
 
 	//clean map data input
 	useEffect(()=>{
@@ -571,30 +532,7 @@ export function MapProvider({children}){
 
 	  },[markersFilter])
 
-		//toggle annotation rasters (layers) based on filtered polygons.
-	  useEffect(()=>{
-	    if (mapboxMap === undefined) return;
 
-			const allPolygons = mapData.sources['annotationsPolygons'].data.features || [];
-			const visiblePolygons = getFilteredFeatures(allPolygons);
-
-			allPolygons.forEach(feature => {
-
-				const layerId = feature.properties.image_layer;
-
-				if (!layerId || !mapboxMap.getLayer(layerId)) {
-				    return;//continue
-				}
-
-				const isVisible = visiblePolygons.includes(feature);
-				const visibilityValue = isVisible ? 'visible' : 'none';
-
-				mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
-
-		  });
-
-
-	  },[markersFilter])
 
 	useEffect(()=>{
 
@@ -677,7 +615,7 @@ export function MapProvider({children}){
 		zoomOnFeatures:zoomOnFeatures,
 		getFeatureSourceKey:getFeatureSourceKey,
 		getFeatureById:getFeatureById,
-		getFilteredFeatures:getFilteredFeatures
+		markersFilter:markersFilter
 	};
 
   return (

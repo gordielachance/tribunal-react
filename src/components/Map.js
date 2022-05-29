@@ -3,7 +3,7 @@ import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-load
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
-import {MAPBOX_TOKEN,DEBUG} from "./../Constants";
+import {MAPBOX_TOKEN,DEBUG,getUniqueMapFeatures} from "./../Constants";
 
 import FeaturePopup from "./FeaturePopup";
 
@@ -20,7 +20,8 @@ const Map = (props) => {
     mapData,
     mapboxMap,
     setMapboxMap,
-    setMapFeatureState
+    setMapFeatureState,
+    markersFilter
   } = useMap();
 
   const initializeMap = data => {
@@ -360,6 +361,36 @@ const Map = (props) => {
     }
 
   },[mapboxMap]);
+
+  //toggle annotation rasters (layers) based on filtered polygons.
+  useEffect(()=>{
+    if (mapboxMap === undefined) return;
+
+    const allPolygons = mapData.sources['annotationsPolygons'].data.features || [];
+
+    let visiblePolygons = mapboxMap.queryRenderedFeatures({
+      layers: ['annotationsFill'],
+      filter: markersFilter
+    }) || [];
+    visiblePolygons = getUniqueMapFeatures(visiblePolygons);
+
+    allPolygons.forEach(feature => {
+
+      const layerId = feature.properties.image_layer;
+
+      if (!layerId || !mapboxMap.getLayer(layerId)) {
+          return;//continue
+      }
+
+      const isVisible = visiblePolygons.includes(feature);
+      const visibilityValue = isVisible ? 'visible' : 'none';
+
+      mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
+
+    });
+
+
+  },[markersFilter])
 
   return (
     <div id="map-container">
