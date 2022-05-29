@@ -11,14 +11,11 @@ const FeaturesList = props => {
     mapData,
     mapboxMap,
     sortMarkerBy,
-    getFilteredFeatures,
     setMapFeatureState,
     zoomOnFeatures,
     activeFeatureId,
-    setActiveFeatureId
+    setActiveFeatureId,
   } = useMap();
-
-  const source = mapData?.sources[props.sourceId];
 
   const [mapCenter,setMapCenter] = useState();
   const [features,setFeatures] = useState();
@@ -28,7 +25,6 @@ const FeaturesList = props => {
 
     //clone array; we don't want to alter the original data
     let newFeatures = JSON.parse(JSON.stringify(features || []));
-    newFeatures = getFilteredFeatures(newFeatures);
 
     //compute distance
     if (mapCenter){
@@ -55,21 +51,14 @@ const FeaturesList = props => {
   }
 
   useEffect(()=>{
-    if (source?.data.features === undefined) return;
-    const data = prepareFeatures(source?.data.features);
-    setFeatures(data);
-
+    if (props.features === undefined) return;
+    const data = prepareFeatures(props.features);
     const refs = data.map(feature => createRef()); //for LI scrolls
+
+    setFeatures(data);
     setFeaturesRefs(refs);
-  },[source?.data.features,mapCenter,sortMarkerBy])
 
-  useEffect(()=>{
-    if (features === undefined) return;
-    const refs = features.map(feature => createRef()); //for LI scrolls
-    setFeaturesRefs(refs);
-  },[features])
-
-
+  },[props.features,mapCenter,sortMarkerBy])
 
   useEffect(()=>{
 
@@ -130,22 +119,11 @@ const FeaturesList = props => {
 
   const handleClick = feature => {
 
-    //we've altered the features (by setting a distance, etc.) - so retrieve the original feature
-    const sourceCollection = source?.data.features || [];
-    const sourceFeature = sourceCollection.find(sourceFeature => sourceFeature.properties.id === feature.properties.id);
-
     //center/zoom on feature
-    zoomOnFeatures(sourceFeature);
+    //zoomOnFeatures(feature);
 
-    //unset current feature
-    setActiveFeatureId();
-
-    //wait until the map movements stops,
-    //so mapbox can handle the feature (it only consider features within the viewport)
-    mapboxMap.once('idle', () => {
-      //set active feature
-      setActiveFeatureId(feature.properties.id);
-    });
+    //set active feature
+    setActiveFeatureId(feature.id);
 
   }
 
@@ -173,7 +151,7 @@ const FeaturesList = props => {
               onMouseLeave={e=>toggleHoverFeature(feature,false)}
               onClick={e=>{handleClick(feature)}}
               className={classNames({
-                active:   active
+                //active:   active
               })}
               >
                 <p className='sorted-value'>{sortValue}</p>

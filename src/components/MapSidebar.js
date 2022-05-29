@@ -1,6 +1,8 @@
 import React, { useEffect,useState }  from "react";
 import classNames from "classnames";
 
+import {getUniqueMapFeatures} from "../Constants";
+
 import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
 
@@ -12,7 +14,9 @@ const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState(props.active);
   const [mapTransition,setMapTransition] = useState();
-  const [section,setSection] = useState('creations');
+  const [section,setSection] = useState('features');
+  const [sidebarFeatures,setSidebarFeatures] = useState();
+
   const {
     mapData,
     mapboxMap,
@@ -20,6 +24,7 @@ const MapSidebar = (props) => {
     getFeatureById,
     getFeatureSourceKey,
   } = useMap();
+
   const annotationsCount = (mapData?.sources.annotationsPolygons?.data.features || []).length;
   const creationsCount = (mapData?.sources.creations?.data.features || []).length;
 
@@ -43,27 +48,40 @@ const MapSidebar = (props) => {
       setMapTransition(false);
     });
 
+    const populateSidebarFeatures = e => {
+      //get visible features on map for use in the sidebar
+
+      const getFeatures = () => {
+
+        const getVisibleCreationFeatures = () => {
+          let features = mapboxMap.queryRenderedFeatures({ layers: ['creations'] }) || [];
+          return getUniqueMapFeatures(features);
+        }
+
+        const getVisibleAnnotationFeatures = () => {
+          let features = mapboxMap.queryRenderedFeatures({ layers: ['annotationsFill'] }) || [];
+          return getUniqueMapFeatures(features);
+        }
+
+    		const creationFeatures = getVisibleCreationFeatures();
+    		const annotationFeatures = getVisibleAnnotationFeatures();
+
+    		return creationFeatures.concat(annotationFeatures);
+    	}
+
+      const features = getFeatures();
+      setSidebarFeatures(features);
+    }
+
+    mapboxMap.once('idle',populateSidebarFeatures);//on init
+    mapboxMap.on('moveend',populateSidebarFeatures);
+
 
   },[mapboxMap])
 
-  //switch section when a feature is clicked
   useEffect(()=>{
-    if (activeFeatureId === undefined) return;
-
-    const feature = getFeatureById(activeFeatureId);
-    const sourceKey = getFeatureSourceKey(feature);
-
-    switch(sourceKey){
-      case 'creations':
-        setSection('creations');
-      break;
-      case 'annotationsHandles':
-      case 'annotationsPolygons':
-        setSection('annotationsPolygons');
-      break;
-    }
-
-  },[activeFeatureId])
+    console.log("SIDEBAR FEATURES",(sidebarFeatures || []).length);
+  },[sidebarFeatures]);
 
   return (
     <div
@@ -83,30 +101,16 @@ const MapSidebar = (props) => {
             <h3>{props.title}</h3>
 
             <Menu id="map-menu" pointing secondary>
-              {
-                (creationsCount > 0) &&
+
                 <Menu.Item
-                  id="map-menu-creations"
-                  name='Créations'
-                  active={section === 'creations'}
-                  onClick={e=>setSection('creations')}
-                >
-                  <Icon name="circle"/>
-                  Créations
-                </Menu.Item>
-              }
-              {
-                (annotationsCount > 0) &&
-                <Menu.Item
-                  id="map-menu-annotations"
-                  name='Annotations'
-                  active={section === 'annotationsPolygons'}
-                  onClick={e=>setSection('annotationsPolygons')}
+                  id="map-menu-features"
+                  name='Features'
+                  active={section === 'features'}
+                  onClick={e=>setSection('features')}
                 >
                 <Icon name="circle"/>
-                Annotations
+                Liste
               </Menu.Item>
-              }
 
               <Menu.Item
                 id="map-menu-settings"
@@ -115,6 +119,7 @@ const MapSidebar = (props) => {
                 onClick={e=>setSection('settings')}
               >
                 <Icon name="setting"/>
+                Filtres
               </Menu.Item>
 
             </Menu>
@@ -134,17 +139,9 @@ const MapSidebar = (props) => {
               />
             }
             {
-              (section === 'creations') &&
+              (section === 'features') &&
               <FeaturesList
-              sourceId='creations'
-              disabledTags={props.markerTagsDisabled}
-              sortBy={props.sortMarkerBy}
-              />
-            }
-            {
-              (section === 'annotationsPolygons') &&
-              <FeaturesList
-              sourceId='annotationsPolygons'
+              features={sidebarFeatures}
               disabledTags={props.markerTagsDisabled}
               sortBy={props.sortMarkerBy}
               />

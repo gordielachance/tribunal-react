@@ -33,8 +33,10 @@ const MapPost = (props) => {
   },[props.mapData]);
 
   useEffect(()=>{
-    if (mapboxMap === undefined) return;
-    setLoading(false);
+    mapboxMap?.once('idle', (e) => {
+      setLoading(false);
+    });
+
   },[mapboxMap]);
 
   return (
