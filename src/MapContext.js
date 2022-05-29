@@ -314,11 +314,15 @@ export function MapProvider({children}){
 
 		let newMapData = {...rawMapData};
 
-		const sources = newMapData.sources || {};
-		const featureSourceKeys = Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
+
+
+		const getFeatureSourceKeys = () => {
+			const sources = newMapData.sources || {};
+			return Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
+		}
 
     //clean sources
-		featureSourceKeys.forEach(sourceKey => {
+		getFeatureSourceKeys().forEach(sourceKey => {
 
 			//remove features that do not have geometry
 			const filterFeaturesWithGeometry = features => {
@@ -349,45 +353,55 @@ export function MapProvider({children}){
 
 		})
 
+    if (newMapData.sources.annotationsPolygons ){
+			//add polygon handles automatically
+			const buildAnnotationHandlesSource = polygonFeatures => {
 
-    //add polygon handles automatically
+				const buildAnnotationHandlesFeatures = polygonFeatures => {
+					let collection = [];
+		      (polygonFeatures || []).forEach((polygonFeature,index) => {
+		        const handleFeature = turf.pointOnFeature(polygonFeature);
+						handleFeature.properties.id = index + 1;
+		        handleFeature.properties.target_id = polygonFeature.properties.id;
 
-    if (newMapData.sources['annotationsPolygons'] ){
+						//clone tags prop if any
+						if (polygonFeature.properties?.tag_slugs){
+							handleFeature.properties.tag_slugs = polygonFeature.properties.tag_slugs;
+						}
 
-			const createAnnotationHandles = polygonFeatures => {
-				let collection = [];
-	      (polygonFeatures || []).forEach((polygonFeature,index) => {
-	        const handleFeature = turf.pointOnFeature(polygonFeature);
-					handleFeature.properties.id = index + 1;
-	        handleFeature.properties.target_id = polygonFeature.properties.id;
+						//clone minzoom prop if any
+						if (polygonFeature.properties?.minzoom){
+							handleFeature.properties.minzoom = polygonFeature.properties.minzoom;
+						}
 
-					//clone tags prop if any
-					if (polygonFeature.properties?.tag_slugs){
-						handleFeature.properties.tag_slugs = polygonFeature.properties.tag_slugs;
-					}
+						console.log("HANDLE FEAT",handleFeature);
 
-					//clone minzoom prop if any
-					if (polygonFeature.properties?.minzoom){
-						handleFeature.properties.minzoom = polygonFeature.properties.minzoom;
-					}
+						collection.push(handleFeature);
+		      })
+					return collection;
+				}
 
-					console.log("HANDLE FEAT",handleFeature);
-
-					collection.push(handleFeature);
-	      })
-				return collection;
+				return {
+		      data:{
+		        type:'FeatureCollection',
+		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotationsPolygons.data.features)
+		      },
+		      promoteId:'id',
+		      type:'geojson'
+		    }
 			}
-			newMapData.sources['annotationsHandles'].data.features = createAnnotationHandles(newMapData.sources['annotationsPolygons'].data.features);
-
+			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotationsPolygons.data.features);
+			console.log("ZOUB",newMapData.sources);
 		}
 
+		/*
+		if (newMapDatasources.annotationsHandles ){
 
-		if (newMapData.sources['annotationsPolygons'] && newMapData.sources['annotationsHandles'] ){
-
-			const allPolygons = newMapData.sources['annotationsPolygons'].data.features || [];
-			const allHandles = newMapData.sources['annotationsHandles'].data.features || [];
+			const allPolygons = newMapData.sources.annotationsPolygons.data.features || [];
+			const allHandles = newMapDatasources.annotationsHandles.data.features || [];
 
 			//remove polygons that does not have handles
+
 			const filterPolygonsWithHandles = (polygons,handles) => {
 
 				const polygonIds = polygons.map(feature => feature.properties.id);
@@ -403,7 +417,7 @@ export function MapProvider({children}){
 				return polygons;
 			}
 
-			newMapData.sources['annotationsPolygons'].data.features = filterPolygonsWithHandles(allPolygons,allHandles);
+			newMapData.sources.annotationsPolygons.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
 
 			//remove handles that does not have polygons
 			const filterHandlesWithPolygons = (handles,polygons) => {
@@ -421,14 +435,16 @@ export function MapProvider({children}){
 				return handles;
 			}
 
-			newMapData.sources['annotationsHandles'].data.features = filterHandlesWithPolygons(allHandles,allPolygons);
+			newMapDatasources.annotationsHandles.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
 
 
 		}
+		*/
+
 
 		//set really unique IDs for each feature
 
-		featureSourceKeys.forEach(sourceKey => {
+		getFeatureSourceKeys().forEach(sourceKey => {
 
 			const setSourcePrefixes = features => {
 				features = (features || []);
@@ -440,7 +456,6 @@ export function MapProvider({children}){
 			}
 
 			newMapData.sources[sourceKey].data.features = setSourcePrefixes(newMapData.sources[sourceKey].data.features);
-
 
 		})
 

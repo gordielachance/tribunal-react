@@ -370,7 +370,7 @@ const Map = (props) => {
   useEffect(()=>{
     if (mapboxMap === undefined) return;
 
-    const allPolygons = mapData.sources['annotationsPolygons'].data.features || [];
+    const allPolygons = mapData.sources.annotationsPolygons.data.features || [];
 
     let visiblePolygons = mapboxMap.queryRenderedFeatures({
       layers: ['annotationsFill'],
