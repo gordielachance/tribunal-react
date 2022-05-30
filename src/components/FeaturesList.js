@@ -15,6 +15,9 @@ const FeaturesList = props => {
     zoomOnFeatures,
     activeFeatureId,
     setActiveFeatureId,
+    getFeatureById,
+    getFeatureSourceKey,
+    getAnnotationPolygonByHandle
   } = useMap();
 
   const [mapCenter,setMapCenter] = useState();
@@ -149,10 +152,7 @@ const FeaturesList = props => {
           features.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
-
             let active = (activeFeatureId === feature.properties.id);
-
-            console.log("YO VS",active,feature,activeFeatureId,feature.properties.id);
 
             return (
               <li

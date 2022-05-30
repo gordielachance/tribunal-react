@@ -21,7 +21,8 @@ const Map = (props) => {
     mapboxMap,
     setMapboxMap,
     setMapFeatureState,
-    markersFilter
+    markersFilter,
+    getHandlesByAnnotationPolygonId
   } = useMap();
 
   const initializeMap = data => {
@@ -104,17 +105,11 @@ const Map = (props) => {
         }
       });
 
-
       // When the user clicks a polygon handle
       map.on('click','annotationsHandles',e=>{
-
-
         if (e.features.length > 0) {
-
           const feature = e.features[0];
           setActiveFeatureId(feature.properties.id);
-
-
         }
       });
 
@@ -131,6 +126,18 @@ const Map = (props) => {
 
           //Set 'active' polygon
           setMapFeatureState(hoveredMapPolygon,'hover',true);
+        }
+      });
+
+      //!!!NOT MOBILE FRIENDLY
+      map.on('click','annotationsFill',e=>{
+        if (e.features.length > 0) {
+          const polygon = e.features[0];
+          const handles = getHandlesByAnnotationPolygonId(polygon.id);
+          const firstHandle = handles[0];
+          console.log("NNOT FILL CLICK",firstHandle);
+
+          setActiveFeatureId(firstHandle.properties.id);
         }
       });
 
@@ -370,29 +377,32 @@ const Map = (props) => {
   useEffect(()=>{
     if (mapboxMap === undefined) return;
 
-    const allPolygons = mapData.sources.annotationsPolygons.data.features || [];
+    mapboxMap.once('idle',(e)=>{
 
-    let visiblePolygons = mapboxMap.queryRenderedFeatures({
-      layers: ['annotationsFill'],
-      filter: markersFilter
-    }) || [];
-    visiblePolygons = getUniqueMapFeatures(visiblePolygons);
+      const allPolygons = mapData.sources.annotationsPolygons.data.features || [];
 
-    allPolygons.forEach(feature => {
+      const visiblePolygons = mapboxMap.queryRenderedFeatures({
+        layers: ['annotationsFill'],
+        filter: markersFilter
+      }) || [];
+      const visiblePolygonIds = getUniqueMapFeatures(visiblePolygons).map(feature=>feature.id);
 
-      const layerId = feature.properties.image_layer;
+      allPolygons.forEach(feature => {
 
-      if (!layerId || !mapboxMap.getLayer(layerId)) {
-          return;//continue
-      }
+        const layerId = feature.properties.image_layer;
 
-      const isVisible = visiblePolygons.includes(feature);
-      const visibilityValue = isVisible ? 'visible' : 'none';
+        if (!layerId) return;//continue
 
-      mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
+        const isVisible = visiblePolygonIds.includes(feature.properties.id);
+        const visibilityValue = isVisible ? 'visible' : 'none';
 
-    });
+        //console.log("LAYER VISIBLE ?",layerId,isVisible);
 
+        mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
+
+      });
+
+    })
 
   },[markersFilter])
 

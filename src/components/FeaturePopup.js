@@ -62,63 +62,17 @@ const FeaturePopup = props => {
 
   if (!props.featureId) return;
 
-  //get the data needed to display the popup
-  const getPopupData = feature => {
-
-    const sourceKey = getFeatureSourceKey(feature);
-    let location;
-    let feature_id;
-
-    switch(sourceKey){
-      case 'creations':
-        location = feature.geometry.coordinates;
-        feature_id = feature.properties.id;
-      break;
-      case 'annotationsPolygons':
-
-        //get first handle
-        const handles = getHandlesByAnnotationPolygonId(feature.properties.id);
-        const handleFeature = handles[0];
-
-        if (handleFeature){
-          //get popup content
-          location = handleFeature.geometry.coordinates;
-          feature_id = feature.properties.id;
-        }
-
-      break;
-      case 'annotationsHandles':
-
-        location = feature.geometry.coordinates;
-
-        //get polygon
-        const polygonFeature = getAnnotationPolygonByHandle(feature);
-
-        if (polygonFeature){
-          feature_id = polygonFeature.properties.id;
-        }
-
-      break;
-    }
-
-    return {
-      latlng:location,
-      feature_id:feature_id
-    }
-  }
-
   const feature = getFeatureById(props.featureId);
-  const data = getPopupData(feature);
 
   return (
     <>
       {
-        data &&
+        feature &&
         <MapPopup
-        lngLat={data.latlng}
+        lngLat={feature.geometry.coordinates}
         settings={popupSettings}
         >
-          <FeaturePopupContent featureId={data.feature_id}/>
+          <FeaturePopupContent featureId={feature.properties.id}/>
         </MapPopup>
       }
 

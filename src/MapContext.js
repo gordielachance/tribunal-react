@@ -361,20 +361,11 @@ export function MapProvider({children}){
 					let collection = [];
 		      (polygonFeatures || []).forEach((polygonFeature,index) => {
 		        const handleFeature = turf.pointOnFeature(polygonFeature);
-						handleFeature.properties.id = index + 1;
-		        handleFeature.properties.target_id = polygonFeature.properties.id;
 
-						//clone tags prop if any
-						if (polygonFeature.properties?.tag_slugs){
-							handleFeature.properties.tag_slugs = polygonFeature.properties.tag_slugs;
+						handleFeature.properties = {
+							id:index+1,
+							target_id:polygonFeature.properties.id
 						}
-
-						//clone minzoom prop if any
-						if (polygonFeature.properties?.minzoom){
-							handleFeature.properties.minzoom = polygonFeature.properties.minzoom;
-						}
-
-						console.log("HANDLE FEAT",handleFeature);
 
 						collection.push(handleFeature);
 		      })
@@ -441,7 +432,6 @@ export function MapProvider({children}){
 		}
 		*/
 
-
 		//set really unique IDs for each feature
 
 		getFeatureSourceKeys().forEach(sourceKey => {
@@ -459,7 +449,23 @@ export function MapProvider({children}){
 
 		})
 
+		if (newMapData.sources.annotationsHandles ){
 
+			const copyPolygonProperties = handles => {
+				return handles.map(handle => {
+					const targetId = handle.properties.target_id;
+					const polygonId = 'annotationsPolygons-' + targetId;
+					const polygon = newMapData.sources.annotationsPolygons.data.features.find(feature => (feature.properties.id === polygonId));
+					handle.properties = {
+						...polygon.properties,
+						...handle.properties
+					}
+					return handle;
+				})
+			}
+
+			newMapData.sources.annotationsHandles.data.features = copyPolygonProperties(newMapData.sources.annotationsHandles.data.features);
+		}
 
 		console.log("NEWMAPDATA",newMapData);
 

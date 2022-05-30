@@ -23,6 +23,7 @@ const MapSidebar = (props) => {
     activeFeatureId,
     getFeatureById,
     getFeatureSourceKey,
+    markersFilter,
   } = useMap();
 
   const annotationsCount = (mapData?.sources.annotationsPolygons?.data.features || []).length;
@@ -51,6 +52,37 @@ const MapSidebar = (props) => {
 
   }
 
+  const populateSidebarFeatures = e => {
+    //get visible features on map for use in the sidebar
+
+    const getFeatures = () => {
+
+      const getVisibleCreationFeatures = () => {
+        let features = mapboxMap.queryRenderedFeatures({
+          layers: ['creations'],
+          filter: markersFilter
+        }) || [];
+        return getUniqueMapFeatures(features);
+      }
+
+      const getVisibleAnnotationFeatures = () => {
+        let features = mapboxMap.queryRenderedFeatures({
+          layers: ['annotationsHandles'],
+          filter: markersFilter
+        }) || [];
+        return getUniqueMapFeatures(features);
+      }
+
+      const creationFeatures = getVisibleCreationFeatures();
+      const annotationFeatures = getVisibleAnnotationFeatures();
+
+      return creationFeatures.concat(annotationFeatures);
+    }
+
+    const features = getFeatures();
+    setSidebarFeatures(features);
+  }
+
   useEffect(()=>{
     if (mapboxMap===undefined) return;
 
@@ -67,36 +99,16 @@ const MapSidebar = (props) => {
       setMapTransition(false);
     });
 
-    const populateSidebarFeatures = e => {
-      //get visible features on map for use in the sidebar
-
-      const getFeatures = () => {
-
-        const getVisibleCreationFeatures = () => {
-          let features = mapboxMap.queryRenderedFeatures({ layers: ['creations'] }) || [];
-          return getUniqueMapFeatures(features);
-        }
-
-        const getVisibleAnnotationFeatures = () => {
-          let features = mapboxMap.queryRenderedFeatures({ layers: ['annotationsFill'] }) || [];
-          return getUniqueMapFeatures(features);
-        }
-
-    		const creationFeatures = getVisibleCreationFeatures();
-    		const annotationFeatures = getVisibleAnnotationFeatures();
-
-    		return creationFeatures.concat(annotationFeatures);
-    	}
-
-      const features = getFeatures();
-      setSidebarFeatures(features);
-    }
-
     mapboxMap.once('idle',populateSidebarFeatures);//on init
     mapboxMap.on('moveend',populateSidebarFeatures);
 
-
   },[mapboxMap])
+
+  //when filters are updated
+  useEffect(()=>{
+    if (mapboxMap === undefined) return;
+    populateSidebarFeatures();
+  },[markersFilter])
 
   useEffect(()=>{
     console.log("SIDEBAR FEATURES",(sidebarFeatures || []).length);
