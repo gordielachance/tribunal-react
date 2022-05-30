@@ -22,7 +22,8 @@ const Map = (props) => {
     setMapboxMap,
     setMapFeatureState,
     markersFilter,
-    getHandlesByAnnotationPolygonId
+    getHandlesByAnnotationPolygonId,
+    getFeatureById
   } = useMap();
 
   const initializeMap = data => {
@@ -405,6 +406,15 @@ const Map = (props) => {
     })
 
   },[markersFilter])
+
+  //move to feature is an active feature is set
+  useEffect(() => {
+    if (activeFeatureId === undefined) return;
+    const activeFeature = getFeatureById(activeFeatureId);
+    mapboxMap.flyTo({
+      center: activeFeature.geometry.coordinates
+    });
+  },[activeFeatureId])
 
   return (
     <div id="map-container">
