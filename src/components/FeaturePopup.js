@@ -50,6 +50,7 @@ const FeaturePopup = props => {
     getFeatureSourceKey,
     getFeatureById,
     getHandlesByAnnotationPolygonId,
+    activeFeature,
     setActiveFeatureId
   } = useMap();
 
@@ -66,6 +67,7 @@ const FeaturePopup = props => {
   const feature = getFeatureById(props.featureId);
 
   const handleClose = e => {
+    if (activeFeature !== props.featureId) return;
     setActiveFeatureId();
   }
 
