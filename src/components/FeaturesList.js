@@ -1,6 +1,6 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
-
+import {DEBUG} from "./../Constants";
 import { CreationCard } from "./CreationCard";
 import {setFeatureDistance,getHumanDistance} from "../Constants";
 import { useMap } from '../MapContext';
@@ -91,8 +91,6 @@ const FeaturesList = props => {
     //scroll to list item
     const scrollToFeature = feature_id => {
 
-      console.log("SCROLL TO FEATURE",feature_id);
-
       //using a feature ID, get its index in the filtered features array.
       const getListIndex = feature_id => {
         let index = (features || []).findIndex(feature => feature.properties.id === feature_id);
@@ -103,7 +101,7 @@ const FeaturesList = props => {
       if (index === undefined) return;
 
       const ref = scrollRefs.current[index];
-      console.log("!!!SCROLL TO FEATURE",{id:feature_id,index:index},ref);
+      DEBUG && console.log("SCROLL TO FEATURE",{id:feature_id,index:index},ref);
       ref.current.scrollIntoView({ behavior: 'smooth'});
     }
 

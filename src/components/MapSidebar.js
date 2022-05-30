@@ -38,8 +38,6 @@ const MapSidebar = (props) => {
 
     setisActive(bool);
 
-    console.log("TOGGLE",bool);
-
     //https://docs.mapbox.com/mapbox-gl-js/example/offset-vanishing-point-with-padding/
     const collapsed = !bool;
     // 'id' is 'right' or 'left'. When run at start, this object looks like: '{left: 300}';

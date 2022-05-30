@@ -38,13 +38,11 @@ const CreationModal = (props) => {
   const handleLoaded = () => {
     const iframeItem = iframeContent.current;
 
-    console.log("IFRAME",iframeItem);
-
     try{
       const iFrameTitle = iframeItem.contentWindow.document.title;
       setTitle(iFrameTitle);
     } catch (error) {
-      console.log("error getting iframe title",error);
+      DEBUG && console.log("Error getting iframe title",error);
     }
 
     setLoading(false);

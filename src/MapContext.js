@@ -545,7 +545,7 @@ export function MapProvider({children}){
 	//build features formats filter
   useEffect(()=>{
 		if (!mapHasInit) return;
-		console.log("MAP HAS BEEN FULLY INITIALIZED");
+		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
   },[mapHasInit])
 
   //set global marker filters
@@ -562,8 +562,7 @@ export function MapProvider({children}){
 
 	useEffect(()=>{
 
-
-		console.log("ACTIF FEAT ID",activeFeatureId);
+		DEBUG && console.log("TOGGLE ACTIVE FEATURE ID",activeFeatureId);
 
 		//hide old
 		if (prevActiveFeatureId.current){
@@ -574,7 +573,7 @@ export function MapProvider({children}){
 		//show new
 		if (activeFeatureId !== undefined){
 			const activeFeature = getFeatureById(activeFeatureId);
-			console.log("ACTIF FEAT",activeFeature);
+			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 			setMapFeatureState(activeFeature,'active',true);
 		}
 

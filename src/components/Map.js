@@ -158,13 +158,8 @@ const Map = (props) => {
       });
     }
 
-
     initMapPolygonsListeners();
     initMapMarkersListeners();
-
-    map.on('idle', () => {
-      console.log('A idle event occurred.');
-    });
 
   }
 
