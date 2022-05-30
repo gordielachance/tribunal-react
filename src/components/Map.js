@@ -23,6 +23,7 @@ const Map = (props) => {
     mapData,
     mapboxMap,
     setMapboxMap,
+    setMapHasInit,
     setMapFeatureState,
     markersFilter,
     getHandlesByAnnotationPolygonId,
@@ -31,12 +32,11 @@ const Map = (props) => {
 
   const initializeMap = data => {
 
-    console.log("INIT MAPBOX MAP",data);
+    DEBUG && console.log("INIT MAPBOX MAP",data.map);
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
     const map = new mapboxgl.Map({
       ...data.map,
-      center: [4.3779,50.7786],
       container: mapContainerRef.current
     });
 
@@ -158,9 +158,9 @@ const Map = (props) => {
       });
     }
 
-    initMapMarkersListeners();
-    initMapPolygonsListeners();
 
+    initMapPolygonsListeners();
+    initMapMarkersListeners();
 
     map.on('idle', () => {
       console.log('A idle event occurred.');
@@ -305,13 +305,13 @@ const Map = (props) => {
             if (data){
               //add source for this image
               if (map.getSource(data.source.id)) {
-                console.log(`Source "${data.source.id}" already exists.`);
+                DEBUG && console.log(`Source "${data.source.id}" already exists.`);
                 return;//continue
               }
 
               //add image
               if (map.getLayer(data.layer.id)) {
-                console.log(`Layer "${data.layer.id}" already exists.`);
+                DEBUG && console.log(`Layer "${data.layer.id}" already exists.`);
                 return;//continue
               }
 
@@ -341,7 +341,7 @@ const Map = (props) => {
         }
 
         //list all layers
-        console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
+        DEBUG && console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
 
         map.resize(); // fit to container
 
@@ -358,14 +358,18 @@ const Map = (props) => {
 
         initMapListeners(map);
 
+        mapboxMap.once('idle',(e)=>{
+          setMapHasInit(true);
+        })
+
       });
 
       map.on('moveend', (e) => {
 
         console.log({
-          'bounds':map.getBounds(),
           'center':[map.getCenter().lng.toFixed(4),map.getCenter().lat.toFixed(4)],
-          'zoom':map.getZoom().toFixed(2)
+          'zoom':map.getZoom().toFixed(2),
+          'bounds':map.getBounds(),
         })
       });
 

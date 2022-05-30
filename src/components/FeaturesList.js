@@ -10,6 +10,7 @@ const FeaturesList = props => {
   const {
     mapData,
     mapboxMap,
+    mapHasInit,
     sortMarkerBy,
     setMapFeatureState,
     zoomOnFeatures,
@@ -67,13 +68,11 @@ const FeaturesList = props => {
       (_, i) => scrollRefs.current[i] ?? createRef()
     );
 
-    console.log("!!!SCROLL REFS",scrollRefs);
-
   },[features])
 
   useEffect(()=>{
 
-    if (mapboxMap===undefined) return;
+    if (!mapHasInit) return;
 
     //on init
     setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
@@ -83,7 +82,7 @@ const FeaturesList = props => {
       setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
     });
 
-  },[mapboxMap])
+  },[mapHasInit])
 
   //scroll to the list item
   useEffect(()=>{

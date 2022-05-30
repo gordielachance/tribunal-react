@@ -58,7 +58,6 @@ const FeaturePopup = props => {
   const [dataFeatureId,setDataFeatureId] = useState();
 
   let popupSettings = {
-    closeOnClick:false,
     anchor:'bottom'
   }
 

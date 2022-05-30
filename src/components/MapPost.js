@@ -15,7 +15,7 @@ import Map from "./Map";
 const MapPost = (props) => {
 
   const {featurePostId} = useParams();
-  const {mapboxMap,mapData,setRawMapData,setActiveFeatureId} = useMap();
+  const {mapboxMap,mapData,setRawMapData,mapHasInit,setActiveFeatureId} = useMap();
 
   const [loading,setLoading] = useState(true);
 
@@ -55,11 +55,10 @@ const MapPost = (props) => {
   },[props.mapData]);
 
   useEffect(()=>{
-    mapboxMap?.once('idle', (e) => {
+    if (mapHasInit){
       setLoading(false);
-    });
-
-  },[mapboxMap]);
+    }
+  },[mapHasInit]);
 
   return (
     <Dimmer.Dimmable dimmed={loading} id="map-post-container">

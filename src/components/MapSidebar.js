@@ -20,6 +20,7 @@ const MapSidebar = (props) => {
   const {
     mapData,
     mapboxMap,
+    mapHasInit,
     activeFeatureId,
     getFeatureById,
     getFeatureSourceKey,
@@ -86,9 +87,7 @@ const MapSidebar = (props) => {
   useEffect(()=>{
     if (mapboxMap===undefined) return;
 
-    mapboxMap.on('load', (e) => {
-      toggleSidebar(true);
-    });
+    toggleSidebar(true);
 
     //When the map is animated
     mapboxMap.on('movestart', (e) => {
@@ -102,17 +101,13 @@ const MapSidebar = (props) => {
     mapboxMap.once('idle',populateSidebarFeatures);//on init
     mapboxMap.on('moveend',populateSidebarFeatures);
 
-  },[mapboxMap])
+  },[mapHasInit])
 
   //when filters are updated
   useEffect(()=>{
     if (mapboxMap === undefined) return;
     populateSidebarFeatures();
   },[markersFilter])
-
-  useEffect(()=>{
-    console.log("SIDEBAR FEATURES",(sidebarFeatures || []).length);
-  },[sidebarFeatures]);
 
   return (
     <div

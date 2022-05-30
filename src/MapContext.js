@@ -14,6 +14,7 @@ const MapContext = createContext();
 
 export function MapProvider({children}){
 	const [mapboxMap,setMapboxMap] = useState();
+	const [mapHasInit,setMapHasInit] = useState(false);
 	const mapContainerRef = useRef();
 	const [rawMapData,setRawMapData] = useState(); //map data before it is cleaned
 	const [mapData,setMapData] = useState();
@@ -541,6 +542,12 @@ export function MapProvider({children}){
     setFormatsFilter(filter);
   },[markerFormatsDisabled])
 
+	//build features formats filter
+  useEffect(()=>{
+		if (!mapHasInit) return;
+		console.log("MAP HAS BEEN FULLY INITIALIZED");
+  },[mapHasInit])
+
   //set global marker filters
   useEffect(()=>{
     if (mapboxMap === undefined) return;
@@ -578,7 +585,7 @@ export function MapProvider({children}){
 	//filter features that have a minzoom property
 	/*
 	useEffect(()=>{
-    if (mapboxMap===undefined) return;
+    if (maphasInit===undefined) return;
 
 		const computeZoomFilter = () => {
 			const currentZoom = Math.floor(mapboxMap.getZoom());
@@ -595,7 +602,7 @@ export function MapProvider({children}){
     });
 
 
-  },[mapboxMap])
+  },[maphasInit])
 
 
 	useEffect(()=>{
@@ -616,6 +623,8 @@ export function MapProvider({children}){
 		setRawMapData:setRawMapData,
 		mapboxMap:mapboxMap,
 		setMapboxMap:setMapboxMap,
+		mapHasInit:mapHasInit,
+		setMapHasInit:setMapHasInit,
 		getAnnotationPolygonByHandle:getAnnotationPolygonByHandle,
 		activeFeatureId:activeFeatureId,
 		setActiveFeatureId:setActiveFeatureId,
