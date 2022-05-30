@@ -3,13 +3,16 @@ import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-load
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
-import {MAPBOX_TOKEN,DEBUG,getUniqueMapFeatures} from "./../Constants";
+import {MAPBOX_TOKEN,DEBUG,WP_URL,getUniqueMapFeatures} from "./../Constants";
+
 
 import FeaturePopup from "./FeaturePopup";
 
 import './Map.scss';
 import * as turf from "@turf/turf";
 import { useMap } from '../MapContext';
+
+
 
 const Map = (props) => {
 
@@ -178,6 +181,8 @@ const Map = (props) => {
     if (map){
       map.on('load', () => {
 
+
+
         //init mapbox sources
         for (var key in mapData.sources) {
           const sourceData = mapData.sources[key];
@@ -186,6 +191,7 @@ const Map = (props) => {
         }
 
         //add raster layers
+
         const addRasterLayers = () => {
           /*
           set polygon minzoom properties
@@ -245,13 +251,15 @@ const Map = (props) => {
 
 
           //init mapbox annotation images
-          const addRaster = (feature) => {
+          const getRasterDatas = (feature) => {
 
             const postId = feature.properties.post_id;
-
-
             const imageUrl = feature.properties.image_url;
             const imageBbox = feature.properties.image_bbox;
+
+            //compute minimum zoom and store as a prop
+            const minzoom = getPolygonMinimumZoom(feature);
+            feature.properties.minzoom = minzoom;
 
             const imagePolygon = turf.bboxPolygon(imageBbox);
             let coordinates = imagePolygon.geometry.coordinates[0];
@@ -260,54 +268,57 @@ const Map = (props) => {
             const sourceId = "annotation-raster-source-"+postId;
             const layerId = "annotation-raster-layer-"+postId;
 
-            //add source for this image
-            if (map.getSource(sourceId)) {
-              throw `Source "${sourceId}" already exists.`
-            }
-
-            map.addSource(
-              sourceId,
-              {
-                'type': 'image',
-                'url': imageUrl,
-                'coordinates': coordinates
+            return {
+              polygon_id:feature.properties.target_id,
+              source:{
+                id:sourceId,
+                type: 'image',
+                url: imageUrl,
+                coordinates: coordinates
+              },
+              layer:{
+                id: layerId,
+                source: sourceId,
+                type: "raster",
+                //"minzoom":minzoom
               }
-           )
-
-
-           //add image
-           if (map.getLayer(layerId)) {
-             throw `Layer "${layerId}" already exists.`
-           }
-
-           const settings = {
-             "id": layerId,
-             "source": sourceId,
-             "type": "raster",
-             "minzoom":feature.properties.minzoom
-           };
-
-
-           map.addLayer(settings);
-
-           return layerId;
+            }
 
           }
 
-          mapData.sources?.annotationsPolygons.data.features.forEach((feature,index) => {
-
-            //compute minimum zoom and store as a prop
-            const minzoom = getPolygonMinimumZoom(feature);
-            feature.properties.minzoom = minzoom;
-
-            //set raster and store its ID in the polygon's properties
-            try{
-              const layerId = addRaster(feature);
-              feature.properties.image_layer = layerId;
-            }catch(e){
-              console.log(e);
-            }
+          const polygonFeatures = (mapData.sources?.annotationsPolygons.data.features || []);
+          const rasterDatas = polygonFeatures.map(feature => {
+            const datas = getRasterDatas(feature);
+            feature.properties.image_layer = datas.layer.id;
+            return datas;
           })
+
+          rasterDatas.forEach(data => {
+
+            if (data){
+              //add source for this image
+              if (map.getSource(data.source.id)) {
+                console.log(`Source "${data.source.id}" already exists.`);
+                return;//continue
+              }
+
+              //add image
+              if (map.getLayer(data.layer.id)) {
+                console.log(`Layer "${data.layer.id}" already exists.`);
+                return;//continue
+              }
+
+
+              const sourceData = {...data.source};delete sourceData.id;//remove ID since to avoid bug
+
+              map.addSource(data.source.id,sourceData);
+              map.addLayer(data.layer);
+
+
+            }
+
+          })
+
         }
         addRasterLayers();
 
@@ -375,6 +386,7 @@ const Map = (props) => {
   },[mapboxMap]);
 
   //toggle annotation rasters (layers) based on filtered polygons.
+
   useEffect(()=>{
     if (mapboxMap === undefined) return;
 
