@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from 'semantic-ui-react';
 
 import MapPopup from "./MapPopup";
@@ -6,31 +6,24 @@ import { CreationCard } from "./CreationCard";
 import { useMap } from '../MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
-import {getMarkerUrl} from "./../Constants";
+import {getFeatureUrl} from "./../Constants";
 
 const FeaturePopupContent = (props) => {
 
-  const {
-    getFeatureById
-  } = useMap();
-
   const navigate = useNavigate();
-  const feature = getFeatureById(props.featureId);
-
   const {mapPostSlug,mapPostId} = useParams();
 
-  const hasMore = feature?.properties.has_more;
+  const hasMore = props.feature?.properties.has_more;
 
   const handleClick = () => {
-    const realId = feature.properties.id.replace("creations-", "");
-    const url = getMarkerUrl(mapPostId,mapPostSlug,realId,feature.properties.slug);
+    const url = getFeatureUrl(mapPostId,mapPostSlug,props.feature.properties.source,props.feature.properties.id,'full');
     navigate(url);
   }
 
   return (
     <div className="feature-popup">
       <CreationCard
-      feature={feature}
+      feature={props.feature}
       highlightTags={true}
       />
       {
@@ -46,41 +39,35 @@ const FeaturePopupContent = (props) => {
 
 const FeaturePopup = props => {
 
-  const {
-    getAnnotationPolygonByHandle,
-    getFeatureSourceKey,
-    getFeatureById,
-    getHandlesByAnnotationPolygonId,
-    activeFeature,
-    setActiveFeatureId
-  } = useMap();
+  const navigate = useNavigate();
+  const {mapPostSlug,mapPostId} = useParams();
 
-  const [latLng,setLatLng] = useState();
-  const [dataFeatureId,setDataFeatureId] = useState();
+  const {
+    activeFeature
+  } = useMap();
 
   let popupSettings = {
     anchor:'bottom'
   }
 
-  if (!props.featureId) return;
-
-  const feature = getFeatureById(props.featureId);
-
   const handleClose = e => {
-    if (activeFeature !== props.featureId) return;
-    setActiveFeatureId();
+    /*
+    if (JSON.stringify(activeFeature) !== JSON.stringify(props.feature)) return;
+    const url = getMapUrl(mapPostId,mapPostSlug);
+    navigate(url);
+    */
   }
 
   return (
     <>
       {
-        feature &&
+        props.feature &&
         <MapPopup
-        lngLat={feature.geometry.coordinates}
+        lngLat={props.feature.geometry.coordinates}
         settings={popupSettings}
         onClose={handleClose}
         >
-          <FeaturePopupContent featureId={feature.properties.id}/>
+          <FeaturePopupContent feature={props.feature}/>
         </MapPopup>
       }
 

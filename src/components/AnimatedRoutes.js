@@ -11,7 +11,7 @@ export const AnimatedRoutes = props => {
     '/',
     '/cartes',
     '/carte/:mapPostId/:mapPostSlug',
-    '/carte/:mapPostId/:mapPostSlug/creation/:postFeatureId/:featurePostSlug',
+    '/carte/:mapPostId/:mapPostSlug/creation/:urlFeatureId/:urlPostSlug',
   ]
   const verticalPaths = [
     '/',

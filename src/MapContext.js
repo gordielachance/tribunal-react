@@ -1,6 +1,6 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
-import React, { useState,useEffect,useCallback,createContext,useRef } from 'react';
+import React, { useState,useEffect,createContext,useRef } from 'react';
 import {
 	DEBUG,
 	isFeaturesSource,
@@ -19,8 +19,8 @@ export function MapProvider({children}){
 	const [rawMapData,setRawMapData] = useState(); //map data before it is cleaned
 	const [mapData,setMapData] = useState();
 
-	const [activeFeatureId,setActiveFeatureId] = useState();
-	const prevActiveFeatureId = useRef();
+	const [activeFeature,setActiveFeature] = useState();
+	const prevActiveFeature = useRef();
 
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
@@ -31,10 +31,8 @@ export function MapProvider({children}){
   const [markersFilter,setMarkersFilter] = useState();
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
-		const sourceCollection = mapData?.sources.annotationsHandles.data.features || [];
-		const realId = parseInt(feature_id.replace("annotationsPolygons-", ""));
-
-    const handleFeatures = sourceCollection.filter(feature => feature.properties.target_id === realId);
+		const sourceCollection = mapData?.sources.annotations.data.features || [];
+    const handleFeatures = sourceCollection.filter(feature => feature.properties.id === feature_id);
 		return handleFeatures;
 	}
 
@@ -43,30 +41,8 @@ export function MapProvider({children}){
 			throw "Missing 'handleFeature' parameter.";
 		}
 		const sourceCollection = mapData?.sources.annotationsPolygons?.data.features;
-
-		const polygonId = 'annotationsPolygons-' + handleFeature.properties.target_id;
+		const polygonId = handleFeature.properties.id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
-	}
-
-	const getFeatureById = id => {
-
-		if (!id){
-			throw "Missing 'id' parameter.";
-		}
-
-		const sources = mapData?.sources || {};
-		const featureSourceKeys = Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
-
-		let allFeatures = [];
-
-		featureSourceKeys.forEach(sourceKey => {
-			const source = sources[sourceKey];
-			const sourceFeatures = source.data.features || [];
-			allFeatures = allFeatures.concat(sourceFeatures);
-		})
-
-		return allFeatures.find(feature => feature.properties.id === id);
-
 	}
 
 	//find the ID of the source for a feature
@@ -90,7 +66,7 @@ export function MapProvider({children}){
 
 		if (!feature) return;
 
-		const sourceKey = getFeatureSourceKey(feature);
+		const sourceKey = feature.properties.source;
 		const featureId = feature.properties.id;
 
 		if (sourceKey === undefined) return;
@@ -112,7 +88,7 @@ export function MapProvider({children}){
 					if(key === 'hover'){
 						handles.forEach(handle => {
 							mapboxMap.setFeatureState(
-								{ source: 'annotationsHandles', id: handle.properties.id },
+								{ source: 'annotations', id: handle.properties.id },
 								{ 'side-hover': value }
 							);
 						})
@@ -124,7 +100,7 @@ export function MapProvider({children}){
 						console.log("FIRST HANDLE YO",firstHandle);
 
 						mapboxMap.setFeatureState(
-							{ source: 'annotationsHandles', id: firstHandle.properties.id },
+							{ source: 'annotations', id: firstHandle.properties.id },
 							{ [key]: value }
 						);
 					}
@@ -134,7 +110,7 @@ export function MapProvider({children}){
 				polygonSideEffects(feature,key,value);
 
 			break;
-			case 'annotationsHandles':
+			case 'annotations':
 
 				const handleSideEffects = (feature,key,value) => {
 					const polygon = getAnnotationPolygonByHandle(feature);
@@ -229,7 +205,7 @@ export function MapProvider({children}){
 
 						//TOUFIX URGENT ONLY VISIBLE FEATURES
 						const creationFeatures = mapData?.sources.creations?.data.features || [];
-					  const handlesFeatures = mapData?.sources.annotationsHandles?.data.features || [];
+					  const handlesFeatures = mapData?.sources.annotations?.data.features || [];
 					  const allPoints = creationFeatures.concat(handlesFeatures);
 
 						//get this feature within the new array
@@ -315,8 +291,6 @@ export function MapProvider({children}){
 
 		let newMapData = {...rawMapData};
 
-
-
 		const getFeatureSourceKeys = () => {
 			const sources = newMapData.sources || {};
 			return Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
@@ -364,8 +338,7 @@ export function MapProvider({children}){
 		        const handleFeature = turf.pointOnFeature(polygonFeature);
 
 						handleFeature.properties = {
-							id:index+1,
-							target_id:polygonFeature.properties.id
+							id:polygonFeature.properties.id
 						}
 
 						collection.push(handleFeature);
@@ -382,21 +355,21 @@ export function MapProvider({children}){
 		      type:'geojson'
 		    }
 			}
-			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotationsPolygons.data.features);
+			newMapData.sources.annotations = buildAnnotationHandlesSource(newMapData.sources.annotationsPolygons.data.features);
 		}
 
 		/*
-		if (newMapDatasources.annotationsHandles ){
+		if (newMapDatasources.annotations ){
 
 			const allPolygons = newMapData.sources.annotationsPolygons.data.features || [];
-			const allHandles = newMapDatasources.annotationsHandles.data.features || [];
+			const allHandles = newMapDatasources.annotations.data.features || [];
 
 			//remove polygons that does not have handles
 
 			const filterPolygonsWithHandles = (polygons,handles) => {
 
 				const polygonIds = polygons.map(feature => feature.properties.id);
-				const handleIds = handles.map(feature => feature.properties.target_id);
+				const handleIds = handles.map(feature => feature.properties.id);
 				const noHandlePolygonIds = polygonIds.filter(x => !handleIds.includes(x));
 				const noHandlePolygons = polygons.filter(feature => noHandlePolygonIds.includes(feature.properties.id));
 
@@ -414,7 +387,7 @@ export function MapProvider({children}){
 			const filterHandlesWithPolygons = (handles,polygons) => {
 
 				const polygonIds = polygons.map(feature => feature.properties.id);
-				const handleIds = handles.map(feature => feature.properties.target_id);
+				const handleIds = handles.map(feature => feature.properties.id);
 				const noPolygonHandleIds = handleIds.filter(x => !polygonIds.includes(x));
 				const noPolygonHandles = handles.filter(feature => noPolygonHandleIds.includes(feature.properties.id));
 
@@ -426,35 +399,35 @@ export function MapProvider({children}){
 				return handles;
 			}
 
-			newMapDatasources.annotationsHandles.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
+			newMapDatasources.annotations.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
 
 
 		}
 		*/
 
-		//set really unique IDs for each feature
+		//append source Ids
 
 		getFeatureSourceKeys().forEach(sourceKey => {
 
-			const setSourcePrefixes = features => {
+			const setSourceIds = features => {
 				features = (features || []);
 				const newFeatures = [...features];
 				newFeatures.forEach(feature =>{
-					feature.properties.id = sourceKey + "-" + feature.properties.id;
+					feature.properties.source = sourceKey;
 				})
 				return newFeatures;
 			}
 
-			newMapData.sources[sourceKey].data.features = setSourcePrefixes(newMapData.sources[sourceKey].data.features);
+			newMapData.sources[sourceKey].data.features = setSourceIds(newMapData.sources[sourceKey].data.features);
 
 		})
 
-		if (newMapData.sources.annotationsHandles ){
+		if (newMapData.sources.annotations ){
 
 			const copyPolygonProperties = handles => {
 				return handles.map(handle => {
-					const targetId = handle.properties.target_id;
-					const polygonId = 'annotationsPolygons-' + targetId;
+					const targetId = handle.properties.id;
+					const polygonId = targetId;
 					const polygon = newMapData.sources.annotationsPolygons.data.features.find(feature => (feature.properties.id === polygonId));
 					handle.properties = {
 						...polygon.properties,
@@ -464,7 +437,7 @@ export function MapProvider({children}){
 				})
 			}
 
-			newMapData.sources.annotationsHandles.data.features = copyPolygonProperties(newMapData.sources.annotationsHandles.data.features);
+			newMapData.sources.annotations.data.features = copyPolygonProperties(newMapData.sources.annotations.data.features);
 		}
 
 		console.log("NEWMAPDATA",newMapData);
@@ -554,7 +527,7 @@ export function MapProvider({children}){
     console.log("RUN GLOBAL FILTER",markersFilter,mapboxMap);
 
     mapboxMap.setFilter("creations",markersFilter);
-    mapboxMap.setFilter("annotationsHandles",markersFilter);
+    mapboxMap.setFilter("annotations",markersFilter);
 		mapboxMap.setFilter("annotationsFill",markersFilter);
 		mapboxMap.setFilter("annotationsStroke",markersFilter);
 
@@ -562,24 +535,21 @@ export function MapProvider({children}){
 
 	useEffect(()=>{
 
-		DEBUG && console.log("TOGGLE ACTIVE FEATURE ID",activeFeatureId);
+		DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 
 		//hide old
-		if (prevActiveFeatureId.current){
-			const prevFeature = getFeatureById(prevActiveFeatureId.current);
-			setMapFeatureState(prevFeature,'active',false);
+		if (prevActiveFeature.current){
+			setMapFeatureState(prevActiveFeature.current,'active',false);
 		}
 
 		//show new
-		if (activeFeatureId !== undefined){
-			const activeFeature = getFeatureById(activeFeatureId);
-			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
+		if (activeFeature){
 			setMapFeatureState(activeFeature,'active',true);
 		}
 
-		prevActiveFeatureId.current = activeFeatureId;
+		prevActiveFeature.current = activeFeature;
 
-	},[activeFeatureId])
+	},[activeFeature])
 
 	//filter features that have a minzoom property
 	/*
@@ -625,8 +595,8 @@ export function MapProvider({children}){
 		mapHasInit:mapHasInit,
 		setMapHasInit:setMapHasInit,
 		getAnnotationPolygonByHandle:getAnnotationPolygonByHandle,
-		activeFeatureId:activeFeatureId,
-		setActiveFeatureId:setActiveFeatureId,
+		activeFeature:activeFeature,
+		setActiveFeature:setActiveFeature,
 		sortMarkerBy:sortMarkerBy,
 		setSortMarkerBy:setSortMarkerBy,
 		markerTagsDisabled:markerTagsDisabled,
@@ -640,8 +610,6 @@ export function MapProvider({children}){
 		toggleHoverTag:toggleHoverTag,
 		toggleHoverFormat:toggleHoverFormat,
 		zoomOnFeatures:zoomOnFeatures,
-		getFeatureSourceKey:getFeatureSourceKey,
-		getFeatureById:getFeatureById,
 		markersFilter:markersFilter
 	};
 

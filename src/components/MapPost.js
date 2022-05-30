@@ -1,7 +1,7 @@
 import React, { useEffect,useState }  from "react";
 import { useParams } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { Loader,Dimmer,Container } from 'semantic-ui-react';
+import { Loader,Dimmer } from 'semantic-ui-react';
 
 import {DEBUG} from "./../Constants";
 
@@ -14,38 +14,46 @@ import Map from "./Map";
 
 const MapPost = (props) => {
 
-  const {postFeatureId} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,setActiveFeatureId,getFeatureById} = useMap();
-  const [activePostId,setActivePostId] = useState();
+  const {urlSourceId,urlFeatureId,urlFeatureAction} = useParams();
+  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature} = useMap();
 
   const [loading,setLoading] = useState(true);
 
   //marker in URL
   useEffect(()=>{
-    if (mapboxMap === undefined) return;
-    if (postFeatureId === undefined) return;
+    if (!mapHasInit) return;
+    if (urlSourceId === undefined) return;
+    if (urlFeatureId === undefined) return;
 
-    const feature = getFeatureById('creations-'+postFeatureId);
+    const getSourceFeature = (sourceId,featureId) => {
+
+  		const sources = mapData?.sources || {};
+  		const source = sources[sourceId];
+  		const features = source.data.features || [];
+
+  		return features.find(feature => feature.properties.id === parseInt(featureId));
+
+  	}
+
+    const feature = getSourceFeature(urlSourceId,urlFeatureId);
+    console.log("!!!FEATURE",feature);
 
     if (feature){
-      DEBUG && console.log("SET ACTIVE FEATURE BASED ON THE POST ID",postFeatureId,feature);
-
-      setActivePostId(feature.properties.post_id);
 
       //center on the marker since we need to have it in the viewport
-      mapboxMap.jumpTo({
+      mapboxMap.easeTo({
         //center: [-75,43],
         center: feature.geometry.coordinates,
+        duration: 2000,
+
       })
 
       //once done, set marker as active
-      mapboxMap.once('idle',(e) => {
-        setActiveFeatureId(feature.properties.id);
-      })
+      setActiveFeature(feature);
 
     }
 
-  },[postFeatureId,mapboxMap])
+  },[urlFeatureId,urlSourceId,mapHasInit])
 
   //initialize map data
   useEffect(()=>{
@@ -67,8 +75,11 @@ const MapPost = (props) => {
       <MapSidebar
       title={props.title}
       />
-      <CreationModal postId={activePostId}/>
-      <Map/>
+      {
+        ( activeFeature && (urlFeatureAction==='full') ) &&
+        <CreationModal/>
+      }
+      <Map featureId={activeFeature}/>
     </Dimmer.Dimmable>
   );
 }

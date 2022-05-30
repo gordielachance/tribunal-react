@@ -23,11 +23,15 @@ function Layout() {
       </div>
      <Routes location={location}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/cartes" element={<MapListPage/>} />
         <Route path="/agenda" element={<AgendaPage/>} />
         <Route path="/credits" element={<CreditsPage/>} />
-        <Route exact path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
-        <Route path="/carte/:mapPostId/:mapPostSlug/creation/:postFeatureId/:featurePostSlug" element={<SingleMapPage/>} />
+        <Route path="/cartes">
+          <Route index element={<MapListPage />} />
+          <Route path=":mapPostId/:mapPostSlug" element={<SingleMapPage />} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={<SingleMapPage />} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={<SingleMapPage />} />
+        </Route>
+
         <Route path='*' component={NotFound} />
       </Routes>
     </div>

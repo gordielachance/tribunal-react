@@ -18,17 +18,10 @@ const MapSidebar = (props) => {
   const [sidebarFeatures,setSidebarFeatures] = useState();
 
   const {
-    mapData,
     mapboxMap,
     mapHasInit,
-    activeFeatureId,
-    getFeatureById,
-    getFeatureSourceKey,
     markersFilter,
   } = useMap();
-
-  const annotationsCount = (mapData?.sources.annotationsPolygons?.data.features || []).length;
-  const creationsCount = (mapData?.sources.creations?.data.features || []).length;
 
   const toggleSidebar = (bool) => {
 
@@ -66,7 +59,7 @@ const MapSidebar = (props) => {
 
       const getVisibleAnnotationFeatures = () => {
         let features = mapboxMap.queryRenderedFeatures({
-          layers: ['annotationsHandles'],
+          layers: ['annotations'],
           filter: markersFilter
         }) || [];
         return getUniqueMapFeatures(features);
@@ -79,6 +72,7 @@ const MapSidebar = (props) => {
     }
 
     const features = getFeatures();
+
     setSidebarFeatures(features);
   }
 

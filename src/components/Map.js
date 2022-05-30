@@ -3,7 +3,7 @@ import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-load
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
-import {MAPBOX_TOKEN,DEBUG,WP_URL,getUniqueMapFeatures} from "./../Constants";
+import {MAPBOX_TOKEN,DEBUG,WP_URL,getUniqueMapFeatures,getFeatureUrl} from "./../Constants";
 
 
 import FeaturePopup from "./FeaturePopup";
@@ -11,14 +11,16 @@ import FeaturePopup from "./FeaturePopup";
 import './Map.scss';
 import * as turf from "@turf/turf";
 import { useMap } from '../MapContext';
-
+import { useNavigate,useParams } from 'react-router-dom';
 
 
 const Map = (props) => {
 
+  const navigate = useNavigate();
+  const {mapPostId,mapPostSlug} = useParams();
+
   const {
-    activeFeatureId,
-    setActiveFeatureId,
+    activeFeature,
     mapContainerRef,
     mapData,
     mapboxMap,
@@ -26,8 +28,7 @@ const Map = (props) => {
     setMapHasInit,
     setMapFeatureState,
     markersFilter,
-    getHandlesByAnnotationPolygonId,
-    getFeatureById
+    getHandlesByAnnotationPolygonId
   } = useMap();
 
   const initializeMap = data => {
@@ -73,12 +74,9 @@ const Map = (props) => {
 
       //open (add) popup when clicking marker
       map.on('click','creations', e => {
-
         if (e.features.length === 0) return;
-
         const feature = e.features[0];
-        setActiveFeatureId(feature.properties.id);
-
+        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
       });
     }
 
@@ -89,7 +87,7 @@ const Map = (props) => {
 
       //Update cursors IN
 
-      map.on('mousemove','annotationsHandles', e => {
+      map.on('mousemove','annotations', e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
 
@@ -102,7 +100,7 @@ const Map = (props) => {
       });
 
       //Update cursors OUT
-      map.on('mouseleave','annotationsHandles', e => {
+      map.on('mouseleave','annotations', e => {
         map.getCanvas().style.cursor = '';
         if(hoveredHandle){
           setMapFeatureState(hoveredHandle,'hover',false);
@@ -110,10 +108,10 @@ const Map = (props) => {
       });
 
       // When the user clicks a polygon handle
-      map.on('click','annotationsHandles',e=>{
+      map.on('click','annotations',e=>{
         if (e.features.length > 0) {
           const feature = e.features[0];
-          setActiveFeatureId(feature.properties.id);
+          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
         }
       });
 
@@ -139,9 +137,8 @@ const Map = (props) => {
           const polygon = e.features[0];
           const handles = getHandlesByAnnotationPolygonId(polygon.id);
           const firstHandle = handles[0];
-          console.log("NNOT FILL CLICK",firstHandle);
 
-          setActiveFeatureId(firstHandle.properties.id);
+          navigate(getFeatureUrl(mapPostId,mapPostSlug,firstHandle.properties.source,firstHandle.properties.id));
         }
       });
 
@@ -271,7 +268,7 @@ const Map = (props) => {
             const layerId = "annotation-raster-layer-"+postId;
 
             return {
-              polygon_id:feature.properties.target_id,
+              polygon_id:feature.properties.id,
               source:{
                 id:sourceId,
                 type: 'image',
@@ -427,18 +424,17 @@ const Map = (props) => {
 
   //move to feature is an active feature is set
   useEffect(() => {
-    if (activeFeatureId === undefined) return;
-    const activeFeature = getFeatureById(activeFeatureId);
+    if (activeFeature === undefined) return;
     mapboxMap.flyTo({
       center: activeFeature.geometry.coordinates
     });
-  },[activeFeatureId])
+  },[activeFeature])
 
   return (
     <div id="map-container">
       {
-        activeFeatureId &&
-        <FeaturePopup featureId={activeFeatureId}/>
+        activeFeature &&
+        <FeaturePopup feature={activeFeature}/>
       }
       <div
       id="map"

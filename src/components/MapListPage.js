@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Container,Loader } from 'semantic-ui-react';
+import { Loader } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
 import {getMapUrl} from "./../Constants";
 

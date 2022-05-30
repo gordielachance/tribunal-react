@@ -1,25 +1,25 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
-import {DEBUG} from "./../Constants";
+import {DEBUG,getFeatureUrl} from "./../Constants";
 import { CreationCard } from "./CreationCard";
 import {setFeatureDistance,getHumanDistance} from "../Constants";
 import { useMap } from '../MapContext';
+import { useNavigate,useParams } from 'react-router-dom';
 
 const FeaturesList = props => {
 
   const {
-    mapData,
     mapboxMap,
     mapHasInit,
     sortMarkerBy,
     setMapFeatureState,
     zoomOnFeatures,
-    activeFeatureId,
-    setActiveFeatureId,
-    getFeatureById,
-    getFeatureSourceKey,
+    activeFeature,
     getAnnotationPolygonByHandle
   } = useMap();
+
+  const navigate = useNavigate();
+  const {mapPostId,mapPostSlug} = useParams();
 
   const [mapCenter,setMapCenter] = useState();
   const [features,setFeatures] = useState();
@@ -86,7 +86,7 @@ const FeaturesList = props => {
 
   //scroll to the list item
   useEffect(()=>{
-    if (activeFeatureId===undefined) return;
+    if (activeFeature===undefined) return;
 
     //scroll to list item
     const scrollToFeature = feature_id => {
@@ -105,9 +105,9 @@ const FeaturesList = props => {
       ref.current.scrollIntoView({ behavior: 'smooth'});
     }
 
-    scrollToFeature(activeFeatureId);
+    scrollToFeature(activeFeature);
 
-  },[activeFeatureId])
+  },[activeFeature])
 
   //TOUFIX should not be updated when center changes; distance should be computed in parent ?
 
@@ -126,13 +126,7 @@ const FeaturesList = props => {
   }
 
   const handleClick = feature => {
-
-    //center/zoom on feature
-    //zoomOnFeatures(feature);
-
-    //set active feature
-    setActiveFeatureId(feature.id);
-
+    navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
   }
 
   const toggleHoverFeature = (feature,bool) => {
@@ -149,7 +143,7 @@ const FeaturesList = props => {
           features.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
-            let active = (activeFeatureId === feature.properties.id);
+            let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
 
             return (
               <li

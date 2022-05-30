@@ -1,6 +1,5 @@
 import React,{useState,useEffect} from "react";
 import { useParams } from 'react-router-dom';
-import { Container } from 'semantic-ui-react';
 import DatabaseAPI from "../databaseAPI/api";
 
 import { MapProvider } from "../MapContext";

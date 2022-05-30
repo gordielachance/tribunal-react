@@ -1,6 +1,5 @@
 import React,{useState} from "react";
 import { Link } from 'react-router-dom';
-import { Container } from 'semantic-ui-react';
 import {getWpIframePostUrl,WP_POST_ID_HOME,WP_POST_ID_AGENDA,WP_POST_ID_CONTACT} from "./../Constants";
 
 const IframePage = (props) => {

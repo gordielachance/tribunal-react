@@ -194,12 +194,17 @@ export function getUniqueMapFeatures(features){
 }
 
 export const getMapUrl = (id,slug) => {
-  return `/carte/${id}/${slug}`;
+  return `/cartes/${id}/${slug}`;
 }
 
-export const getMarkerUrl = (mapId,mapSlug,markerId,markerSlug) => {
+export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId,action) => {
+  const layerId = 'item';
   const mapUrl = getMapUrl(mapId,mapSlug);
-  return mapUrl + `/creation/${markerId}/${markerSlug}`;
+  let url = mapUrl + `/${sourceId}/${featureId}`;
+  if (action !== undefined){
+    url = url + '/' + action;
+  }
+  return url;
 }
 
 const getWpIframeUrl = url => {

@@ -1,9 +1,9 @@
 import React, {useState,useEffect,useRef} from 'react';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
-import {getWpIframePostUrl} from "./../Constants";
+import {getWpIframePostUrl,getFeatureUrl} from "./../Constants";
 import { useParams,useNavigate } from 'react-router-dom';
-import {DEBUG,getMapUrl} from "./../Constants";
-
+import {DEBUG} from "./../Constants";
+import { useMap } from '../MapContext';
 
 //broken: /http://localhost:3000/carte/944/new-demo-map/creation/925/jette-geographie-des-prejuges
 //ok: http://localhost:3000/carte/944/new-demo-map/creation/892/prejuquoi
@@ -11,29 +11,26 @@ import {DEBUG,getMapUrl} from "./../Constants";
 const CreationModal = (props) => {
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug} = useParams();
+  const {activeFeature} = useMap();
   const iframeContent = useRef(null);
   const [title,setTitle] = useState('...');
   const [loading,setLoading] = useState(false);
-  const [open,setOpen] = useState(false);
   const [url,setUrl] = useState();
 
-
   useEffect(()=>{
-    DEBUG && console.log("LOAD POST ID IN MODAL",props.postId);
-    const hasId = (props.postId!==undefined);
 
-    if (hasId){
-      setOpen(true);
+    const post_id = activeFeature?.properties.post_id;
+
+    if (post_id){
       setLoading(true);
-      const url = getWpIframePostUrl(props.postId);
-      console.log("!!!MODAL URL:",url);
-      setUrl(url)
+      const url = getWpIframePostUrl(post_id);
+      console.log("LOAD POST ID IN MODAL",post_id,url);
+      setUrl(url);
     }else{
-      setOpen(false);
       setUrl();
     }
 
-  },[props.postId])
+  },[activeFeature])
 
   const handleLoaded = () => {
     const iframeItem = iframeContent.current;
@@ -49,16 +46,15 @@ const CreationModal = (props) => {
   }
 
   const handleClose = () => {
-    const mapUrl = getMapUrl(mapPostId,mapPostSlug);
-    navigate(mapUrl);
-    setOpen(false);
+    const url = getFeatureUrl(mapPostId,mapPostSlug,activeFeature.properties.source,activeFeature.properties.id);
+    navigate(url);
   }
 
   return(
     <Modal
       className="marker-modal"
       closeIcon
-      open={open}
+      open={true}
       onClose={handleClose}
     >
       <Modal.Header>
