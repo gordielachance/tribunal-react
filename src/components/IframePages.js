@@ -8,7 +8,7 @@ const IframePage = (props) => {
   const [loading,setLoading] = useState(true);
 
   return(
-    <Container id={props.id} className="page horizontal-page iframe-page">
+    <div id={props.id} className="page horizontal-page iframe-page">
       <div className="page-content">
         <h1>{props.title}</h1>
         {props.before}
@@ -19,7 +19,7 @@ const IframePage = (props) => {
         onLoad={()=>setLoading(false)}
         />
       </div>
-    </Container>
+    </div>
 
   )
 }

@@ -9,7 +9,7 @@ const MapListPage = (props) => {
   const loading = (mapPosts === undefined);
 
   return(
-    <Container id="mapListPage" className="page horizontal-page padding-page">
+    <div id="mapListPage" className="page horizontal-page padding-page">
       <div className="page-content">
         <h1>MAPS LIST</h1>
         {
@@ -39,7 +39,7 @@ const MapListPage = (props) => {
         </>
         }
       </div>
-    </Container>
+    </div>
   )
 }
 
