@@ -382,7 +382,6 @@ export function MapProvider({children}){
 		    }
 			}
 			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotationsPolygons.data.features);
-			console.log("ZOUB",newMapData.sources);
 		}
 
 		/*
