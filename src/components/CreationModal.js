@@ -10,7 +10,7 @@ import {DEBUG,getMapUrl} from "./../Constants";
 
 const CreationModal = (props) => {
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug,featurePostId} = useParams();
+  const {mapPostId,mapPostSlug} = useParams();
   const iframeContent = useRef(null);
   const [title,setTitle] = useState('...');
   const [loading,setLoading] = useState(false);
@@ -19,13 +19,13 @@ const CreationModal = (props) => {
 
 
   useEffect(()=>{
-    console.log("!!!MODAL ID:",featurePostId);
-    const hasId = (featurePostId!==undefined);
+    DEBUG && console.log("LOAD POST ID IN MODAL",props.postId);
+    const hasId = (props.postId!==undefined);
 
     if (hasId){
       setOpen(true);
       setLoading(true);
-      const url = getWpIframePostUrl(featurePostId);
+      const url = getWpIframePostUrl(props.postId);
       console.log("!!!MODAL URL:",url);
       setUrl(url)
     }else{
@@ -33,7 +33,7 @@ const CreationModal = (props) => {
       setUrl();
     }
 
-  },[featurePostId])
+  },[props.postId])
 
   const handleLoaded = () => {
     const iframeItem = iframeContent.current;

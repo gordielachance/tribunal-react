@@ -15,16 +15,38 @@ import Map from "./Map";
 const MapPost = (props) => {
 
   const {featurePostId} = useParams();
-  const {mapboxMap,setRawMapData} = useMap();
+  const {mapboxMap,mapData,setRawMapData,setActiveFeatureId} = useMap();
 
   const [loading,setLoading] = useState(true);
 
   //marker in URL
   useEffect(()=>{
+    if (mapboxMap === undefined) return;
     if (featurePostId === undefined) return;
-    console.log("POPULATE CREATION FROM URL",featurePostId);
 
-  },[featurePostId])
+    //get the source feature based on its post ID
+    const creationFeatures = mapData?.sources.creations?.data.features || [];
+    const feature = creationFeatures.find(feature => {
+      return (feature.properties.post_id === parseInt(featurePostId));
+    })
+
+    if (feature){
+      DEBUG && console.log("SET ACTIVE FEATURE BASED ON THE POST ID",featurePostId,feature);
+
+      //center on the marker since we need to have it in the viewport
+      mapboxMap.jumpTo({
+        //center: [-75,43],
+        center: feature.geometry.coordinates,
+      })
+
+      //once done, set marker as active
+      mapboxMap.once('idle',(e) => {
+        setActiveFeatureId(feature.properties.id);
+      })
+
+    }
+
+  },[featurePostId,mapboxMap])
 
   //initialize map data
   useEffect(()=>{
@@ -47,7 +69,7 @@ const MapPost = (props) => {
       <MapSidebar
       title={props.title}
       />
-      <CreationModal/>
+      <CreationModal postId={featurePostId}/>
       <Map/>
     </Dimmer.Dimmable>
   );
