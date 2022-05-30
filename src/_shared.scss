@@ -50,6 +50,6 @@
     100% {opacity: 1;}
 }
 
-$sidebarWidth:30vw;
+$sidebarWidth:MIN(250px,30vw);
 $sidebarHandleWidth:25px;
-$logoContainerHeight:20vh;
+$logoContainerHeight:MIN(125px, 20vh);

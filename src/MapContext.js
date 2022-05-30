@@ -473,7 +473,6 @@ export function MapProvider({children}){
 
 	},[rawMapData])
 
-
 	//set global marker filters
   useEffect(()=>{
 
@@ -500,62 +499,60 @@ export function MapProvider({children}){
   },[tagsFilter,formatsFilter,zoomFilter])
 
 
-		//build features tags filter
-	  useEffect(()=>{
-	    const buildFilter = tags => {
+	//build features tags filter
+  useEffect(()=>{
+    const buildFilter = tags => {
 
-	      //no tags set
-	      if ( (tags || []).length === 0) return;
+      //no tags set
+      if ( (tags || []).length === 0) return;
 
-	      //expression for each tag
-	      const tagFilters = tags.map(tag=>['in',tag,['get', 'tag_slugs']]) //URGENT TOU FIX
+      //expression for each tag
+      const tagFilters = tags.map(tag=>['in',tag,['get', 'tag_slugs']]) //URGENT TOU FIX
 
-	      return ['any'].concat(tagFilters);
+      return ['any'].concat(tagFilters);
 
-	    }
+    }
 
-	    let filter = buildFilter(markerTagsDisabled);
+    let filter = buildFilter(markerTagsDisabled);
 
-	    if (filter){//exclude all
-	      filter = ['!',filter];
-	    }
+    if (filter){//exclude all
+      filter = ['!',filter];
+    }
 
-	    setTagsFilter(filter);
-	  },[markerTagsDisabled])
+    setTagsFilter(filter);
+  },[markerTagsDisabled])
 
-	  //build features formats filter
-	  useEffect(()=>{
-	    const buildFilter = formats => {
+  //build features formats filter
+  useEffect(()=>{
+    const buildFilter = formats => {
 
-	      //no formats set
-	      if ( (formats || []).length === 0) return;
+      //no formats set
+      if ( (formats || []).length === 0) return;
 
-	      return ['in', ['get', 'format'], ['literal', formats]];
+      return ['in', ['get', 'format'], ['literal', formats]];
 
-	    }
+    }
 
-	    let filter = buildFilter(markerFormatsDisabled);
+    let filter = buildFilter(markerFormatsDisabled);
 
-	    if (filter){//exclude all
-	      filter = ['!',filter];
-	    }
+    if (filter){//exclude all
+      filter = ['!',filter];
+    }
 
-	    setFormatsFilter(filter);
-	  },[markerFormatsDisabled])
+    setFormatsFilter(filter);
+  },[markerFormatsDisabled])
 
-	  //set global marker filters
-	  useEffect(()=>{
-	    if (mapboxMap === undefined) return;
-	    console.log("RUN GLOBAL FILTER",markersFilter,mapboxMap);
+  //set global marker filters
+  useEffect(()=>{
+    if (mapboxMap === undefined) return;
+    console.log("RUN GLOBAL FILTER",markersFilter,mapboxMap);
 
-	    mapboxMap.setFilter("creations",markersFilter);
-	    mapboxMap.setFilter("annotationsHandles",markersFilter);
-			mapboxMap.setFilter("annotationsFill",markersFilter);
-			mapboxMap.setFilter("annotationsStroke",markersFilter);
+    mapboxMap.setFilter("creations",markersFilter);
+    mapboxMap.setFilter("annotationsHandles",markersFilter);
+		mapboxMap.setFilter("annotationsFill",markersFilter);
+		mapboxMap.setFilter("annotationsStroke",markersFilter);
 
-	  },[markersFilter])
-
-
+  },[markersFilter])
 
 	useEffect(()=>{
 

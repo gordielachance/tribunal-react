@@ -127,7 +127,7 @@
 #site-logo{
   z-index:10;
   position:absolute;
-  width:$sidebarWidth;
+  width:MAX(125px,$sidebarWidth);
   height:$logoContainerHeight;
   a{
     width:100%;
@@ -138,6 +138,7 @@
     display:block;
   }
   img{
+    max-height:125px;
     height:100%;
     width:auto;
   }
