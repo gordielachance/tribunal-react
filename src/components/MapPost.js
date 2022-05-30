@@ -14,24 +14,23 @@ import Map from "./Map";
 
 const MapPost = (props) => {
 
-  const {featurePostId} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,setActiveFeatureId} = useMap();
+  const {postFeatureId} = useParams();
+  const {mapboxMap,mapData,setRawMapData,mapHasInit,setActiveFeatureId,getFeatureById} = useMap();
+  const [activePostId,setActivePostId] = useState();
 
   const [loading,setLoading] = useState(true);
 
   //marker in URL
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    if (featurePostId === undefined) return;
+    if (postFeatureId === undefined) return;
 
-    //get the source feature based on its post ID
-    const creationFeatures = mapData?.sources.creations?.data.features || [];
-    const feature = creationFeatures.find(feature => {
-      return (feature.properties.post_id === parseInt(featurePostId));
-    })
+    const feature = getFeatureById('creations-'+postFeatureId);
 
     if (feature){
-      DEBUG && console.log("SET ACTIVE FEATURE BASED ON THE POST ID",featurePostId,feature);
+      DEBUG && console.log("SET ACTIVE FEATURE BASED ON THE POST ID",postFeatureId,feature);
+
+      setActivePostId(feature.properties.post_id);
 
       //center on the marker since we need to have it in the viewport
       mapboxMap.jumpTo({
@@ -46,7 +45,7 @@ const MapPost = (props) => {
 
     }
 
-  },[featurePostId,mapboxMap])
+  },[postFeatureId,mapboxMap])
 
   //initialize map data
   useEffect(()=>{
@@ -68,7 +67,7 @@ const MapPost = (props) => {
       <MapSidebar
       title={props.title}
       />
-      <CreationModal postId={featurePostId}/>
+      <CreationModal postId={activePostId}/>
       <Map/>
     </Dimmer.Dimmable>
   );

@@ -22,7 +22,8 @@ const FeaturePopupContent = (props) => {
   const hasMore = feature?.properties.has_more;
 
   const handleClick = () => {
-    const url = getMarkerUrl(mapPostId,mapPostSlug,feature.properties.post_id,feature.properties.slug);
+    const realId = feature.properties.id.replace("creations-", "");
+    const url = getMarkerUrl(mapPostId,mapPostSlug,realId,feature.properties.slug);
     navigate(url);
   }
 

@@ -27,7 +27,7 @@ function Layout() {
         <Route path="/agenda" element={<AgendaPage/>} />
         <Route path="/credits" element={<CreditsPage/>} />
         <Route exact path="/carte/:mapPostId/:mapPostSlug" element={<SingleMapPage/>} />
-        <Route path="/carte/:mapPostId/:mapPostSlug/creation/:featurePostId/:featurePostSlug" element={<SingleMapPage/>} />
+        <Route path="/carte/:mapPostId/:mapPostSlug/creation/:postFeatureId/:featurePostSlug" element={<SingleMapPage/>} />
         <Route path='*' component={NotFound} />
       </Routes>
     </div>
