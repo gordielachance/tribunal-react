@@ -15,6 +15,14 @@
   animation: opacityPulse 0.2s linear 2;
 }
 
+.ui{
+  &.page{
+    &.dimmer{
+      padding:0!important;//remove padding (for mobile)
+    }
+  }
+}
+
 .cover-img{
   &img{
     vertical-align: top;
