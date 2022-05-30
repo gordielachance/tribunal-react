@@ -26,14 +26,14 @@ const SingleMapPage = (props) => {
   },[])
 
   return(
-    <Container id="singleMapPage" className="page horizontal-page">
+    <div id="singleMapPage" className="page horizontal-page">
       <MapProvider>
         <MapPost
         title={post?.title.react}
         mapData={post?.map}
         />
       </MapProvider>
-    </Container>
+    </div>
   )
 }
 
