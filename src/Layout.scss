@@ -137,12 +137,10 @@
   position:absolute;
   width:$sidebarWidth;
   height:$logoContainerHeight;
-  display:flex;
-  align-items: center;
-  justify-content: center;
   a{
-    width:125px;
-    height:125px;
+    width:100%;
+    height:100%;
+    text-align:center;
     overflow:visible;
     position:relative;
     display:block;

@@ -40,7 +40,7 @@ const MapPost = (props) => {
   },[mapboxMap]);
 
   return (
-    <Dimmer.Dimmable as={Container} dimmed={loading} id="map-post-container">
+    <Dimmer.Dimmable dimmed={loading} id="map-post-container">
       <Dimmer active={loading} inverted>
         <Loader />
       </Dimmer>
