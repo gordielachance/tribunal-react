@@ -6,9 +6,6 @@ const MapPopup = (props) => {
   const {mapboxMap} = useMap();
   const popupRef = useRef();
 
-
-
-
   //on init
   useEffect(() => {
     if (mapboxMap === undefined) return;
@@ -20,8 +17,11 @@ const MapPopup = (props) => {
     .setLngLat(props.lngLat)
     .setDOMContent(popupRef.current)
     .addTo(mapboxMap)
+    .on('close',props.onClose)
 
-    return popup.remove;
+    return () => {
+      popup.remove();
+    };
 
   }, [props.lngLat,props.children]);
 
