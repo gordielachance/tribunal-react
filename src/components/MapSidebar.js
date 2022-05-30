@@ -115,57 +115,62 @@ const MapSidebar = (props) => {
           <Link to="/cartes">Retour aux cartes</Link>
         </div>
         <div id="sidebar-content">
-          <div id="map-header">
-            <h3>{props.title}</h3>
+          {
+            isActive &&
+            <>
+              <div id="map-header">
+                <h3>{props.title}</h3>
 
-            <Menu id="map-menu" pointing secondary>
+                <Menu id="map-menu" pointing secondary>
 
-                <Menu.Item
-                  id="map-menu-features"
-                  name='Features'
-                  active={section === 'features'}
-                  onClick={e=>setSection('features')}
-                >
-                <Icon name="circle"/>
-                Liste
-              </Menu.Item>
+                    <Menu.Item
+                      id="map-menu-features"
+                      name='Features'
+                      active={section === 'features'}
+                      onClick={e=>setSection('features')}
+                    >
+                    <Icon name="circle"/>
+                    Liste
+                  </Menu.Item>
 
-              <Menu.Item
-                id="map-menu-settings"
-                name='Filtres'
-                active={section === 'settings'}
-                onClick={e=>setSection('settings')}
-              >
-                <Icon name="setting"/>
-                Filtres
-              </Menu.Item>
+                  <Menu.Item
+                    id="map-menu-settings"
+                    name='Filtres'
+                    active={section === 'settings'}
+                    onClick={e=>setSection('settings')}
+                  >
+                    <Icon name="setting"/>
+                    Filtres
+                  </Menu.Item>
 
-            </Menu>
-          </div>
-          <div
-          id="map-sections"
-          className={classNames({
-            mapTransition: mapTransition
-          })}>
-            {
-              (section === 'settings') &&
-              <MapSettings
-              sortBy={props.sortMarkerBy}
-              onSortBy={props.onSortBy}
-              disabledFormats={props.markerFormatsDisabled}
-              onDisableFormats={props.onDisableFormats}
-              />
-            }
-            {
-              (section === 'features') &&
-              <FeaturesList
-              features={sidebarFeatures}
-              disabledTags={props.markerTagsDisabled}
-              sortBy={props.sortMarkerBy}
-              />
-            }
+                </Menu>
+              </div>
+              <div
+              id="map-sections"
+              className={classNames({
+                mapTransition: mapTransition
+              })}>
+                {
+                  (section === 'settings') &&
+                  <MapSettings
+                  sortBy={props.sortMarkerBy}
+                  onSortBy={props.onSortBy}
+                  disabledFormats={props.markerFormatsDisabled}
+                  onDisableFormats={props.onDisableFormats}
+                  />
+                }
+                {
+                  (section === 'features') &&
+                  <FeaturesList
+                  features={sidebarFeatures}
+                  disabledTags={props.markerTagsDisabled}
+                  sortBy={props.sortMarkerBy}
+                  />
+                }
+              </div>
+            </>
+          }
         </div>
-      </div>
       </div>
       <div className="sidebar-toggle clickable" onClick={e=>{toggleSidebar()}} >
         <span>
