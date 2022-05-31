@@ -260,11 +260,14 @@ const Map = (props) => {
         //TOUFIX ULTRA URGENT
         //TEMPORARY FIX because images doesn't show up on mobile devices
         //replace image URL by old server URL
-        const old_wp_url = 'https://www.tribunaldesprejuges.org';
-        mapData.sources.annotationsPolygons.data.features = mapData.sources.annotationsPolygons.data.features.map(feature=>{
-          feature.properties.image_url = feature.properties.image_url.replace(WP_URL,old_wp_url);
-          return feature;
-        })
+        if (mapData.sources?.annotationsPolygons){
+          const old_wp_url = 'https://www.tribunaldesprejuges.org';
+          mapData.sources.annotationsPolygons.data.features = mapData.sources.annotationsPolygons.data.features.map(feature=>{
+            feature.properties.image_url = feature.properties.image_url.replace(WP_URL,old_wp_url);
+            return feature;
+          })
+        }
+
 
         //init mapbox sources
         for (var key in mapData.sources) {
