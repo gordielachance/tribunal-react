@@ -57,7 +57,7 @@ const MapSidebar = (props) => {
   useEffect(()=>{
     if (!mapHasInit) return;
 
-    mapboxMap.once('idle',populateSidebarFeatures);//on init
+    populateSidebarFeatures();
     mapboxMap.on('moveend',populateSidebarFeatures);
 
   },[mapHasInit])
