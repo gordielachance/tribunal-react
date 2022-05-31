@@ -126,7 +126,7 @@ const FeaturesList = props => {
   }
 
   const handleClick = feature => {
-    navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
+    navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id,'full'));
   }
 
   const toggleHoverFeature = (feature,bool) => {
