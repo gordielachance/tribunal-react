@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Routes,Route, Link,useLocation } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
@@ -5,6 +6,8 @@ import './Layout.scss';
 import {PageHome,PageAgenda,PageCreations,PageCredits} from "./components/PagesIframe";
 import PageMaps from "./components/PageMaps";
 import PageSingleMap from "./components/PageSingleMap";
+import useWindowDimensions from './components/ScreenSize';
+import classNames from "classnames";
 
 //arrays of pages on the two axis
 export const menuItems = {
@@ -62,13 +65,26 @@ export const getMenuAxisItems = path => {
 function Layout() {
 
   const location = useLocation();
+  const screenSize = useWindowDimensions();
+  const [vertical,setVertical] = useState();
 
   const NotFound = () => (
     <h2>404 Page Not Found</h2>
   );
 
+  //check is vertical
+  useEffect(()=>{
+    const bool = screenSize.height > screenSize.width;
+    setVertical(bool);
+  },[screenSize]);
+
   return (
-    <div id="layout">
+    <div
+    id="layout"
+    className={classNames({
+      vertical: vertical
+    })}
+    >
       <div id="site-logo">
         <Link to="/">
           <img src="https://www.tribunaldesprejuges.org/wordpress/wp-content/themes/tribunaldesprejuges/_inc/images/logo-tdp.png"/>
