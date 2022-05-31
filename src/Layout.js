@@ -2,9 +2,9 @@ import { Routes,Route, Link,useLocation } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
-import {HomePage,AgendaPage,CreditsPage} from "./components/IframePages";
-import MapListPage from "./components/MapListPage";
-import SingleMapPage from "./components/SingleMapPage";
+import {PageHome,PageAgenda,PageCreations,PageCredits} from "./components/PagesIframe";
+import PageMaps from "./components/PageMaps";
+import PageSingleMap from "./components/PageSingleMap";
 
 function Layout() {
 
@@ -22,14 +22,15 @@ function Layout() {
         </Link>
       </div>
      <Routes location={location}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/agenda" element={<AgendaPage/>} />
-        <Route path="/credits" element={<CreditsPage/>} />
+        <Route path="/" element={<PageHome />} />
+        <Route path="/agenda" element={<PageAgenda/>} />
+        <Route path="/creations" element={<PageCreations/>} />
+        <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">
-          <Route index element={<MapListPage />} />
-          <Route path=":mapPostId/:mapPostSlug" element={<SingleMapPage />} />
-          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={<SingleMapPage />} />
-          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={<SingleMapPage />} />
+          <Route index element={<PageMaps />} />
+          <Route path=":mapPostId/:mapPostSlug" element={<PageSingleMap />} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={<PageSingleMap />} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={<PageSingleMap />} />
         </Route>
 
         <Route path='*' component={NotFound} />

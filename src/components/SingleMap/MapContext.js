@@ -22,6 +22,7 @@ export function MapProvider({children}){
 	const [rawMapData,setRawMapData] = useState(); //map data before it is cleaned
 	const [mapData,setMapData] = useState();
 
+	const [sidebarFeatures,setSidebarFeatures] = useState();
 	const [activeFeature,setActiveFeature] = useState();
 	const prevActiveFeature = useRef();
 
@@ -613,7 +614,9 @@ export function MapProvider({children}){
 		toggleHoverTag:toggleHoverTag,
 		toggleHoverFormat:toggleHoverFormat,
 		zoomOnFeatures:zoomOnFeatures,
-		markersFilter:markersFilter
+		markersFilter:markersFilter,
+		sidebarFeatures:sidebarFeatures,
+		setSidebarFeatures:setSidebarFeatures,
 	};
 
   return (

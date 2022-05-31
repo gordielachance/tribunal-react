@@ -15,7 +15,7 @@ import Map from "./Map";
 const MapPost = (props) => {
 
   const {urlFeatureAction} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature} = useMap();
+  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,sidebarFeatures} = useMap();
   const [loading,setLoading] = useState(true);
 
 

@@ -7,7 +7,7 @@ import MapPost from "./SingleMap/MapPost";
 
 
 
-const SingleMapPage = (props) => {
+const PageSingleMap = (props) => {
 
   const { mapPostId } = useParams();
 
@@ -36,4 +36,4 @@ const SingleMapPage = (props) => {
   )
 }
 
-export default SingleMapPage
+export default PageSingleMap

@@ -12,7 +12,7 @@ const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState(true);
   const [section,setSection] = useState('features');
-  const [sidebarFeatures,setSidebarFeatures] = useState();
+
 
   const [loading,setLoading] = useState(true);
 
@@ -20,47 +20,9 @@ const MapSidebar = (props) => {
     mapboxMap,
     mapHasInit,
     markersFilter,
+    sidebarFeatures
   } = useMap();
 
-  const populateSidebarFeatures = e => {
-    //get visible features on map for use in the sidebar
-
-    const getFeatures = () => {
-
-      const getVisibleCreationFeatures = () => {
-        let features = mapboxMap.queryRenderedFeatures({
-          layers: ['creations'],
-          filter: markersFilter
-        }) || [];
-        return getUniqueMapFeatures(features);
-      }
-
-      const getVisibleAnnotationFeatures = () => {
-        let features = mapboxMap.queryRenderedFeatures({
-          layers: ['annotations'],
-          filter: markersFilter
-        }) || [];
-        return getUniqueMapFeatures(features);
-      }
-
-      const creationFeatures = getVisibleCreationFeatures();
-      const annotationFeatures = getVisibleAnnotationFeatures();
-
-      return creationFeatures.concat(annotationFeatures);
-    }
-
-    const features = getFeatures();
-
-    setSidebarFeatures(features);
-  }
-
-  useEffect(()=>{
-    if (!mapHasInit) return;
-
-    populateSidebarFeatures();
-    mapboxMap.on('moveend',populateSidebarFeatures);
-
-  },[mapHasInit])
 
   //on sidebar features first init
   useEffect(()=>{
@@ -83,11 +45,6 @@ const MapSidebar = (props) => {
     });
   },[isActive])
 
-  //when filters are updated
-  useEffect(()=>{
-    if (mapboxMap === undefined) return;
-    populateSidebarFeatures();
-  },[markersFilter])
 
   return (
       <div

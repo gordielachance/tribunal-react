@@ -28,7 +28,8 @@ const Map = (props) => {
     setMapHasInit,
     setMapFeatureState,
     markersFilter,
-    getHandlesByAnnotationPolygonId
+    getHandlesByAnnotationPolygonId,
+    setSidebarFeatures
   } = useMap();
 
   const initializeMap = data => {
@@ -181,6 +182,39 @@ const Map = (props) => {
     return features.find(feature => feature.properties.id === parseInt(urlFeatureId));
 
   },[mapData,urlSourceId,urlFeatureId])
+
+  const populateSidebarFeatures = e => {
+    //get visible features on map for use in the sidebar
+
+    const getFeatures = () => {
+
+      const getVisibleCreationFeatures = () => {
+        let features = mapboxMap.queryRenderedFeatures({
+          layers: ['creations'],
+          filter: markersFilter
+        }) || [];
+        return getUniqueMapFeatures(features);
+      }
+
+      const getVisibleAnnotationFeatures = () => {
+        let features = mapboxMap.queryRenderedFeatures({
+          layers: ['annotations'],
+          filter: markersFilter
+        }) || [];
+        return getUniqueMapFeatures(features);
+      }
+
+      const creationFeatures = getVisibleCreationFeatures();
+      const annotationFeatures = getVisibleAnnotationFeatures();
+
+      return creationFeatures.concat(annotationFeatures);
+    }
+
+    const features = getFeatures();
+
+    setSidebarFeatures(features);
+  }
+
 
   //set active marker from URL
   useEffect(()=>{
@@ -470,6 +504,20 @@ const Map = (props) => {
 
     })
 
+  },[markersFilter])
+
+  useEffect(()=>{
+    if (!mapHasInit) return;
+
+    populateSidebarFeatures();
+    mapboxMap.on('moveend',populateSidebarFeatures);
+
+  },[mapHasInit])
+
+  //when filters are updated
+  useEffect(()=>{
+    if (mapboxMap === undefined) return;
+    populateSidebarFeatures();
   },[markersFilter])
 
   return (

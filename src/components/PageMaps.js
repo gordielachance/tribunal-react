@@ -3,7 +3,7 @@ import { Loader } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
 import {getMapUrl} from "./../Constants";
 
-const MapListPage = (props) => {
+const PageMaps = (props) => {
 
   const {mapPosts} = useApp();
   const loading = (mapPosts === undefined);
@@ -43,4 +43,4 @@ const MapListPage = (props) => {
   )
 }
 
-export default MapListPage
+export default PageMaps
