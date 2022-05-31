@@ -126,7 +126,14 @@ const FeaturesList = props => {
   }
 
   const handleClick = feature => {
-    navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id,'full'));
+    switch(feature.source){
+      case 'creations':
+        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id,'full'));
+      break;
+      default:
+        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
+    }
+
   }
 
   const toggleHoverFeature = (feature,bool) => {
