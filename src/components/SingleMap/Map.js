@@ -2,17 +2,15 @@ import React, { useEffect }  from "react";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-
-import {MAPBOX_TOKEN,DEBUG,WP_URL,getUniqueMapFeatures,getFeatureUrl} from "./../Constants";
-
-
-import FeaturePopup from "./FeaturePopup";
-
-import './Map.scss';
 import * as turf from "@turf/turf";
-import { useMap } from '../MapContext';
 import { useNavigate,useParams } from 'react-router-dom';
 
+
+import {MAPBOX_TOKEN,DEBUG,WP_URL,getFeatureUrl} from "../../Constants";
+import {getUniqueMapFeatures} from "./MapFunctions";
+import { useMap } from './MapContext';
+import FeaturePopup from "./FeaturePopup";
+import './Map.scss';
 
 const Map = (props) => {
 

@@ -3,13 +3,13 @@ import { useParams } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Loader,Dimmer } from 'semantic-ui-react';
 
-import {DEBUG} from "./../Constants";
+import {DEBUG} from "../../Constants";
 
 import './Map.scss';
 import CreationModal from "./CreationModal";
 import MapSidebar from "./MapSidebar";
 
-import { useMap } from '../MapContext';
+import { useMap } from './MapContext';
 import Map from "./Map";
 
 const MapPost = (props) => {

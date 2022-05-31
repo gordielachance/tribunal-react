@@ -2,13 +2,16 @@
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
 import {
-	DEBUG,
+	DEBUG
+} from "../../Constants";
+import * as turf from "@turf/turf";
+
+import {
 	isFeaturesSource,
 	sortFeaturesByDistance,
 	bboxToCircle,
 	getFeaturesTags
-} from "./Constants";
-import * as turf from "@turf/turf";
+} from "./MapFunctions";
 
 const MapContext = createContext();
 

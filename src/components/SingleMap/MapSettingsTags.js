@@ -1,7 +1,7 @@
 import { Icon } from 'semantic-ui-react';
-import { useApp } from '../AppContext';
-import { useMap } from '../MapContext';
-import {getFeaturesTags,getIdsForTag} from "./../Constants";
+import { useApp } from '../../AppContext';
+import { useMap } from './MapContext';
+import {getFeaturesTags,getIdsForTag} from "./MapFunctions";
 
 const MapSettingsTags = props => {
 

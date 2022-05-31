@@ -1,7 +1,7 @@
 import React  from "react";
-import MapSettingsTags from "../components/MapSettingsTags";
-import MapSettingsFormats from "../components/MapSettingsFormats";
-import MapSettingsSort from "../components/MapSettingsSort";
+import MapSettingsTags from "./MapSettingsTags";
+import MapSettingsFormats from "./MapSettingsFormats";
+import MapSettingsSort from "./MapSettingsSort";
 
 const MapSettings = (props) => {
 

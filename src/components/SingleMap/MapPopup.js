@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
-import { useMap } from '../MapContext';
+import { useMap } from './MapContext';
 
 const MapPopup = (props) => {
   const {mapboxMap} = useMap();

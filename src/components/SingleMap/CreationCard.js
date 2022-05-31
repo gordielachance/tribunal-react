@@ -1,9 +1,9 @@
 import React from "react";
 import classNames from "classnames";
 import { Label,Icon } from 'semantic-ui-react';
-import {getFormatIcon,getFormatText} from "../Constants";
-import { useApp } from '../AppContext';
-import { useMap } from '../MapContext';
+import { useApp } from '../../AppContext';
+import { useMap } from './MapContext';
+import {getFormatIcon,getFormatText} from "./MapFunctions";
 
 function maybeDecodeJson(value){
   return (typeof value === 'string') ? JSON.parse(value) : value;
@@ -43,15 +43,19 @@ const TagLabel = props => {
 
 const FeatureTags = (props) => {
 
-  const formatIcon = props.format ? getFormatIcon(props.format) : undefined;
-  const formatText = props.format ? getFormatText(props.format) : undefined;
+  console.log("YOP",props);
+
+  const featureTags = (props.tags || []);
+  const featureFormat = props.format;
+  const formatIcon = featureFormat ? getFormatIcon(featureFormat) : undefined;
+  const formatText = featureFormat ? getFormatText(featureFormat) : undefined;
 
   const {tags} = useApp();
 
   return (
     <>
     {
-      (props.tags || props.format) &&
+      (featureTags || formatText) &&
         <ul className="feature-tags feature-meta">
         {
           formatText &&
@@ -60,7 +64,7 @@ const FeatureTags = (props) => {
           </li>
         }
         {
-            (props.tags || []).map((slug,k) => {
+            featureTags.map((slug,k) => {
 
               const tag = (tags || []).find(term => term.slug === slug);
               const name = tag?.name || slug;

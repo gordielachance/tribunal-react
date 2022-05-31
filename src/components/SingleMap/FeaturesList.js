@@ -1,10 +1,10 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
-import {DEBUG,getFeatureUrl} from "./../Constants";
-import { CreationCard } from "./CreationCard";
-import {setFeatureDistance,getHumanDistance} from "../Constants";
-import { useMap } from '../MapContext';
 import { useNavigate,useParams } from 'react-router-dom';
+import {DEBUG,getFeatureUrl} from "../../Constants";
+import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
+import { useMap } from './MapContext';
+import { CreationCard } from "./CreationCard";
 
 const FeaturesList = props => {
 

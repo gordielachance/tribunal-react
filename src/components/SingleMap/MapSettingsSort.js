@@ -1,5 +1,5 @@
 import { Icon } from 'semantic-ui-react';
-import { useMap } from '../MapContext';
+import { useMap } from './MapContext';
 
 const MapSettingsSort = props => {
   const {

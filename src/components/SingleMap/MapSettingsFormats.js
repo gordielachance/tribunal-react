@@ -1,6 +1,6 @@
 import { Icon } from 'semantic-ui-react';
-import {getFormatIcon,getFormatText,getFeaturesFormats,getIdsForFormat} from "../Constants";
-import { useMap } from '../MapContext';
+import {getFormatIcon,getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
+import { useMap } from './MapContext';
 
 const MapSettingsFormats = props => {
 

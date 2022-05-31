@@ -2,8 +2,8 @@ import React,{useState,useEffect} from "react";
 import { useParams } from 'react-router-dom';
 import DatabaseAPI from "../databaseAPI/api";
 
-import { MapProvider } from "../MapContext";
-import MapPost from "./MapPost";
+import { MapProvider } from "./SingleMap/MapContext";
+import MapPost from "./SingleMap/MapPost";
 
 
 

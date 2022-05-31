@@ -1,9 +1,9 @@
 import React, {useState,useEffect,useRef} from 'react';
-import { Modal,Dimmer,Loader } from 'semantic-ui-react';
-import {getWpIframePostUrl,getFeatureUrl} from "./../Constants";
 import { useParams,useNavigate } from 'react-router-dom';
-import {DEBUG} from "./../Constants";
-import { useMap } from '../MapContext';
+import { Modal,Dimmer,Loader } from 'semantic-ui-react';
+
+import {DEBUG,getWpIframePostUrl,getFeatureUrl} from "../../Constants";
+import { useMap } from './MapContext';
 
 //broken: /http://localhost:3000/carte/944/new-demo-map/creation/925/jette-geographie-des-prejuges
 //ok: http://localhost:3000/carte/944/new-demo-map/creation/892/prejuquoi

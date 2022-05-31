@@ -1,14 +1,12 @@
 import React, { useEffect,useState }  from "react";
 import classNames from "classnames";
-
-import {getUniqueMapFeatures} from "../Constants";
-
 import { Link } from "react-router-dom";
 import { Icon,Menu } from 'semantic-ui-react';
 
-import MapSettings from "../components/MapSettings";
-import FeaturesList from "../components/FeaturesList";
-import { useMap } from '../MapContext';
+import {getUniqueMapFeatures} from "./MapFunctions";
+import { useMap } from './MapContext';
+import MapSettings from "./MapSettings";
+import FeaturesList from "./FeaturesList";
 
 const MapSidebar = (props) => {
 
@@ -77,7 +75,7 @@ const MapSidebar = (props) => {
   }
 
   useEffect(()=>{
-    if (mapboxMap===undefined) return;
+    if (!mapHasInit) return;
 
     toggleSidebar(true);
 
@@ -135,12 +133,12 @@ const MapSidebar = (props) => {
 
                   <Menu.Item
                     id="map-menu-settings"
-                    name='Filtres'
+                    name='Légende'
                     active={section === 'settings'}
                     onClick={e=>setSection('settings')}
                   >
                     <Icon name="setting"/>
-                    Filtres
+                    Légende
                   </Menu.Item>
 
                 </Menu>

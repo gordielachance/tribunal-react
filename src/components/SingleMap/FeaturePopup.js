@@ -3,10 +3,10 @@ import { Button } from 'semantic-ui-react';
 
 import MapPopup from "./MapPopup";
 import { CreationCard } from "./CreationCard";
-import { useMap } from '../MapContext';
+import { useMap } from './MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
-import {getFeatureUrl} from "./../Constants";
+import {getFeatureUrl} from "../../Constants";
 
 const FeaturePopupContent = (props) => {
 
