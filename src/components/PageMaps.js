@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Loader } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
 import {getMapUrl} from "./../Constants";
+import PageMenu from "./PageMenu";
 
 const PageMaps = (props) => {
 
@@ -12,6 +13,7 @@ const PageMaps = (props) => {
     <div id="mapListPage" className="page horizontal-page padding-page">
       <div className="page-content">
         <h1>MAPS LIST</h1>
+        <PageMenu/>
         {
 
         <>

@@ -6,6 +6,59 @@ import {PageHome,PageAgenda,PageCreations,PageCredits} from "./components/PagesI
 import PageMaps from "./components/PageMaps";
 import PageSingleMap from "./components/PageSingleMap";
 
+//arrays of pages on the two axis
+export const menuItems = {
+  horizontal:[
+    {
+      path:'/',
+      name:'home'
+    },
+    {
+      path:'/cartes',
+      name:'Cartes'
+    }
+  ],
+  vertical:[
+    {
+      path:'/',
+      name:'home'
+    },
+    {
+      path:'/agenda',
+      name:'Agenda'
+    },
+    {
+      path:'/creations',
+      name:'Créations'
+    },
+    {
+      path:'/credits',
+      name:'Crédits'
+    }
+  ]
+}
+
+//Select the axis depending of the page path
+export const isHorizontalPage = pagePath => {
+  const horizontalPaths = menuItems.horizontal.map(item=>item.path);
+  const xPageIndex = horizontalPaths.indexOf(pagePath);
+  return xPageIndex > -1;
+}
+export const isHorizontalTransition = (path,currentPath) => {
+  return (path === '/') ? isHorizontalPage(currentPath) : isHorizontalPage(path);
+}
+
+export const getMenuAxisItems = path => {
+  const horizontal = isHorizontalPage(path);
+  if (path === '/'){
+    const allItems = menuItems.horizontal.concat(menuItems.vertical.slice(1));
+    const allPaths = [...new Set(allItems.map(item=>item.path))];
+    return allItems;
+  }else{
+    return horizontal ? menuItems.horizontal : menuItems.vertical;
+  }
+}
+
 function Layout() {
 
   const location = useLocation();

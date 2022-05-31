@@ -1,23 +1,11 @@
 import { Routes } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import React, { useRef } from "react";
+import {menuItems,isHorizontalTransition,getMenuAxisItems} from "../Layout";
 
 const dynamicChildFactory = classNames => child => React.cloneElement(child, { classNames });
 
 export const AnimatedRoutes = props => {
-
-  //arrays of pages on the two axis
-  const horizontalPaths = [
-    '/',
-    '/cartes',
-    '/carte/:mapPostId/:mapPostSlug',
-    '/carte/:mapPostId/:mapPostSlug/creation/:urlFeatureId/:urlPostSlug',
-  ]
-  const verticalPaths = [
-    '/',
-    '/agenda',
-    '/credits'
-  ]
 
   const location = props.location;
 
@@ -36,24 +24,27 @@ export const AnimatedRoutes = props => {
       if (newPath === undefined) return;
       if (oldPath === newPath) return;
 
-      //Select the axis depending of the page path
-      const checkIsHorizontal = (oldPath,newPath) => {
-        const checkPage = (newPath==='/') ? oldPath : newPath;
-        const xPageIndex = horizontalPaths.indexOf(checkPage);
-        return xPageIndex > -1;
-      }
+      const isHorizontal = isHorizontalTransition(oldPath,newPath);
 
-      const isHorizontal = checkIsHorizontal(oldPath,newPath);
-      const paths = isHorizontal ? horizontalPaths : verticalPaths;
+      //How much steps
+      const getSteps = (oldPath,newPath) => {
 
-      //How much steps and which direction
-      const getSteps = (paths,oldPath,newPath) => {
-        const pageIndex = paths.indexOf(newPath);
-        const oldPathIndex = paths.indexOf(oldPath);
+        const getPaths = () => {
+          let items = getMenuAxisItems(newPath);
+          if (newPath === '/'){
+            items = getMenuAxisItems(oldPath);
+          }
+          return items.map(item => item.path);
+        }
+
+        const axisPaths = getPaths();
+        const pageIndex = axisPaths.indexOf(newPath);
+        const oldPathIndex = axisPaths.indexOf(oldPath);
         return pageIndex - oldPathIndex;
       }
 
-      const steps = getSteps(paths,oldPath,newPath);
+      const steps = getSteps(oldPath,newPath);
+
       if (!steps) return;
 
 
@@ -63,7 +54,6 @@ export const AnimatedRoutes = props => {
         steps:      Math.abs(steps),
       }
     }
-
 
     const transition = getTransitionData(oldPath,newPath);
     if (!transition) return;
@@ -84,8 +74,10 @@ export const AnimatedRoutes = props => {
 
   }
 
-  const newClass = getTransitionClass(oldPath,newPath);
-  if (newClass){
+
+
+  if (previousPagePath.current){
+    const newClass = getTransitionClass(oldPath,newPath);
     transitionClass.current = newClass;
     console.log("!!!TRANSITION CLASS",transitionClass.current);
   }
