@@ -8,6 +8,7 @@ import {DEBUG} from "../../Constants";
 import './Map.scss';
 import CreationModal from "./CreationModal";
 import MapSidebar from "./MapSidebar";
+import MapLegend from "./MapLegend";
 
 import { useMap } from './MapContext';
 import Map from "./Map";
@@ -40,6 +41,7 @@ const MapPost = (props) => {
         ( activeFeature && (urlFeatureAction==='full') ) &&
         <CreationModal/>
       }
+      <MapLegend features={sidebarFeatures}/>
       <Map/>
     </div>
   );

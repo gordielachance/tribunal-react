@@ -272,3 +272,39 @@ ul.features-selection{
     padding-top:.5em;
   }
 }
+
+#mapBottom{
+  z-index: 1;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.5);
+  width: calc(100% - #{$sidebarWidth} - #{$sidebarHandleWidth});
+  padding: 0.5em;
+  text-align:right;
+  ul#mapLegend{
+    margin-bottom: 0.5em;
+    li{
+      display:inline;
+      .legend-source{
+        &[data-source="annotations"]{
+          .source-icon{
+            color: #0080ff;
+          }
+        }
+
+        &[data-source="creations"]{
+          .source-icon{
+            color: #c6ad09;
+          }
+        }
+      }
+      &:not(:last-child){
+        margin-right: 1em;
+      }
+    }
+  }
+  #mapBottomText{
+    font-size:.8em;
+  }
+}
