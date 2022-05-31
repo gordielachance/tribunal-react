@@ -137,13 +137,31 @@ const FeaturesList = props => {
     <>
     {
       (features || []).length ?
-      <ul id="features-list" className="map-section features-selection">
+      <ul
+      id="features-list"
+      className="map-section features-selection"
+      >
 
         {
           features.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
+
+            return <li
+            key={k}
+            onMouseEnter={e=>toggleHoverFeature(feature,true)}
+            onMouseLeave={e=>toggleHoverFeature(feature,false)}
+            onClick={e=>{handleClick(feature)}}
+            className={classNames({
+              active:   active
+            })}
+            >
+            <p className='sorted-value'>{sortValue}</p>
+            <CreationCard feature={feature}/>
+            </li>
+            /*
+
 
             return (
               <li
@@ -152,14 +170,13 @@ const FeaturesList = props => {
               onMouseEnter={e=>toggleHoverFeature(feature,true)}
               onMouseLeave={e=>toggleHoverFeature(feature,false)}
               onClick={e=>{handleClick(feature)}}
-              className={classNames({
-                active:   active
-              })}
+
               >
                 <p className='sorted-value'>{sortValue}</p>
-                <CreationCard feature={feature}/>
+
               </li>
             )
+            */
           })
         }
       </ul>

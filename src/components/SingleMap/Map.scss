@@ -100,6 +100,13 @@
     justify-content: center;
     align-items: center;
   }
+
+  &.loading{
+    .sidebar-toggle{
+      pointer-events: none;
+    }
+  }
+
 }
 
 ul.features-selection{
@@ -209,12 +216,13 @@ ul.features-selection{
 
 .feature-card{
 
-  &.annotation{
+  &[data-source="annotations"]{
     .feature-icon{
       color: #0080ff;
     }
   }
-  &.creation{
+
+  &[data-source="creations"]{
     .feature-icon{
       color: #c6ad09;
     }

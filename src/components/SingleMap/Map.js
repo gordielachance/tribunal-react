@@ -1,4 +1,4 @@
-import React, { useEffect }  from "react";
+import React, { useEffect,useCallback }  from "react";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -15,9 +15,11 @@ import './Map.scss';
 const Map = (props) => {
 
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug} = useParams();
+  const {mapPostId,mapPostSlug,urlSourceId,urlFeatureId,urlFeatureAction} = useParams();
 
   const {
+    mapHasInit,
+    setActiveFeature,
     activeFeature,
     mapContainerRef,
     mapData,
@@ -32,6 +34,14 @@ const Map = (props) => {
   const initializeMap = data => {
 
     DEBUG && console.log("INIT MAPBOX MAP",data.map);
+
+    const urlFeature = getUrlFeature();
+
+    if (urlFeature){
+      const featureCenter = urlFeature.geometry.coordinates;
+      DEBUG && console.log("INIT MAPBOX MAP ON FEATURE CENTER",featureCenter);
+      data.map.center = featureCenter;
+    }
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
     const map = new mapboxgl.Map({
@@ -158,12 +168,54 @@ const Map = (props) => {
 
   }
 
-  //At init
+  const getUrlFeature = useCallback(() => {
+
+    if (!mapData) return;
+    if (urlSourceId === undefined) return;
+    if (urlFeatureId === undefined) return;
+
+    const sources = mapData?.sources || {};
+    const source = sources[urlSourceId];
+    const features = source?.data.features || [];
+
+    return features.find(feature => feature.properties.id === parseInt(urlFeatureId));
+
+  },[mapData,urlSourceId,urlFeatureId])
+
+  //set active marker from URL
+  useEffect(()=>{
+
+    if (!mapHasInit) return;
+
+    //first, unset active feature so popup gets removed
+    setActiveFeature();
+
+    const urlFeature = getUrlFeature();
+
+    if (urlFeature){
+
+      //center on the marker since we need to have it in the viewport
+      mapboxMap.easeTo({
+        //center: [-75,43],
+        center: urlFeature.geometry.coordinates
+      })
+
+      //once done, set marker as active
+      mapboxMap.once('idle',(e)=>{
+        setActiveFeature(urlFeature);
+      })
+
+    }
+
+  },[mapHasInit,urlSourceId,urlFeatureId]);
+
+  //on data init
   useEffect(() => {
     if (mapData === undefined) return;
     initializeMap(mapData);
   },[mapData]);
 
+  //on map init
   useEffect(() => {
 
     const map = mapboxMap;
@@ -419,14 +471,6 @@ const Map = (props) => {
     })
 
   },[markersFilter])
-
-  //move to feature is an active feature is set
-  useEffect(() => {
-    if (activeFeature === undefined) return;
-    mapboxMap.flyTo({
-      center: activeFeature.geometry.coordinates
-    });
-  },[activeFeature])
 
   return (
     <div id="map-container">

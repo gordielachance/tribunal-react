@@ -537,7 +537,7 @@ export function MapProvider({children}){
   },[markersFilter])
 
 	useEffect(()=>{
-
+		if (!mapHasInit) return;
 		DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 
 		//hide old

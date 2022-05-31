@@ -43,8 +43,6 @@ const TagLabel = props => {
 
 const FeatureTags = (props) => {
 
-  console.log("YOP",props);
-
   const featureTags = (props.tags || []);
   const featureFormat = props.format;
   const formatIcon = featureFormat ? getFormatIcon(featureFormat) : undefined;
@@ -85,12 +83,12 @@ const FeatureTags = (props) => {
 
 export const CreationCard = props => {
 
-
-  const title = props.feature?.properties.title;
-  const description=  props.feature?.properties.excerpt;
-  const format = props.feature?.properties.format;
-  const tags = maybeDecodeJson(props.feature?.properties.tag_slugs);
-  const post_type = props.feature?.properties.post_type;
+  const feature = props.feature;
+  const title = feature?.properties.title;
+  const description=  feature?.properties.excerpt;
+  const format = feature?.properties.format;
+  const tags = maybeDecodeJson(feature?.properties.tag_slugs);
+  const post_type = feature?.properties.post_type;
 
   return(
     <div
@@ -99,6 +97,7 @@ export const CreationCard = props => {
       creation:   (post_type==='tdp_creation'),
       annotation:   (post_type==='tdp_annotation')
     })}
+    data-source={feature.source}
     >
       <div className="feature-header">
         <p className="feature-title">
