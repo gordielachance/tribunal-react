@@ -1,6 +1,6 @@
 import { Routes } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import React, { useRef } from "react";
+import React, { useRef,useState,useEffect } from "react";
 import {menuItems,isHorizontalTransition,getMenuAxisItems} from "../Layout";
 
 const dynamicChildFactory = classNames => child => React.cloneElement(child, { classNames });
@@ -10,9 +10,11 @@ export const AnimatedRoutes = props => {
   const location = props.location;
 
   const previousPagePath = useRef();
-  const transitionClass = useRef();
+  const [transitionClass,setTransitionClass] = useState();
+  const [updateTransition,setUpdateTransition] = useState(0);
+  const [hasEnterTransition,setHasEnterTransition] = useState(true);
+  const [hasExitTransition,setHasExitTransition] = useState(true);
 
-  const oldPath = previousPagePath.current;
   const newPath = location.pathname;
 
   const getTransitionClass = (oldPath,newPath) => {
@@ -56,6 +58,7 @@ export const AnimatedRoutes = props => {
     }
 
     const transition = getTransitionData(oldPath,newPath);
+
     if (!transition) return;
 
     if (transition.horizontal){
@@ -74,25 +77,35 @@ export const AnimatedRoutes = props => {
 
   }
 
+  useEffect(()=>{
+    if (!previousPagePath.current) return;
 
+    let transClass = getTransitionClass(previousPagePath.current,newPath);
 
-  if (previousPagePath.current){
-    const newClass = getTransitionClass(oldPath,newPath);
-    transitionClass.current = newClass;
-    console.log("!!!TRANSITION CLASS",transitionClass.current);
-  }
+    transClass = 'slideRight';
+
+    if (previousPagePath.current === '/credits'){
+      transClass = undefined;
+    }
+
+    if (transClass){
+      console.log("!!!TRANSITION CLASS FOR",previousPagePath.current+' --> '+newPath,transitionClass);
+      setUpdateTransition(updateTransition+1);
+    }
+
+    setTransitionClass(transClass);
+
+  },[previousPagePath.current])
 
   //store last visited page for further use
   previousPagePath.current = location.pathname;
 
-
   return(
-    <TransitionGroup childFactory={dynamicChildFactory(transitionClass.current)}>
+    <TransitionGroup key={updateTransition} enter={hasEnterTransition} exit={hasExitTransition}>
       <CSSTransition
-        classNames={transitionClass.current}
-        key={newPath}
-        timeout={500}
-      >
+      classNames={transitionClass}
+      key={newPath}
+      timeout={500}>
         <Routes location={newPath}>{props.children}</Routes>
       </CSSTransition>
     </TransitionGroup>
