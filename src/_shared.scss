@@ -1,6 +1,70 @@
 $sidebarWidth:MIN(250px,30vw);
 $logoContainerHeight:MIN(125px, 20vh);
 
+
+@font-face{
+  font-family: 'Migrena Grotesque';
+  src:  local('Migrena Grotesque Black'),
+        url('./fonts/Migrena_Grotesque/Migrena_Grotesque-Black.woff') format('woff'),
+        url('./fonts/Migrena_Grotesque/Migrena_Grotesque-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face{
+  font-family: 'Migrena Grotesque';
+  src:  local('Migrena Grotesque Black Italic'),
+        url('./fonts/Migrena_Grotesque/Migrena_Grotesque-Blackitalic.woff') format('woff'),
+        url('./fonts/Migrena_Grotesque/Migrena_Grotesque-Blackitalic.woff2') format('woff2');
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face{
+  font-family: 'Brizeux';
+  src:  local('Brizeux Normal Regular'),
+        url('./fonts/brizeux/brizeux_normal-webfont.woff') format('woff'),
+        url('./fonts/brizeux/brizeux_normal-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face{
+  font-family: 'Brizeux';
+  src:  local('Brizeux Gras Bold'),
+        url('./fonts/brizeux/brizeux_gras-webfont.woff') format('woff'),
+        url('./fonts/brizeux/brizeux_gras-webfont.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face{
+  font-family: 'Brizeux';
+  src:  local('Brizeux Italique Italic'),
+        url('./fonts/brizeux/brizeux_italique-webfont.woff') format('woff'),
+        url('./fonts/brizeux/brizeux_italique-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face{
+  font-family: 'Brizeux Signes';
+  src:  local('Brizeux Signes Regular'),
+        url('./fonts/brizeux/brizeux_signes-webfont.woff') format('woff'),
+        url('./fonts/brizeux/brizeux_signes-webfont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+.migrena{
+  font-family: 'Migrena Grotesque Black', monospace;
+}
+
+.brizeux{
+  font-family: 'Brizeux', Arial, Helvetica, sans-serif;
+}
+
 .clickable{
   cursor:pointer;
 }
