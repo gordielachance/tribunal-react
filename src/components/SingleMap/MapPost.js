@@ -1,9 +1,9 @@
 import React, { useEffect,useState }  from "react";
-import { useParams } from 'react-router-dom';
+import { Link,useParams } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Loader,Dimmer } from 'semantic-ui-react';
 
-import {DEBUG} from "../../Constants";
+import {DEBUG,ImageLogo} from "../../Constants";
 
 import './Map.scss';
 import CreationModal from "./CreationModal";
@@ -12,6 +12,16 @@ import MapLegend from "./MapLegend";
 
 import { useMap } from './MapContext';
 import Map from "./Map";
+
+export const TdpLogoLink = props => {
+  return(
+    <div className="site-logo">
+      <Link to="/">
+        <img src={ImageLogo}/>
+      </Link>
+    </div>
+  )
+}
 
 const MapPost = (props) => {
 
@@ -33,7 +43,8 @@ const MapPost = (props) => {
   },[mapHasInit]);
 
   return (
-    <div id="map-post-container">
+    <div className="page-content">
+
       <MapSidebar
       title={props.title}
       />
@@ -41,6 +52,7 @@ const MapPost = (props) => {
         ( activeFeature && (urlFeatureAction==='full') ) &&
         <CreationModal/>
       }
+      <TdpLogoLink/>
       <MapLegend features={sidebarFeatures}/>
       <Map/>
     </div>

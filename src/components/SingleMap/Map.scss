@@ -1,7 +1,7 @@
 @import "../../_shared";
 
 
-$sidebarCollapsedMargin:MAX(-250px,-30vw);
+
 $sidebarHandleWidth:25px;
 
 $mapLegendHeight:5.5em;
@@ -28,6 +28,25 @@ $mapLegendHeight:5.5em;
   }
 }
 
+.site-logo{
+  width: calc(#{$sidebarWidth} - #{$sidebarHandleWidth});
+  margin:auto;
+  a{
+    width:100%;
+    height:100%;
+    text-align:center;
+    overflow:visible;
+    position:relative;
+    display:block;
+    padding: 1.5em;
+  }
+  img{
+    max-height:125px;
+    height:100%;
+    width:auto;
+  }
+}
+
 #map-container{
 	position:relative;
   margin:0;
@@ -41,7 +60,6 @@ $mapLegendHeight:5.5em;
   z-index: 5;
   background: white;
   height: 100%;
-  padding-top: $logoContainerHeight;
   transition:margin-left .5s, width .5s;
   width:$sidebarWidth;
   padding-right:$sidebarHandleWidth;
@@ -138,14 +156,6 @@ $mapLegendHeight:5.5em;
         }
       }
 
-    }
-  }
-
-
-
-  &.loading{
-    .sidebar-toggle{
-      pointer-events: none;
     }
   }
 
@@ -343,7 +353,8 @@ ul.features-selection{
   }
 }
 #layout.vertical{
+
   #mapBottom{
-    width:calc(100% - #{$sidebarHandleWidth})
+    width:calc(100% - #{$sidebarHandleWidth});
   }
 }

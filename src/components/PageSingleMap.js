@@ -25,7 +25,7 @@ const PageSingleMap = (props) => {
   },[])
 
   return(
-    <div id="singleMapPage" className="page horizontal-page">
+    <div id="singleMapPage" className="page">
       <MapProvider>
         <MapPost
         title={post?.title.react}

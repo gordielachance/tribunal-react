@@ -10,10 +10,12 @@ const PageMaps = (props) => {
   const loading = (mapPosts === undefined);
 
   return(
-    <div id="mapListPage" className="page horizontal-page padding-page">
+    <div id="mapListPage" className="page padding-page">
       <div className="page-content">
-        <h1>MAPS LIST</h1>
-        <PageMenu/>
+        <div className="page-header">
+          <h1>Cartes</h1>
+          <PageMenu/>
+        </div>
         {
 
         <>

@@ -40,7 +40,7 @@ const PageMenu = props => {
   }
 
   return(
-    <ul id="pageMenu">
+    <ul id={props.id} className="pageMenu">
     {
       axisMenuItems.map((item,k) => {
 
@@ -51,6 +51,7 @@ const PageMenu = props => {
 
         return(
           <li
+          data-path={item.path}
           key={k}
           className={classNames({
             active:   isCurrentMenu,

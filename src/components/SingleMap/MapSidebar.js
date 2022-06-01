@@ -8,10 +8,7 @@ import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import MapSettings from "./MapSettings";
 import FeaturesList from "./FeaturesList";
-
-const MapSidebarToggle = props => {
-
-}
+import {TdpLogoLink} from "./MapPost";
 
 const MapSidebar = (props) => {
 
@@ -67,8 +64,8 @@ const MapSidebar = (props) => {
       className={classNames({
         sidebar:  true,
         active:   isActive,
-        loading:  loading,
-        fullScreen:     isFullScreen
+        isLoading:  loading,
+        fullScreen: isFullScreen
       })}
       >
         <Dimmer.Dimmable dimmed={loading} id="sidebar-container">
@@ -76,7 +73,7 @@ const MapSidebar = (props) => {
             <Loader />
           </Dimmer>
           <div id="sidebar-header">
-
+            <TdpLogoLink/>
             <Link to="/cartes">Retour aux cartes</Link>
           </div>
           <div id="sidebar-content">
