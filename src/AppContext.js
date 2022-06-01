@@ -3,17 +3,24 @@
 import React, { useState,useEffect,createContext } from 'react';
 import DatabaseAPI from "./databaseAPI/api";
 import {DEBUG} from "./Constants";
+import useWindowDimensions from './components/ScreenSize';
 
 const AppContext = createContext();
 
 export function AppProvider({children}){
 	const [tags,setTags] = useState();
   const [mapPosts,setMapPosts] = useState();
+	const screenSize = useWindowDimensions();
+  const [verticalScreen,setVerticalScreen] = useState();
+  const [mobileScreen,setMobileScreen] = useState();
 
-	//load home on init
-  useEffect(() => {
-
-  }, []);
+	//check is vertical
+  useEffect(()=>{
+    const isVertical = screenSize.height > screenSize.width;
+    const isMobile = screenSize.width <= 576;
+    setVerticalScreen(isVertical);
+    setMobileScreen(isMobile);
+  },[screenSize]);
 
 	//load maps on init
   useEffect(() => {
@@ -40,7 +47,9 @@ export function AppProvider({children}){
   // Learn more in http://kcd.im/optimize-context
   const value = {
     tags:tags,
-    mapPosts:mapPosts
+    mapPosts:mapPosts,
+		mobileScreen:mobileScreen,
+		verticalScreen:verticalScreen
 	};
 
   return (

@@ -6,8 +6,9 @@ import './Layout.scss';
 import {PageHome,PageAgenda,PageCreations,PageCredits} from "./components/PagesIframe";
 import PageMaps from "./components/PageMaps";
 import PageSingleMap from "./components/PageSingleMap";
-import useWindowDimensions from './components/ScreenSize';
+
 import classNames from "classnames";
+import { useApp } from './AppContext';
 
 //arrays of pages on the two axis
 export const menuItems = {
@@ -65,28 +66,21 @@ export const getMenuAxisItems = path => {
 function Layout() {
 
   const location = useLocation();
-  const screenSize = useWindowDimensions();
-  const [vertical,setVertical] = useState();
-  const [mobile,setMobile] = useState();
+  const {verticalScreen,mobileScreen} = useApp();
+
 
   const NotFound = () => (
     <h2>404 Page Not Found</h2>
   );
 
-  //check is vertical
-  useEffect(()=>{
-    const isVertical = screenSize.height > screenSize.width;
-    const isMobile = screenSize.width <= 576;
-    setVertical(isVertical);
-    setMobile(isMobile);
-  },[screenSize]);
+
 
   return (
     <div
     id="layout"
     className={classNames({
-      vertical: vertical,
-      mobile: mobile
+      vertical: verticalScreen,
+      mobile: mobileScreen
     })}
     >
       <div id="site-logo">

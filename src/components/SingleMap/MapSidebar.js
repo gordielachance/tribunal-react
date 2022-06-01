@@ -4,13 +4,22 @@ import { Link } from "react-router-dom";
 import { Icon,Menu,Loader,Dimmer } from 'semantic-ui-react';
 
 import {getUniqueMapFeatures} from "./MapFunctions";
+import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import MapSettings from "./MapSettings";
 import FeaturesList from "./FeaturesList";
 
+const MapSidebarToggle = props => {
+
+}
+
 const MapSidebar = (props) => {
 
-  const [isActive, setisActive] = useState(true);
+  const {verticalScreen,mobileScreen} = useApp();
+
+  const [isActive, setisActive] = useState(!verticalScreen);
+  const [isFullScreen, setIsFullScreen] = useState(verticalScreen);
+
   const [section,setSection] = useState('features');
 
 
@@ -51,7 +60,8 @@ const MapSidebar = (props) => {
       className={classNames({
         sidebar:  true,
         active:   isActive,
-        loading:  loading
+        loading:  loading,
+        fullScreen:     isFullScreen
       })}
       >
         <Dimmer.Dimmable dimmed={loading} id="sidebar-container">
@@ -70,12 +80,12 @@ const MapSidebar = (props) => {
 
                   <Menu.Item
                     id="map-menu-features"
-                    name='Features'
+                    name='Index'
                     active={section === 'features'}
                     onClick={e=>setSection('features')}
                   >
                   <Icon name="circle"/>
-                  Liste
+                  Index
                 </Menu.Item>
 
                 <Menu.Item
@@ -98,6 +108,7 @@ const MapSidebar = (props) => {
                 onSortBy={props.onSortBy}
                 disabledFormats={props.markerFormatsDisabled}
                 onDisableFormats={props.onDisableFormats}
+                fullScreen={isFullScreen}
                 />
               }
               {
@@ -106,15 +117,36 @@ const MapSidebar = (props) => {
                 features={sidebarFeatures}
                 disabledTags={props.markerTagsDisabled}
                 sortBy={props.sortMarkerBy}
+                fullScreen={isFullScreen}
                 />
               }
             </div>
           </div>
         </Dimmer.Dimmable>
-        <div className="sidebar-toggle clickable" onClick={e=>{setisActive(!isActive)}} >
+        <div className="sidebar-toggle clickable" >
           <span>
           {
-            isActive ? <Icon name='chevron left' /> : <Icon name='chevron right' />
+            <>
+            {
+              //close sidebar
+              isActive ?
+                (!isFullScreen || verticalScreen) &&
+                <Icon name='chevron left' onClick={e=>{setisActive(false)}}/>
+              :
+              //open sidebar
+              <Icon name='chevron right' onClick={e=>{setisActive(true)}}/>
+            }
+            {
+            //open full
+            (!verticalScreen && isActive && !isFullScreen) &&
+            <Icon name='chevron right' onClick={e=>{setIsFullScreen(true)}}/>
+            }
+            {
+            //close full
+            (!verticalScreen && isActive && isFullScreen) &&
+            <Icon name='chevron left' onClick={e=>{setIsFullScreen(false)}}/>
+            }
+            </>
           }
           </span>
         </div>

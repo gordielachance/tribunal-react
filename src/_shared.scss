@@ -1,3 +1,6 @@
+$sidebarWidth:MIN(250px,30vw);
+$logoContainerHeight:MIN(125px, 20vh);
+
 .clickable{
   cursor:pointer;
 }
@@ -49,8 +52,3 @@
     50% {opacity: 0.5; }
     100% {opacity: 1;}
 }
-
-$sidebarWidth:MIN(250px,30vw);
-$sidebarCollapsedMargin:MAX(-250px,-30vw);
-$sidebarHandleWidth:25px;
-$logoContainerHeight:MIN(125px, 20vh);
