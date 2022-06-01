@@ -32,6 +32,13 @@ const MapSidebar = (props) => {
     sidebarFeatures
   } = useMap();
 
+  //on sidebar features first init
+  useEffect(()=>{
+    if (verticalScreen){
+      setIsFullScreen(true);
+    }
+
+  },[verticalScreen])
 
   //on sidebar features first init
   useEffect(()=>{
@@ -79,6 +86,16 @@ const MapSidebar = (props) => {
               <Menu id="map-menu" pointing secondary>
 
                   <Menu.Item
+                    id="map-menu-settings"
+                    name='Légende'
+                    active={section === 'settings'}
+                    onClick={e=>setSection('settings')}
+                  >
+                    <Icon name="setting"/>
+                    Légende
+                  </Menu.Item>
+
+                  <Menu.Item
                     id="map-menu-features"
                     name='Index'
                     active={section === 'features'}
@@ -86,16 +103,6 @@ const MapSidebar = (props) => {
                   >
                   <Icon name="circle"/>
                   Index
-                </Menu.Item>
-
-                <Menu.Item
-                  id="map-menu-settings"
-                  name='Légende'
-                  active={section === 'settings'}
-                  onClick={e=>setSection('settings')}
-                >
-                  <Icon name="setting"/>
-                  Légende
                 </Menu.Item>
 
               </Menu>

@@ -188,7 +188,7 @@ const FeaturesList = props => {
         }
       </ul>
       :
-      <span>Pas de marqueurs trouvés.</span>
+      <span>Pas de marqueurs trouvés. Veuillez repositionner la carte.</span>
     }
 
     </>

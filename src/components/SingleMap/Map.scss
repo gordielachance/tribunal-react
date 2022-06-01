@@ -155,7 +155,6 @@ $mapLegendHeight:5.5em;
       margin-left:calc(-100% + #{$sidebarHandleWidth});
     }
     #sidebar-container{
-      margin:2em;
       padding-bottom: calc(#{$mapLegendHeight} + #{$sidebarHandleWidth} + 1em + 1em);//+padding+sextra
     }
   }
@@ -301,7 +300,7 @@ ul.features-selection{
 
 #mapBottom{
   z-index: 6;//above sidebar
-
+  overflow:hidden;
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -312,11 +311,13 @@ ul.features-selection{
   height: $mapLegendHeight;
   padding: 0.5em;
   text-align:right;
+  margin-bottom:auto;
   > *{
     margin-top:auto;
   }
   ul#mapLegend{
     margin-bottom: 0.5em;
+    white-space: nowrap;
     li{
       display:inline;
       .legend-source{
@@ -339,5 +340,10 @@ ul.features-selection{
   }
   #mapBottomText{
     font-size:.8em;
+  }
+}
+#layout.vertical{
+  #mapBottom{
+    width:calc(100% - #{$sidebarHandleWidth})
   }
 }
