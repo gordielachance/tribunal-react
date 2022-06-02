@@ -29,6 +29,17 @@ export default class DatabaseAPI extends React.Component {
     .catch(error=>console.error("ERROR GETTING MAPS",error))
   }
 
+  static async getCreations(){
+
+    const config = {
+     method: 'get',
+     url: `/wp/v2/creations`,
+    }
+    return databaseAPI.request(config)
+    .then(resp => resp.data)
+    .catch(error=>console.error("ERROR GETTING MAPS",error))
+  }
+
   static async getMapPost(post_id){
 
     const config = {

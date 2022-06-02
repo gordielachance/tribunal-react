@@ -4,16 +4,15 @@ import { useApp } from '../AppContext';
 import {getMapUrl} from "./../Constants";
 import PageMenu from "./PageMenu";
 
-const PageMaps = (props) => {
+const PagePosts = (props) => {
 
-  const {mapPosts} = useApp();
-  const loading = (mapPosts === undefined);
+  const loading = (props.posts === undefined);
 
   return(
-    <div id="mapListPage" className="page padding-page">
+    <div id={props.id} className="page posts-page padding-page">
       <div className="page-content">
         <div className="page-header">
-          <h1>Cartes</h1>
+          <h1>{props.title}</h1>
           <PageMenu/>
         </div>
         {
@@ -23,12 +22,14 @@ const PageMaps = (props) => {
             loading ?
             <Loader active />
             :
-            <ul>
+            <ul className="posts-list">
               {
-                (mapPosts || []).map((post,key) => {
+                (props.posts || []).map((post,key) => {
                   return(
-                    <li key={post.id}>
-                      <h2><Link to={getMapUrl(post.id,post.slug)}>{post.title.react}</Link></h2>
+                    <li post_id={post.id} key={post.id}>
+                      <h3 className="post-title">
+                        <Link to={getMapUrl(post.id,post.slug)}>{post.title.react}</Link>
+                      </h3>
                       <div>
                         {post.excerpt.react}
                       </div>
@@ -47,4 +48,4 @@ const PageMaps = (props) => {
   )
 }
 
-export default PageMaps
+export default PagePosts

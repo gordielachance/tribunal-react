@@ -4,7 +4,7 @@ import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
 import {PageHome,PageAgenda,PageCreations,PageCredits} from "./components/PagesIframe";
-import PageMaps from "./components/PageMaps";
+import PagePosts from "./components/PagePosts";
 import PageSingleMap from "./components/PageSingleMap";
 import {DEBUG} from "./Constants";
 
@@ -74,6 +74,8 @@ function Layout() {
     <h2>404 Page Not Found</h2>
   );
 
+  const {mapPosts,creationPosts} = useApp();
+
 
 
   return (
@@ -87,10 +89,10 @@ function Layout() {
      <Routes location={location}>
         <Route path="/" element={<PageHome />} />
         <Route path="/agenda" element={<PageAgenda/>} />
-        <Route path="/creations" element={<PageCreations/>} />
+        <Route path="/creations" element={<PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>} />
         <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">
-          <Route index element={<PageMaps />} />
+          <Route index element={<PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>} />
           <Route path=":mapPostId/:mapPostSlug" element={<PageSingleMap />} />
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={<PageSingleMap />} />
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={<PageSingleMap />} />

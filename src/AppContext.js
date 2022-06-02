@@ -10,6 +10,7 @@ const AppContext = createContext();
 export function AppProvider({children}){
 	const [tags,setTags] = useState();
   const [mapPosts,setMapPosts] = useState();
+	const [creationPosts,setCreationPosts] = useState();
 	const screenSize = useWindowDimensions();
   const [verticalScreen,setVerticalScreen] = useState();
   const [mobileScreen,setMobileScreen] = useState();
@@ -24,12 +25,21 @@ export function AppProvider({children}){
 
 	//load maps on init
   useEffect(() => {
-    //LOAD MAPS
     console.info("GETTING MAPS...");
     DatabaseAPI.getMaps()
     .then(resp => {
       console.info("...MAPS LOADED",resp);
       setMapPosts(resp);
+    })
+  }, []);
+
+	//load creations on init
+  useEffect(() => {
+    console.info("GETTING CREATIONS...");
+    DatabaseAPI.getCreations()
+    .then(resp => {
+      console.info("...CREATIONS LOADED",resp);
+      setCreationPosts(resp);
     })
   }, []);
 
@@ -48,6 +58,7 @@ export function AppProvider({children}){
   const value = {
     tags:tags,
     mapPosts:mapPosts,
+		creationPosts:creationPosts,
 		mobileScreen:mobileScreen,
 		verticalScreen:verticalScreen
 	};
