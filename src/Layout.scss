@@ -99,6 +99,19 @@ h2,h3,h4,h5,h6{
     }
   }
 
+  &.posts-page{
+    .posts-list{
+      li{
+        h3.post-title{
+          margin:0;
+        }
+        &:not(:last-child){
+          margin-bottom:1em;
+        }
+      }
+    }
+  }
+
   &#singleMapPage{
     > .page-content{
       width:100vw;
@@ -165,25 +178,25 @@ h2,h3,h4,h5,h6{
   }
 
   &#agendaPage{
-    .page-header h1 {
+    .page-header h1,a {
       color:$colorB;
     }
   }
 
   &#creationsPage{
-    .page-header h1 {
+    .page-header h1,a {
       color:$colorC;
     }
   }
 
   &#creditsPage{
-    .page-header h1 {
+    .page-header h1,a {
       color:$colorD;
     }
   }
 
   &#mapListPage{
-    .page-header h1 {
+    .page-header h1,a {
       color:$colorA;
     }
 
@@ -211,7 +224,7 @@ ul.pageMenu{
       opacity:.8
     }
     a{
-      color:black;
+      color:black!important;
     }
 
   }
