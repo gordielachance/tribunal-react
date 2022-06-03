@@ -256,7 +256,7 @@ const Map = (props) => {
 
     if (map){
       map.on('load', () => {
-        
+
         //init mapbox sources
         for (var key in mapData.sources) {
           const sourceData = mapData.sources[key];
@@ -403,7 +403,7 @@ const Map = (props) => {
             ...mapData.layers[key],
             id:key
           }
-          console.log("ADD LAYER",key,layerData);
+          DEBUG && console.log("ADD LAYER",key,layerData);
           map.addLayer(layerData);
         }
 
