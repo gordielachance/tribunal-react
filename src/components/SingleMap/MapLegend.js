@@ -1,5 +1,6 @@
 import { Icon } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+import { useMap } from './MapContext';
 
 const SourceLegendItem = props => {
   const source = props.source;
@@ -24,10 +25,21 @@ const SourceLegendItem = props => {
 
 const MapLegend = (props) => {
 
+  const {
+    mapboxMap
+  } = useMap();
+
   const features = (props.features || []);
 
   const sources = [...new Set(features.map(feature => feature.source))];
 
+  const toggleLayer = layerId => {
+    const currentBool = mapboxMap.getLayoutProperty(layerId, 'visibility') === 'visible' ? true : false;
+    const value = !currentBool ? 'visible' : 'none';
+
+    map.setLayoutProperty(clickedLayer, 'visibility',value);
+    console.log("TOGGLE",layerId,value);
+  }
 
   return(
     <div id="mapBottom">
@@ -37,7 +49,7 @@ const MapLegend = (props) => {
         {
           sources.map((source,k) => {
             return(
-              <li key={k}><SourceLegendItem source={source}/></li>
+              <li key={k}><SourceLegendItem source={source} onClick={(e)=>toggleLayer(source)}/></li>
             )
           })
         }
