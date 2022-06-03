@@ -56,27 +56,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam imperdiet nulla
 
 }
 
-export const PageAgenda = (props) => {
-  return (
-    <PageIframe
-      id="agendaPage"
-      title="Agenda"
-      url={getWpIframePostUrl(WP_POST_ID_AGENDA)}
-    />
-  )
-}
-
-export const PageCreations = (props) => {
-  return (
-    <PageIframe
-      id="creationsPage"
-      title="Créations"
-      url={getWpIframePostUrl(WP_POST_ID_CONTACT)}
-    />
-  )
-}
-
-
 export const PageCredits = (props) => {
   return (
     <PageIframe

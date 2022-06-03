@@ -4,7 +4,6 @@ import {databaseAPI} from "./connect";
 
 export default class DatabaseAPI extends React.Component {
 
-
   static async getTags(){
     const config = {
      method: 'get',
@@ -37,7 +36,18 @@ export default class DatabaseAPI extends React.Component {
     }
     return databaseAPI.request(config)
     .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING MAPS",error))
+    .catch(error=>console.error("ERROR GETTING CREATIONS",error))
+  }
+
+  static async getEvents(){
+
+    const config = {
+     method: 'get',
+     url: `/wp/v2/agenda`,
+    }
+    return databaseAPI.request(config)
+    .then(resp => resp.data)
+    .catch(error=>console.error("ERROR GETTING EVENTS",error))
   }
 
   static async getMapPost(post_id){
@@ -50,17 +60,6 @@ export default class DatabaseAPI extends React.Component {
     return databaseAPI.request(config)
     .then(resp => resp.data)
     .catch(error=>console.error("ERROR GETTING MAP",post_id,error))
-  }
-
-  static async getMapMarkers(post_id){
-    const config = {
-     method: 'get',
-     url: `wp/v2/maps/${post_id}/markers`,
-    }
-
-    return databaseAPI.request(config)
-    .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING MAP MARKERS",post_id,error))
   }
 
 

@@ -3,7 +3,7 @@ import { Routes,Route, Link,useLocation } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
-import {PageHome,PageAgenda,PageCreations,PageCredits} from "./components/PagesIframe";
+import {PageHome,PageCredits} from "./components/PagesIframe";
 import PagePosts from "./components/PagePosts";
 import PageSingleMap from "./components/PageSingleMap";
 import {DEBUG} from "./Constants";
@@ -74,7 +74,7 @@ function Layout() {
     <h2>404 Page Not Found</h2>
   );
 
-  const {mapPosts,creationPosts} = useApp();
+  const {mapPosts,creationPosts,agendaPosts} = useApp();
 
 
 
@@ -88,7 +88,7 @@ function Layout() {
     >
      <Routes location={location}>
         <Route path="/" element={<PageHome />} />
-        <Route path="/agenda" element={<PageAgenda/>} />
+        <Route path="/agenda" element={<PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>} />
         <Route path="/creations" element={<PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>} />
         <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">

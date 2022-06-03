@@ -11,6 +11,7 @@ export function AppProvider({children}){
 	const [tags,setTags] = useState();
   const [mapPosts,setMapPosts] = useState();
 	const [creationPosts,setCreationPosts] = useState();
+	const [agendaPosts,setAgendaPosts] = useState();
 	const screenSize = useWindowDimensions();
   const [verticalScreen,setVerticalScreen] = useState();
   const [mobileScreen,setMobileScreen] = useState();
@@ -25,21 +26,31 @@ export function AppProvider({children}){
 
 	//load maps on init
   useEffect(() => {
-    console.info("GETTING MAPS...");
+    DEBUG && console.info("GETTING MAPS...");
     DatabaseAPI.getMaps()
     .then(resp => {
-      console.info("...MAPS LOADED",resp);
+      DEBUG && console.info("...MAPS LOADED",resp);
       setMapPosts(resp);
     })
   }, []);
 
 	//load creations on init
   useEffect(() => {
-    console.info("GETTING CREATIONS...");
+    DEBUG && console.info("GETTING CREATIONS...");
     DatabaseAPI.getCreations()
     .then(resp => {
-      console.info("...CREATIONS LOADED",resp);
+      DEBUG && console.info("...CREATIONS LOADED",resp);
       setCreationPosts(resp);
+    })
+  }, []);
+
+	//load events on init
+  useEffect(() => {
+    DEBUG && console.info("GETTING EVENTS...");
+    DatabaseAPI.getEvents()
+    .then(resp => {
+      DEBUG && console.info("...EVENTS LOADED",resp);
+      setAgendaPosts(resp);
     })
   }, []);
 
@@ -59,6 +70,7 @@ export function AppProvider({children}){
     tags:tags,
     mapPosts:mapPosts,
 		creationPosts:creationPosts,
+		agendaPosts:agendaPosts,
 		mobileScreen:mobileScreen,
 		verticalScreen:verticalScreen
 	};
