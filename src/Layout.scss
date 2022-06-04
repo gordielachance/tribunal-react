@@ -220,11 +220,14 @@ h2,h3,h4,h5,h6{
       overflow:visible;
     }
   }
-  .pageMenu{
-    a{
-      color:black!important;
+  &:not(#homePage){
+    .pageMenu{
+      a{
+        color:black;
+      }
     }
   }
+
 }
 
 
