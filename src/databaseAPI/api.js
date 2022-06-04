@@ -59,6 +59,7 @@ export default class DatabaseAPI extends React.Component {
 
     return databaseAPI.request(config)
     .then(resp => resp.data)
+    .then(resp => {console.log("GET MAP POST",JSON.parse(JSON.stringify(resp || [])));return resp;})
     .catch(error=>console.error("ERROR GETTING MAP",post_id,error))
   }
 

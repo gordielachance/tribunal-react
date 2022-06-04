@@ -107,12 +107,12 @@ $mapLegendHeight:5.5em;
         }
         #map-menu-creations{
           .icon{
-            color:#c6ad09;
+            color:$creationsColor;
           }
         }
         #map-menu-annotations{
           .icon{
-            color:#0080ff;
+            color:$annotationsColor;
           }
         }
       }
@@ -202,39 +202,77 @@ ul.features-selection{
       @extend .clickable;
     }
   }
+}
 
 
-  #map-settings-orderby{
-    li{
+#map-settings-orderby{
+  li{
+    .icon{
+      opacity:.25;
+    }
+    &.active{
+      font-weight: bold;
       .icon{
-        opacity:.25;
-      }
-      &.active{
-        font-weight: bold;
-        .icon{
-          opacity:1;
-        }
+        opacity:1;
       }
     }
   }
+}
 
-  #map-settings-tags,
-  #map-settings-formats{
-    li{
+#map-settings-tags,
+#map-settings-formats{
+  li{
+    .icon{
+      opacity:.25;
+    }
+    &.active{
       .icon{
-        opacity:.25;
-      }
-      &.active{
-        .icon{
-          opacity:1;
-        }
-      }
-      .count{
-        margin-left:.5em;
-        color:grey;
+        opacity:1;
       }
     }
+    .count{
+      margin-left:.5em;
+      color:grey;
+    }
+  }
 
+}
+
+#map-settings-layers{
+  li{
+    @extend .clickable;
+    display:inline;
+
+    > span{
+      color:grey;
+
+      &.active{
+        color:black;
+        &[data-layerid="annotationsHandles"]{
+          .layer-icon{
+            color: $annotationsColor;
+          }
+        }
+        &[data-layerid="creations"]{
+          .layer-icon{
+            color: $creationsColor;
+          }
+        }
+        &[data-layerid="events"]{
+          .layer-icon{
+            color: $eventsColor;
+          }
+        }
+      }
+
+    }
+
+
+
+
+    &:not(:last-child){
+      margin-right: 1em;
+    }
   }
 }
 
@@ -247,19 +285,23 @@ ul.features-selection{
 
 }
 
-
-
 .feature-card{
-
-  &[data-source="annotations"]{
-    .feature-icon{
-      color: #0080ff;
-    }
-  }
 
   &[data-source="creations"]{
     .feature-icon{
-      color: #c6ad09;
+      color: $creationsColor;
+    }
+  }
+
+  &[data-source="annotationsHandles"]{
+    .feature-icon{
+      color: $annotationsColor;
+    }
+  }
+
+  &[data-source="events"]{
+    .feature-icon{
+      color: $eventsColor;
     }
   }
 
@@ -325,29 +367,19 @@ ul.features-selection{
   > *{
     margin-top:auto;
   }
-  ul#mapLegend{
-    margin-bottom: 0.5em;
-    white-space: nowrap;
-    li{
-      display:inline;
-      .legend-source{
-        &[data-source="annotations"]{
-          .source-icon{
-            color: #0080ff;
-          }
-        }
-
-        &[data-source="creations"]{
-          .source-icon{
-            color: #c6ad09;
-          }
-        }
-      }
-      &:not(:last-child){
-        margin-right: 1em;
+  #map-settings-layers{
+    h5{
+      display:none;
+    }
+    ul{
+      margin-bottom: 0.5em;
+      white-space: nowrap;
+      li{
+        display:inline;
       }
     }
   }
+
   #mapBottomText{
     font-size:.8em;
   }

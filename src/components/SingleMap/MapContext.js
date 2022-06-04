@@ -22,20 +22,23 @@ export function MapProvider({children}){
 	const [rawMapData,setRawMapData] = useState(); //map data before it is cleaned
 	const [mapData,setMapData] = useState();
 
-	const [sidebarFeatures,setSidebarFeatures] = useState();
+	const [annotationsLayerIds,setAnnotationsLayerIds] = useState();
+
 	const [activeFeature,setActiveFeature] = useState();
 	const prevActiveFeature = useRef();
 
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
+
+	const [tagsFilter,setTagsFilter] = useState();
+	const [formatsFilter,setFormatsFilter] = useState();
+  const [featuresFilter,setFeaturesFilter] = useState();
+
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
-  const [tagsFilter,setTagsFilter] = useState();
-	const [zoomFilter,setZoomFilter] = useState();
+	const [layersDisabled,setLayersDisabled] = useState();
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
-  const [formatsFilter,setFormatsFilter] = useState();
-  const [markersFilter,setMarkersFilter] = useState();
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
-		const sourceCollection = mapData?.sources.annotations.data.features || [];
+		const sourceCollection = mapData?.sources.annotationsHandles.data.features || [];
     const handleFeatures = sourceCollection.filter(feature => feature.properties.id === feature_id);
 		return handleFeatures;
 	}
@@ -44,7 +47,7 @@ export function MapProvider({children}){
 		if (!handleFeature){
 			throw "Missing 'handleFeature' parameter.";
 		}
-		const sourceCollection = mapData?.sources.annotationsPolygons?.data.features;
+		const sourceCollection = mapData?.sources.annotations?.data.features;
 		const polygonId = handleFeature.properties.id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
 	}
@@ -82,7 +85,7 @@ export function MapProvider({children}){
 		);
 
 		switch(sourceKey){
-			case 'annotationsPolygons':
+			case 'annotations':
 
 				const polygonSideEffects = (feature,key,value) => {
 					const polygonId = feature.properties.id;
@@ -120,7 +123,7 @@ export function MapProvider({children}){
 					const polygon = getAnnotationPolygonByHandle(feature);
 
 					mapboxMap.setFeatureState(
-						{ source: 'annotationsPolygons', id: polygon.properties.id },
+						{ source: 'annotations', id: polygon.properties.id },
 						{ [key]: value }
 					);
 				}
@@ -144,7 +147,7 @@ export function MapProvider({children}){
   const toggleHoverTag = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotationsPolygons?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByTag(allFeatures,slug);
@@ -166,7 +169,7 @@ export function MapProvider({children}){
 	const toggleHoverFormat = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotationsPolygons?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByFormat(allFeatures,slug);
@@ -176,6 +179,33 @@ export function MapProvider({children}){
     })
 
   }
+
+	const toggleMapLayer = (layerId,bool) => {
+
+		let newDisabled = [...(layersDisabled || [])];
+    const index = newDisabled.indexOf(layerId);
+
+		if (bool === undefined){
+			bool = (index === -1);
+		}
+
+		if (bool) {
+			newDisabled.push(layerId);
+    }else{
+      newDisabled.splice(index, 1);
+    }
+
+		//include or exclude raster layers
+		if (layerId === 'annotationsHandles'){
+			if (bool){
+				newDisabled = newDisabled.concat(annotationsLayerIds);
+			}else{
+				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));
+			}
+		}
+
+		setLayersDisabled(newDisabled);
+	}
 
 	const zoomOnFeatures = features => {
 
@@ -293,6 +323,8 @@ export function MapProvider({children}){
 	useEffect(()=>{
 		if (rawMapData === undefined) return;
 
+		DEBUG && console.log("RAW MAP DATA",{...rawMapData})
+
 		let newMapData = {...rawMapData};
 
 		const getFeatureSourceKeys = () => {
@@ -332,7 +364,7 @@ export function MapProvider({children}){
 
 		})
 
-    if (newMapData.sources.annotationsPolygons ){
+    if (newMapData.sources.annotations ){
 			//add polygon handles automatically
 			const buildAnnotationHandlesSource = polygonFeatures => {
 
@@ -353,19 +385,19 @@ export function MapProvider({children}){
 				return {
 		      data:{
 		        type:'FeatureCollection',
-		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotationsPolygons.data.features)
+		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotations.data.features)
 		      },
 		      promoteId:'id',
 		      type:'geojson'
 		    }
 			}
-			newMapData.sources.annotations = buildAnnotationHandlesSource(newMapData.sources.annotationsPolygons.data.features);
+			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotations.data.features);
 		}
 
 		/*
 		if (newMapDatasources.annotations ){
 
-			const allPolygons = newMapData.sources.annotationsPolygons.data.features || [];
+			const allPolygons = newMapData.sources.annotations.data.features || [];
 			const allHandles = newMapDatasources.annotations.data.features || [];
 
 			//remove polygons that does not have handles
@@ -385,7 +417,7 @@ export function MapProvider({children}){
 				return polygons;
 			}
 
-			newMapData.sources.annotationsPolygons.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
+			newMapData.sources.annotations.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
 
 			//remove handles that does not have polygons
 			const filterHandlesWithPolygons = (handles,polygons) => {
@@ -426,13 +458,13 @@ export function MapProvider({children}){
 
 		})
 
-		if (newMapData.sources.annotations ){
+		if (newMapData.sources.annotationsHandles ){
 
 			const copyPolygonProperties = handles => {
 				return handles.map(handle => {
 					const targetId = handle.properties.id;
 					const polygonId = targetId;
-					const polygon = newMapData.sources.annotationsPolygons.data.features.find(feature => (feature.properties.id === polygonId));
+					const polygon = newMapData.sources.annotations.data.features.find(feature => (feature.properties.id === polygonId));
 					handle.properties = {
 						...polygon.properties,
 						...handle.properties
@@ -441,40 +473,20 @@ export function MapProvider({children}){
 				})
 			}
 
-			newMapData.sources.annotations.data.features = copyPolygonProperties(newMapData.sources.annotations.data.features);
+				newMapData.sources.annotationsHandles.data.features = copyPolygonProperties(newMapData.sources.annotationsHandles.data.features);
 		}
 
-		console.log("NEWMAPDATA",newMapData);
+		DEBUG && console.log("***MAP DATA***",newMapData);
 
 		setMapData(newMapData);
 
 	},[rawMapData])
 
-	//set global marker filters
+	//build features formats filter
   useEffect(()=>{
-
-    const filters = [
-      tagsFilter,
-      formatsFilter,
-			zoomFilter
-    ]
-
-    const buildFilter = filters => {
-
-      filters = filters.filter(function(filter) {
-        return filter !== undefined;
-      });
-
-      //no filters
-      if ( (filters || []).length === 0) return;
-      return ['all'].concat(filters);
-    }
-
-    const filter = buildFilter(filters);
-    setMarkersFilter(filter);
-
-  },[tagsFilter,formatsFilter,zoomFilter])
-
+		if (!mapHasInit) return;
+		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
+  },[mapHasInit])
 
 	//build features tags filter
   useEffect(()=>{
@@ -519,23 +531,56 @@ export function MapProvider({children}){
     setFormatsFilter(filter);
   },[markerFormatsDisabled])
 
-	//build features formats filter
+
+	//set global features filters
   useEffect(()=>{
-		if (!mapHasInit) return;
-		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
-  },[mapHasInit])
+
+    const filters = [
+      tagsFilter,
+      formatsFilter
+    ]
+
+    const buildFilter = filters => {
+
+      filters = filters.filter(function(filter) {
+        return filter !== undefined;
+      });
+
+      //no filters
+      if ( (filters || []).length === 0) return;
+      return ['all'].concat(filters);
+    }
+
+    const filter = buildFilter(filters);
+    setFeaturesFilter(filter);
+
+  },[tagsFilter,formatsFilter])
 
   //set global marker filters
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    console.log("RUN GLOBAL FILTER",markersFilter,mapboxMap);
+    console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
 
-    mapboxMap.setFilter("creations",markersFilter);
-    mapboxMap.setFilter("annotations",markersFilter);
-		mapboxMap.setFilter("annotationsFill",markersFilter);
-		mapboxMap.setFilter("annotationsStroke",markersFilter);
+    mapboxMap.setFilter("creations",featuresFilter);
+    mapboxMap.setFilter("annotationsHandles",featuresFilter);
+		mapboxMap.setFilter("annotationsFill",featuresFilter);
+		mapboxMap.setFilter("annotationsStroke",featuresFilter);
 
-  },[markersFilter])
+  },[featuresFilter])
+
+	useEffect(()=>{
+		if (!mapHasInit) return;
+
+		const allLayerIds = mapboxMap.getStyle().layers.map(layer=>layer.id);
+		const disabledIds = (layersDisabled || []);
+
+		allLayerIds.forEach(layerId => {
+			const isVisible = !disabledIds.includes(layerId);
+			const value = isVisible ? 'visible' : 'none';
+		  mapboxMap.setLayoutProperty(layerId, 'visibility', value);
+		})
+
+  },[layersDisabled])
 
 	useEffect(()=>{
 		if (!mapHasInit) return;
@@ -554,6 +599,12 @@ export function MapProvider({children}){
 		prevActiveFeature.current = activeFeature;
 
 	},[activeFeature])
+
+	useEffect(()=>{
+		if (annotationsLayerIds === undefined) return;
+		const layerIds = annotationsLayerIds || [];
+		DEBUG && console.log("ALL MAP RASTERS INITIALIZED",layerIds.length);
+	},[annotationsLayerIds])
 
 	//filter features that have a minzoom property
 	/*
@@ -577,16 +628,7 @@ export function MapProvider({children}){
 
   },[maphasInit])
 
-
-	useEffect(()=>{
-    if (zoomFilter===undefined) return;
-
-		console.log("ZOOM FILTER",zoomFilter);
-
-  },[zoomFilter])
-
-	*/
-
+		*/
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -614,9 +656,11 @@ export function MapProvider({children}){
 		toggleHoverTag:toggleHoverTag,
 		toggleHoverFormat:toggleHoverFormat,
 		zoomOnFeatures:zoomOnFeatures,
-		markersFilter:markersFilter,
-		sidebarFeatures:sidebarFeatures,
-		setSidebarFeatures:setSidebarFeatures,
+		featuresFilter:featuresFilter,
+		layersDisabled:layersDisabled,
+		toggleMapLayer:toggleMapLayer,
+		annotationsLayerIds:annotationsLayerIds,
+		setAnnotationsLayerIds:setAnnotationsLayerIds
 	};
 
   return (

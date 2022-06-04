@@ -27,9 +27,12 @@ const Map = (props) => {
     setMapboxMap,
     setMapHasInit,
     setMapFeatureState,
-    markersFilter,
+    featuresFilter,
+    layersDisabled,
     getHandlesByAnnotationPolygonId,
-    setSidebarFeatures
+    setLegendLayers,
+    setSidebarFeatures,
+    setAnnotationsLayerIds
   } = useMap();
 
   const initializeMap = data => {
@@ -183,37 +186,6 @@ const Map = (props) => {
 
   },[mapData,urlSourceId,urlFeatureId])
 
-  const populateSidebarFeatures = e => {
-    //get visible features on map for use in the sidebar
-
-    const getFeatures = () => {
-
-      const getVisibleCreationFeatures = () => {
-        let features = mapboxMap.queryRenderedFeatures({
-          layers: ['creations'],
-          filter: markersFilter
-        }) || [];
-        return getUniqueMapFeatures(features);
-      }
-
-      const getVisibleAnnotationFeatures = () => {
-        let features = mapboxMap.queryRenderedFeatures({
-          layers: ['annotations'],
-          filter: markersFilter
-        }) || [];
-        return getUniqueMapFeatures(features);
-      }
-
-      const creationFeatures = getVisibleCreationFeatures();
-      const annotationFeatures = getVisibleAnnotationFeatures();
-
-      return creationFeatures.concat(annotationFeatures);
-    }
-
-    const features = getFeatures();
-
-    setSidebarFeatures(features);
-  }
 
 
   //set active marker from URL
@@ -339,8 +311,8 @@ const Map = (props) => {
             let coordinates = imagePolygon.geometry.coordinates[0];
             coordinates.pop();//remove last item of the polygon (the closing vertex)
 
-            const sourceId = "annotation-raster-source-"+postId;
-            const layerId = "annotation-raster-layer-"+postId;
+            const sourceId = "annotation-source-"+postId;
+            const layerId = "annotation-layer-"+postId;
 
             return {
               polygon_id:feature.properties.id,
@@ -360,41 +332,43 @@ const Map = (props) => {
 
           }
 
-          const polygonFeatures = (mapData.sources?.annotationsPolygons.data.features || []);
+          const polygonFeatures = (mapData.sources?.annotations.data.features || []);
+
+          const sourceIds = [];
+
           const rasterDatas = polygonFeatures.map(feature => {
             const datas = getRasterDatas(feature);
             feature.properties.image_layer = datas.layer.id;
             return datas;
           })
 
-          rasterDatas.forEach(data => {
+          .filter(data => {  //Ignore duplicates
 
-            if (data){
-              //add source for this image
-              if (map.getSource(data.source.id)) {
-                DEBUG && console.log(`Source "${data.source.id}" already exists.`);
-                return;//continue
-              }
+            const sourceId = data.source.id;
 
-              //add image
-              if (map.getLayer(data.layer.id)) {
-                DEBUG && console.log(`Layer "${data.layer.id}" already exists.`);
-                return;//continue
-              }
-
-
-              const sourceData = {...data.source};delete sourceData.id;//remove ID since to avoid bug
-
-              map.addSource(data.source.id,sourceData);
-              map.addLayer(data.layer);
-
-
+            if ( sourceIds.includes(sourceId) ){
+              DEBUG && console.log(`Source "${sourceId}" already exists.`);
+              return false;
             }
+
+            sourceIds.push(data.source.id);
+            return true;
 
           })
 
+          //append
+          rasterDatas.forEach(data => {
+            const sourceData = {...data.source};delete sourceData.id;//remove ID since to avoid bug
+            map.addSource(data.source.id,sourceData);
+            map.addLayer(data.layer);
+          })
+
+          return rasterDatas.map(rasterData => rasterData.layer.id);
+
         }
-        addRasterLayers();
+        const layerIds = addRasterLayers();
+
+        setAnnotationsLayerIds(layerIds); //keep a track of the whole set of layer Ids; we'll need this to toggle all the rasters.
 
         //init mapbox layers
         for (var key in mapData.layers) {
@@ -408,7 +382,7 @@ const Map = (props) => {
         }
 
         //list all layers
-        DEBUG && console.log("MAP LAYERS INITIALIZED",map.getStyle().layers);
+        DEBUG && console.log("ALL MAP LAYERS INITIALIZED",map.getStyle().layers.length);
 
         map.resize(); // fit to container
 
@@ -463,53 +437,45 @@ const Map = (props) => {
 
   },[mapboxMap]);
 
-  //toggle annotation rasters (layers) based on filtered polygons.
 
+  //toggle annotation rasters (layers) based on filtered polygons.
   useEffect(()=>{
     if (mapboxMap === undefined) return;
 
     mapboxMap.once('idle',(e)=>{
 
-      const allPolygons = mapData.sources.annotationsPolygons.data.features || [];
+      const allPolygons = mapData.sources.annotations.data.features || [];
 
       const visiblePolygons = mapboxMap.queryRenderedFeatures({
         layers: ['annotationsFill'],
-        filter: markersFilter
+        filter: featuresFilter
       }) || [];
+
       const visiblePolygonIds = getUniqueMapFeatures(visiblePolygons).map(feature=>feature.id);
 
-      allPolygons.forEach(feature => {
-
-        const layerId = feature.properties.image_layer;
+      const toggleAnnotationByLayerId = (layerId,bool) => {
 
         if (!layerId) return;//continue
 
-        const isVisible = visiblePolygonIds.includes(feature.properties.id);
-        const visibilityValue = isVisible ? 'visible' : 'none';
+        if (bool === undefined){
+          bool = !(mapboxMap.getLayoutProperty(layerId, 'visibility') !== 'none');
+        }
 
-        //console.log("LAYER VISIBLE ?",layerId,isVisible);
-
+        const visibilityValue = bool ? 'visible' : 'none';
         mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
+      }
 
+      allPolygons.forEach(feature => {
+        const layerId = feature.properties.image_layer;
+        const isVisible = visiblePolygonIds.includes(feature.properties.id);
+        toggleAnnotationByLayerId(layerId,isVisible);
       });
 
     })
 
-  },[markersFilter])
+  },[featuresFilter])
 
-  useEffect(()=>{
-    if (!mapHasInit) return;
 
-    populateSidebarFeatures();
-    mapboxMap.on('moveend',populateSidebarFeatures);
-
-  },[mapHasInit])
-
-  //when filters are updated
-  useEffect(()=>{
-    if (mapboxMap === undefined) return;
-    populateSidebarFeatures();
-  },[markersFilter])
 
   return (
     <div id="map-container">

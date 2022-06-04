@@ -14,7 +14,7 @@ const MapSettingsTags = props => {
   } = useMap();
 
   const creationFeatures = mapData?.sources.creations?.data.features || [];
-  const annotationFeatures = mapData?.sources.annotationsPolygons?.data.features || [];
+  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
   const allFeatures = creationFeatures.concat(annotationFeatures);
 
   const handleClick = slug => {
