@@ -42,7 +42,7 @@ const MapSettingsTags = props => {
       <h5>Tags</h5>
       <ul id="tags-list" className="features-selection">
         {
-          getFeaturesTags(allFeatures).map(function(slug) {
+          getFeaturesTags(allFeatures).map(function(slug,k) {
 
             const wpTag = tags.find(term=>term.slug===slug);
             const count = getIdsForTag(slug,allFeatures).length;
@@ -50,26 +50,22 @@ const MapSettingsTags = props => {
             const tagNameEl = <span>{wpTag.name}</span>;
 
             return(
-              <>
-
-                <li
-                key={slug}
-                className={!isDisabled(slug) ? 'active' : ''}
-                onClick={e=>{handleClick(slug)}}
-                onMouseEnter={e=>toggleHoverTag(slug,true)}
-                onMouseLeave={e=>toggleHoverTag(slug,false)}
-                >
-                  <span><Icon name="check"/></span>
-                  {
-                    wpTag.description ?
-                      <Popup content={wpTag.description} trigger={tagNameEl} />
-                    :
-                    tagNameEl
-                  }
-                  <span className="count">{count}</span>
-                </li>
-              </>
-
+              <li
+              key={slug}
+              className={!isDisabled(slug) ? 'active' : ''}
+              onClick={e=>{handleClick(slug)}}
+              onMouseEnter={e=>toggleHoverTag(slug,true)}
+              onMouseLeave={e=>toggleHoverTag(slug,false)}
+              >
+                <span><Icon name="check"/></span>
+                {
+                  wpTag.description ?
+                    <Popup content={wpTag.description} trigger={tagNameEl} />
+                  :
+                  tagNameEl
+                }
+                <span className="count">{count}</span>
+              </li>
             )
           })
         }
