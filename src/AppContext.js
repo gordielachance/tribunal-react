@@ -26,43 +26,88 @@ export function AppProvider({children}){
 
 	//load maps on init
   useEffect(() => {
-    DEBUG && console.info("GETTING MAPS...");
-    DatabaseAPI.getMaps()
-    .then(resp => {
-      DEBUG && console.info("...MAPS LOADED",resp);
-      setMapPosts(resp);
-    })
+
+		let isSubscribed = true;
+
+		const fetchData = async () => {
+	    DEBUG && console.info("GETTING MAPS...");
+	    const data = await DatabaseAPI.getMaps();
+			if (isSubscribed) {
+				DEBUG && console.info("...MAPS LOADED",data);
+	      setMapPosts(data);
+	    }
+		}
+
+	  fetchData();
+
+		//clean up fn
+		return () => isSubscribed = false;
+
   }, []);
 
 	//load creations on init
-  useEffect(() => {
-    DEBUG && console.info("GETTING CREATIONS...");
-    DatabaseAPI.getCreations()
-    .then(resp => {
-      DEBUG && console.info("...CREATIONS LOADED",resp);
-      setCreationPosts(resp);
-    })
+	useEffect(() => {
+
+		let isSubscribed = true;
+
+		const fetchData = async () => {
+	    DEBUG && console.info("GETTING CREATIONS...");
+	    const data = await DatabaseAPI.getCreations();
+			if (isSubscribed) {
+				DEBUG && console.info("...CREATIONS LOADED",data);
+	      setCreationPosts(data);
+	    }
+		}
+
+	  fetchData();
+
+		//clean up fn
+		return () => isSubscribed = false;
+
   }, []);
 
 	//load events on init
-  useEffect(() => {
-    DEBUG && console.info("GETTING EVENTS...");
-    DatabaseAPI.getEvents()
-    .then(resp => {
-      DEBUG && console.info("...EVENTS LOADED",resp);
-      setAgendaPosts(resp);
-    })
+	useEffect(() => {
+
+		let isSubscribed = true;
+
+		const fetchData = async () => {
+	    DEBUG && console.info("GETTING EVENTS...");
+	    const data = await DatabaseAPI.getCreations();
+			if (isSubscribed) {
+				DEBUG && console.info("...EVENTS LOADED",data);
+	      setAgendaPosts(data);
+	    }
+		}
+
+	  fetchData();
+
+		//clean up fn
+		return () => isSubscribed = false;
+
   }, []);
 
-	//load tags on init
-  useEffect(() => {
-    console.info("GETTING TAGS...");
-    DatabaseAPI.getTags()
-    .then(resp => {
-      console.info("...TAGS LOADED",resp);
-      setTags(resp);
-    })
+	//load events on init
+	useEffect(() => {
+
+		let isSubscribed = true;
+
+		const fetchData = async () => {
+	    DEBUG && console.info("GETTING TAGS...");
+	    const data = await DatabaseAPI.getTags();
+			if (isSubscribed) {
+				DEBUG && console.info("...TAGS LOADED",data);
+	      setTags(data);
+	    }
+		}
+
+	  fetchData();
+
+		//clean up fn
+		return () => isSubscribed = false;
+
   }, []);
+
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context

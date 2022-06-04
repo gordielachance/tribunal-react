@@ -13,6 +13,9 @@ const SourceLegendItem = props => {
       case 'annotations':
         return 'Géographie subjective'
       break;
+      case 'events':
+        return 'Évènements'
+      break;
     }
   }
 
@@ -34,11 +37,13 @@ const MapLegend = (props) => {
   const sources = [...new Set(features.map(feature => feature.source))];
 
   const toggleLayer = layerId => {
-    const currentBool = mapboxMap.getLayoutProperty(layerId, 'visibility') === 'visible' ? true : false;
-    const value = !currentBool ? 'visible' : 'none';
 
-    map.setLayoutProperty(clickedLayer, 'visibility',value);
-    console.log("TOGGLE",layerId,value);
+    alert(layerId);
+
+    const value = ( mapboxMap.getLayoutProperty(layerId, 'visibility') === 'visible' ) ? 'none' : 'visible';//toggle
+
+    mapboxMap.setLayoutProperty(layerId, 'visibility',value);
+    console.log("TOGGLED VISIBILITY FOR LAYER #",layerId,value);
   }
 
   return(
