@@ -1,15 +1,17 @@
 import { Icon } from 'semantic-ui-react';
 import { Link,useLocation } from 'react-router-dom';
-import {menuItems,isHorizontalPage,isHorizontalTransition,getMenuAxisItems} from "../Layout";
+import {menuItems,isHorizontalPage,isHorizontalTransition,getMenuAxisItems,getFirstLevelPath} from "../Layout";
 import classNames from "classnames";
 
 const PageMenu = props => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const firstLevelPath = getFirstLevelPath(currentPath);
+
   const isHorizontal = isHorizontalPage(currentPath);
   const axisMenuItems = getMenuAxisItems(currentPath);
   const axisMenuPaths = axisMenuItems.map(item=>item.path);
-  const currentMenuIndex = axisMenuPaths.indexOf(currentPath);
+  const currentMenuIndex = axisMenuPaths.indexOf(firstLevelPath);
 
   const getMenuIcon = (item) => {
     const index = axisMenuItems.indexOf(item);
@@ -35,7 +37,6 @@ const PageMenu = props => {
         }
       }
     }
-
 
   }
 

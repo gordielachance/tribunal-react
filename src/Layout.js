@@ -43,10 +43,18 @@ export const menuItems = {
   ]
 }
 
+//get the first-level path; like '/cartes' from '/cartes/944/test'
+export const getFirstLevelPath = pagePath => {
+  const match = pagePath.match(/^\/([^\/]+)?/);
+  return match[0];
+}
+
 //Select the axis depending of the page path
 export const isHorizontalPage = pagePath => {
+  const firstLevelPath = getFirstLevelPath(pagePath);
+
   const horizontalPaths = menuItems.horizontal.map(item=>item.path);
-  const xPageIndex = horizontalPaths.indexOf(pagePath);
+  const xPageIndex = horizontalPaths.indexOf(firstLevelPath);
   return xPageIndex > -1;
 }
 export const isHorizontalTransition = (path,currentPath) => {
@@ -76,7 +84,9 @@ function Layout() {
 
   const {mapPosts,creationPosts,agendaPosts} = useApp();
 
-
+  const agendaPage = <PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>;
+  const creationPage = <PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>;
+  const singleMapPage = <PageSingleMap />;
 
   return (
     <div
@@ -88,16 +98,21 @@ function Layout() {
     >
      <Routes location={location}>
         <Route path="/" element={<PageHome />} />
-        <Route path="/agenda" element={<PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>} />
-        <Route path="/creations" element={<PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>} />
+        <Route path="/agenda">
+          <Route index element={agendaPage} />
+          <Route path=":urlPostId" element={agendaPage} />
+        </Route>
+        <Route path="/creations">
+          <Route index element={creationPage} />
+          <Route path=":urlPostId" element={creationPage} />
+        </Route>
         <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">
           <Route index element={<PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>} />
-          <Route path=":mapPostId/:mapPostSlug" element={<PageSingleMap />} />
-          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={<PageSingleMap />} />
-          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={<PageSingleMap />} />
+          <Route path=":mapPostId/:mapPostSlug" element={singleMapPage} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={singleMapPage} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={singleMapPage} />
         </Route>
-
         <Route path='*' component={NotFound} />
       </Routes>
     </div>
