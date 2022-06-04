@@ -9,6 +9,8 @@ import { useMap } from './MapContext';
 import MapSettings from "./MapSettings";
 import FeaturesList from "./FeaturesList";
 import {TdpLogoLink} from "./MapPost";
+import PageMenu from "../PageMenu";
+
 
 const MapSidebar = (props) => {
 
@@ -73,7 +75,7 @@ const MapSidebar = (props) => {
           </Dimmer>
           <div id="sidebar-header">
             <TdpLogoLink/>
-            <Link to="/cartes">Retour aux cartes</Link>
+            <PageMenu/>
           </div>
           <div id="sidebar-content">
             <div id="map-header">
