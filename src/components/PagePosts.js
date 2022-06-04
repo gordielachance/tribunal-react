@@ -1,16 +1,36 @@
-import { Link,useParams } from 'react-router-dom';
+import React, { useEffect,useState }  from "react";
+import { Link,useParams,useNavigate,useLocation } from 'react-router-dom';
 import { Loader } from 'semantic-ui-react';
 import { useApp } from '../AppContext';
 import {getMapUrl} from "./../Constants";
 import PageMenu from "./PageMenu";
+import WpPostModal from "./WpPostModal";
 
 const PagePosts = (props) => {
-
+  const location = useLocation();
+  const navigate = useNavigate();
   const loading = (props.posts === undefined);
   const {urlPostId} = useParams();
+  const [modalPostId,setModalPostId] = useState();
+
+  useEffect(()=>{
+    setModalPostId(urlPostId);
+  },[urlPostId])
+
+  const handleCloseModal = () => {
+    const url = location.pathname.replace('/'+modalPostId, '');
+    navigate(url);
+  }
 
   return(
     <div id={props.id} className="page posts-page padding-page">
+      {
+        ( modalPostId !== undefined ) &&
+        <WpPostModal
+        postId={modalPostId}
+        onClose={handleCloseModal}
+        />
+      }
       <div className="page-content">
         <div className="page-header">
           <h1>{props.title}</h1>

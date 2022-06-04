@@ -1,8 +1,7 @@
 import React, {useState,useEffect,useRef} from 'react';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
 
-import {DEBUG,getWpIframePostUrl} from "../../Constants";
-import { useMap } from './MapContext';
+import {DEBUG,getWpIframePostUrl} from "../Constants";
 
 //broken: /http://localhost:3000/carte/944/new-demo-map/creation/925/jette-geographie-des-prejuges
 //ok: http://localhost:3000/carte/944/new-demo-map/creation/892/prejuquoi

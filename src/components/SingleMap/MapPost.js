@@ -7,7 +7,7 @@ import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
 
 import './Map.scss';
 import {getUniqueMapFeatures} from "./MapFunctions";
-import WpPostModal from "./WpPostModal";
+import WpPostModal from "../WpPostModal";
 import MapSidebar from "./MapSidebar";
 import MapLegend from "./MapLegend";
 
