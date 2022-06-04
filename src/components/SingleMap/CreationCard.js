@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import { Label,Icon } from 'semantic-ui-react';
+import { Label,Icon,Popup } from 'semantic-ui-react';
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import {getFormatIcon,getFormatText} from "./MapFunctions";
@@ -25,10 +25,11 @@ const TagLabel = props => {
     toggleHoverTag(props.slug,false);
   }
 
+  const tagNameEl = <span>{props.label}</span>;
+
 
   return(
     <Label
-    title={props.description}
     onMouseEnter={handleHover}
     onMouseLeave={handleOut}
     className={props.highlightTags ? 'clickable' : ''}
@@ -36,7 +37,12 @@ const TagLabel = props => {
       {props.icon &&
         <Icon name={props.icon}/>
       }
-      {props.label}
+      {
+        props.description ?
+          <Popup content={props.description} trigger={tagNameEl} />
+        :
+        tagNameEl
+      }
     </Label>
   )
 }
