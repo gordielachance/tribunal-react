@@ -58,12 +58,12 @@ const Map = (props) => {
 
   const initMapListeners = map => {
 
-    const initMapMarkersListeners = () => {
+    const initMapFeaturesListeners = () => {
 
       let hoveredFeature = undefined;
 
       //Update cursors IN
-      map.on('mousemove','creations', e => {
+      map.on('mousemove',['creations','annotationsHandles','events'], e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
 
@@ -76,7 +76,7 @@ const Map = (props) => {
       });
 
       //Update cursors OUT
-      map.on('mouseleave','creations', e => {
+      map.on('mouseleave',['creations','annotationsHandles','events'], e => {
         map.getCanvas().style.cursor = '';
         //Toggle 'hover'
         if(hoveredFeature){
@@ -85,47 +85,15 @@ const Map = (props) => {
       });
 
       //open (add) popup when clicking marker
-      map.on('click','creations', e => {
+      map.on('click',['creations','annotationsHandles','events'], e => {
         if (e.features.length === 0) return;
         const feature = e.features[0];
         navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
       });
+
     }
 
     const initMapPolygonsListeners = () => {
-
-      let hoveredHandle = undefined;
-
-
-      //Update cursors IN
-
-      map.on('mousemove','annotationsHandles', e => {
-        // Change the cursor style as a UI indicator.
-        map.getCanvas().style.cursor = 'pointer';
-
-        //Toggle 'hover'
-        hoveredHandle = e.features[0];//first found feature.
-        if(hoveredHandle){
-          setMapFeatureState(hoveredHandle,'hover',true);
-        }
-
-      });
-
-      //Update cursors OUT
-      map.on('mouseleave','annotationsHandles', e => {
-        map.getCanvas().style.cursor = '';
-        if(hoveredHandle){
-          setMapFeatureState(hoveredHandle,'hover',false);
-        }
-      });
-
-      // When the user clicks a polygon handle
-      map.on('click','annotationsHandles',e=>{
-        if (e.features.length > 0) {
-          const feature = e.features[0];
-          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
-        }
-      });
 
       // When the user moves their mouse over a polygon, show its limits
       //!!!NOT MOBILE FRIENDLY
@@ -168,7 +136,7 @@ const Map = (props) => {
     }
 
     initMapPolygonsListeners();
-    initMapMarkersListeners();
+    initMapFeaturesListeners();
 
   }
 
