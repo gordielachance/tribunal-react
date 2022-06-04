@@ -16,11 +16,22 @@ const PageSingleMap = (props) => {
 
   //load map post on init
   useEffect(()=>{
-    DatabaseAPI.getMapPost(mapPostId)
-    .then(post => {
-      setPost(post);
-      setLoading(false);
-    })
+
+    let isSubscribed = true;
+
+    const fetchData = async () => {
+	    const data = await DatabaseAPI.getMapPost(mapPostId);
+			if (isSubscribed) {
+        setPost(data);
+        setLoading(false);
+	    }
+		}
+
+	  fetchData();
+
+		//clean up fn
+		return () => isSubscribed = false;
+
 
   },[])
 
