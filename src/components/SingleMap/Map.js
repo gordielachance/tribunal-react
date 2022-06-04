@@ -99,7 +99,7 @@ const Map = (props) => {
 
       //Update cursors IN
 
-      map.on('mousemove','annotations', e => {
+      map.on('mousemove','annotationsHandles', e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
 
@@ -112,7 +112,7 @@ const Map = (props) => {
       });
 
       //Update cursors OUT
-      map.on('mouseleave','annotations', e => {
+      map.on('mouseleave','annotationsHandles', e => {
         map.getCanvas().style.cursor = '';
         if(hoveredHandle){
           setMapFeatureState(hoveredHandle,'hover',false);
@@ -120,7 +120,7 @@ const Map = (props) => {
       });
 
       // When the user clicks a polygon handle
-      map.on('click','annotations',e=>{
+      map.on('click','annotationsHandles',e=>{
         if (e.features.length > 0) {
           const feature = e.features[0];
           navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
