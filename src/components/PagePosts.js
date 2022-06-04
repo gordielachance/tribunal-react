@@ -51,11 +51,19 @@ const PagePosts = (props) => {
 
                   return(
                     <li post_id={post.id} key={post.id}>
-                      <h3 className="post-title">
-                        <Link to={post_url}>{post.title.react}</Link>
-                      </h3>
-                      <div>
-                        {post.excerpt.react}
+                      <div className="post-thumbnail">
+                        {
+                          post.featured_media_url &&
+                          <img src={post.featured_media_url} className="cover-img"/>
+                        }
+                      </div>
+                      <div className="post-details">
+                        <h3 className="post-title">
+                          <Link to={post_url}>{post.title.react}</Link>
+                        </h3>
+                        <div>
+                          {post.excerpt.react}
+                        </div>
                       </div>
                     </li>
                   )

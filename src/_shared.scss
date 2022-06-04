@@ -102,15 +102,15 @@ $eventsColor:#4fae32;
 }
 
 .cover-img{
-  &img{
-    vertical-align: top;
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
   background-position: center center;
   background-size: cover;
   background-repeat:no-repeat;
+}
+img.cover-img{
+  vertical-align: top;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
 }
 
 @keyframes opacityFadeIn {
