@@ -1,17 +1,13 @@
 import React, {useState,useEffect,useRef} from 'react';
-import { useParams,useNavigate } from 'react-router-dom';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
 
-import {DEBUG,getWpIframePostUrl,getFeatureUrl} from "../../Constants";
+import {DEBUG,getWpIframePostUrl} from "../../Constants";
 import { useMap } from './MapContext';
 
 //broken: /http://localhost:3000/carte/944/new-demo-map/creation/925/jette-geographie-des-prejuges
 //ok: http://localhost:3000/carte/944/new-demo-map/creation/892/prejuquoi
 
-const CreationModal = (props) => {
-  const navigate = useNavigate();
-  const {mapPostId,mapPostSlug} = useParams();
-  const {activeFeature} = useMap();
+const WpPostModal = (props) => {
   const iframeContent = useRef(null);
   const [title,setTitle] = useState('...');
   const [loading,setLoading] = useState(false);
@@ -19,18 +15,16 @@ const CreationModal = (props) => {
 
   useEffect(()=>{
 
-    const post_id = activeFeature?.properties.post_id;
-
-    if (post_id){
+    if (props.postId){
       setLoading(true);
-      const url = getWpIframePostUrl(post_id);
-      console.log("LOAD POST ID IN MODAL",post_id,url);
+      const url = getWpIframePostUrl(props.postId);
+      console.log("LOAD POST ID IN MODAL",props.postId,url);
       setUrl(url);
     }else{
       setUrl();
     }
 
-  },[activeFeature])
+  },[props.postId])
 
   const handleLoaded = () => {
     const iframeItem = iframeContent.current;
@@ -45,17 +39,12 @@ const CreationModal = (props) => {
     setLoading(false);
   }
 
-  const handleClose = () => {
-    const url = getFeatureUrl(mapPostId,mapPostSlug,activeFeature.properties.source,activeFeature.properties.id);
-    navigate(url);
-  }
-
   return(
     <Modal
       className="marker-modal"
       closeIcon
       open={true}
-      onClose={handleClose}
+      onClose={props.onClose}
     >
       <Modal.Header>
       {
@@ -84,4 +73,4 @@ const CreationModal = (props) => {
 
 }
 
-export default CreationModal
+export default WpPostModal

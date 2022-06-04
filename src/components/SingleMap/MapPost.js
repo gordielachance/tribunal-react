@@ -1,14 +1,13 @@
 import React, { useEffect,useState }  from "react";
-import { Link,useParams } from 'react-router-dom';
+import { Link,useParams,useNavigate } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Loader,Dimmer } from 'semantic-ui-react';
-
-import {DEBUG,ImageLogo} from "../../Constants";
+import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
 
 
 import './Map.scss';
 import {getUniqueMapFeatures} from "./MapFunctions";
-import CreationModal from "./CreationModal";
+import WpPostModal from "./WpPostModal";
 import MapSidebar from "./MapSidebar";
 import MapLegend from "./MapLegend";
 
@@ -26,11 +25,12 @@ export const TdpLogoLink = props => {
 }
 
 const MapPost = (props) => {
-
-  const {urlFeatureAction} = useParams();
+  const navigate = useNavigate();
+  const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
   const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled} = useMap();
   const [loading,setLoading] = useState(true);
 	const [sidebarFeatures,setSidebarFeatures] = useState();
+  const [modalPostId,setModalPostId] = useState();
 
   const populateVisibleFeatures = e => {
     //get visible features on map for use in the sidebar
@@ -75,6 +75,22 @@ const MapPost = (props) => {
     setTimeout(populateVisibleFeatures,250); //wait map finishes refreshing before update (TOUFIX TOUCHECK use 'idle' event instead?)
   },[featuresFilter,layersDisabled])
 
+  useEffect(()=>{
+
+    let postId = undefined;
+
+    if ( (urlFeatureAction==='full') && activeFeature){
+      postId = activeFeature?.properties.post_id;
+    }
+    setModalPostId(postId);
+
+  },[activeFeature,urlFeatureAction])
+
+  const handleCloseModal = () => {
+    const url = getFeatureUrl(mapPostId,mapPostSlug,activeFeature.properties.source,activeFeature.properties.id);
+    navigate(url);
+  }
+
   return (
     <div className="page-content">
 
@@ -83,8 +99,11 @@ const MapPost = (props) => {
       features={sidebarFeatures}
       />
       {
-        ( activeFeature && (urlFeatureAction==='full') ) &&
-        <CreationModal/>
+        ( modalPostId !== undefined ) &&
+        <WpPostModal
+        postId={modalPostId}
+        onClose={handleCloseModal}
+        />
       }
       <TdpLogoLink/>
       <MapLegend features={sidebarFeatures}/>
