@@ -85,6 +85,8 @@ h2,h3,h4,h5,h6{
     }
   }
   &.iframe-page{
+    height:100vh;
+    overflow:hidden;
     iframe{
       display: block;
       width:90%;
@@ -190,6 +192,7 @@ h2,h3,h4,h5,h6{
   }
 
   &#creditsPage{
+
     .page-header h1,a {
       color:$colorD;
     }

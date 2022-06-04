@@ -73,7 +73,7 @@ export function AppProvider({children}){
 
 		const fetchData = async () => {
 	    DEBUG && console.info("GETTING EVENTS...");
-	    const data = await DatabaseAPI.getCreations();
+	    const data = await DatabaseAPI.getEvents();
 			if (isSubscribed) {
 				DEBUG && console.info("...EVENTS LOADED",data);
 	      setAgendaPosts(data);
@@ -87,7 +87,7 @@ export function AppProvider({children}){
 
   }, []);
 
-	//load events on init
+	//load tags on init
 	useEffect(() => {
 
 		let isSubscribed = true;
