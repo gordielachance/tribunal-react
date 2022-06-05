@@ -50,8 +50,8 @@ const PagePosts = (props) => {
                     <li post_id={post.id} key={post.id}>
                       <div className="post-thumbnail">
                         {
-                          post.featured_media_url &&
-                          <img alt='' src={post.featured_media_url} className="cover-img"/>
+                          post.thumbnail_url &&
+                          <img alt='' src={post.thumbnail_url} className="cover-img"/>
                         }
                       </div>
                       <div className="post-details">

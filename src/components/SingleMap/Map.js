@@ -189,16 +189,16 @@ const Map = (props) => {
   //on map init
   useEffect(() => {
 
-    const map = mapboxMap;
+    if (mapboxMap !== undefined){
 
-    if (map){
-      map.on('load', () => {
+      if(mapData !== undefined){
+        mapboxMap.on('load', () => {
 
         //init mapbox sources
         for (var key in mapData.sources) {
           const sourceData = mapData.sources[key];
           console.log("ADD SOURCE",key,sourceData);
-          map.addSource(key,sourceData);
+          mapboxMap.addSource(key,sourceData);
         }
 
         //add raster layers
@@ -293,7 +293,7 @@ const Map = (props) => {
 
           }
 
-          const polygonFeatures = (mapData.sources?.annotations.data.features || []);
+          const polygonFeatures = (mapData.sources?.annotations?.data.features || []);
 
           const sourceIds = [];
 
@@ -320,8 +320,8 @@ const Map = (props) => {
           //append
           rasterDatas.forEach(data => {
             const sourceData = {...data.source};delete sourceData.id;//remove ID since to avoid bug
-            map.addSource(data.source.id,sourceData);
-            map.addLayer(data.layer);
+            mapboxMap.addSource(data.source.id,sourceData);
+            mapboxMap.addLayer(data.layer);
           })
 
           return rasterDatas.map(rasterData => rasterData.layer.id);
@@ -339,16 +339,16 @@ const Map = (props) => {
             id:key
           }
           DEBUG && console.log("ADD LAYER",key,layerData);
-          map.addLayer(layerData);
+          mapboxMap.addLayer(layerData);
         }
 
         //list all layers
-        DEBUG && console.log("ALL MAP LAYERS INITIALIZED",map.getStyle().layers.length);
+        DEBUG && console.log("ALL MAP LAYERS INITIALIZED",mapboxMap.getStyle().layers.length);
 
-        map.resize(); // fit to container
+        mapboxMap.resize(); // fit to container
 
         // Add search
-        map.addControl(
+        mapboxMap.addControl(
           new MapboxGeocoder({
             accessToken: MAPBOX_TOKEN,
             mapboxgl: mapboxgl
@@ -356,38 +356,37 @@ const Map = (props) => {
         );
 
         // Add navigation control (the +/- zoom buttons)
-        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        mapboxMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-        initMapListeners(map);
+        initMapListeners(mapboxMap);
 
         mapboxMap.once('idle',(e)=>{
           setMapHasInit(true);
         })
 
       });
+      }
 
-      map.on('moveend', (e) => {
+      mapboxMap.on('moveend', (e) => {
 
         console.log({
-          'center':[map.getCenter().lng.toFixed(4),map.getCenter().lat.toFixed(4)],
-          'zoom':map.getZoom().toFixed(2),
-          'bounds':map.getBounds(),
+          'center':[mapboxMap.getCenter().lng.toFixed(4),mapboxMap.getCenter().lat.toFixed(4)],
+          'zoom':mapboxMap.getZoom().toFixed(2),
+          'bounds':mapboxMap.getBounds(),
         })
       });
 
       //when a specific source has been loaded
-      map.once('sourcedata', (e) => {
+      mapboxMap.once('sourcedata', (e) => {
         if (e.sourceId !== 'markers') return;
         if (!e.isSourceLoaded) return;
         console.log("SOURCE DATA LOADED",e.source);
-        const sourceObject = map.getSource('markers');
+        const sourceObject = mapboxMap.getSource('markers');
         console.log("RESOURCE YO",sourceObject);
-        var features = map.querySourceFeatures('markers');
+        var features = mapboxMap.querySourceFeatures('markers');
         console.log("FEATURES YO",features);
       });
     }
-
-
 
     // Clean up on unmount
     return () => {
