@@ -1,8 +1,6 @@
 import React, { useEffect,useState }  from "react";
 import { Link,useParams,useNavigate,useLocation } from 'react-router-dom';
 import { Loader } from 'semantic-ui-react';
-import { useApp } from '../AppContext';
-import {getMapUrl} from "./../Constants";
 import PageMenu from "./PageMenu";
 import WpPostModal from "./WpPostModal";
 
@@ -54,7 +52,7 @@ const PagePosts = (props) => {
                       <div className="post-thumbnail">
                         {
                           post.featured_media_url &&
-                          <img src={post.featured_media_url} className="cover-img"/>
+                          <img alt='' src={post.featured_media_url} className="cover-img"/>
                         }
                       </div>
                       <div className="post-details">

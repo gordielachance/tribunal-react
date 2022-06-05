@@ -10,7 +10,6 @@ import {
 	isFeaturesSource,
 	sortFeaturesByDistance,
 	bboxToCircle,
-	getFeaturesTags
 } from "./MapFunctions";
 
 const MapContext = createContext();

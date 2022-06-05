@@ -1,9 +1,7 @@
 import React, { useEffect,useState }  from "react";
 import classNames from "classnames";
-import { Link } from "react-router-dom";
 import { Icon,Menu,Loader,Dimmer } from 'semantic-ui-react';
 
-import {getUniqueMapFeatures} from "./MapFunctions";
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import MapSettings from "./MapSettings";
@@ -14,10 +12,10 @@ import PageMenu from "../PageMenu";
 
 const MapSidebar = (props) => {
 
-  const {verticalScreen,mobileScreen} = useApp();
+  const {mobileScreen} = useApp();
 
-  const [isActive, setisActive] = useState(!verticalScreen);
-  const [isFullScreen, setIsFullScreen] = useState(verticalScreen);
+  const [isActive, setisActive] = useState(!mobileScreen);
+  const [isFullScreen, setIsFullScreen] = useState(mobileScreen);
 
   const [section,setSection] = useState('features');
 
@@ -26,17 +24,16 @@ const MapSidebar = (props) => {
 
   const {
     mapboxMap,
-    mapHasInit,
-    featuresFilter
+    mapHasInit
   } = useMap();
 
   //on sidebar features first init
   useEffect(()=>{
-    if (verticalScreen){
+    if (mobileScreen){
       setIsFullScreen(true);
     }
 
-  },[verticalScreen])
+  },[mobileScreen])
 
   //on sidebar features first init
   useEffect(()=>{
@@ -135,7 +132,7 @@ const MapSidebar = (props) => {
             {
               //close sidebar
               isActive ?
-                (!isFullScreen || verticalScreen) &&
+                (!isFullScreen || mobileScreen) &&
                 <Icon name='chevron left' onClick={e=>{setisActive(false)}}/>
               :
               //open sidebar
@@ -143,12 +140,12 @@ const MapSidebar = (props) => {
             }
             {
             //open full
-            (!verticalScreen && isActive && !isFullScreen) &&
+            (!mobileScreen && isActive && !isFullScreen) &&
             <Icon name='chevron right' onClick={e=>{setIsFullScreen(true)}}/>
             }
             {
             //close full
-            (!verticalScreen && isActive && isFullScreen) &&
+            (!mobileScreen && isActive && isFullScreen) &&
             <Icon name='chevron left' onClick={e=>{setIsFullScreen(false)}}/>
             }
             </>

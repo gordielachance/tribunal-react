@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Routes,Route, Link,useLocation } from 'react-router-dom';
+import { Routes,Route,useLocation } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
@@ -45,7 +44,7 @@ export const menuItems = {
 
 //get the first-level path; like '/cartes' from '/cartes/944/test'
 export const getFirstLevelPath = pagePath => {
-  const match = pagePath.match(/^\/([^\/]+)?/);
+  const match = pagePath.match(new RegExp('^/([^/]+)?'));
   return match[0];
 }
 

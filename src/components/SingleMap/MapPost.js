@@ -1,7 +1,6 @@
 import React, { useEffect,useState }  from "react";
 import { Link,useParams,useNavigate } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { Loader,Dimmer } from 'semantic-ui-react';
 import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
 
 

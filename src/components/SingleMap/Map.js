@@ -6,7 +6,7 @@ import * as turf from "@turf/turf";
 import { useNavigate,useParams } from 'react-router-dom';
 
 
-import {MAPBOX_TOKEN,DEBUG,WP_URL,getFeatureUrl} from "../../Constants";
+import {MAPBOX_TOKEN,DEBUG,getFeatureUrl} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FeaturePopup from "./FeaturePopup";
@@ -15,7 +15,7 @@ import './Map.scss';
 const Map = (props) => {
 
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug,urlSourceId,urlFeatureId,urlFeatureAction} = useParams();
+  const {mapPostId,mapPostSlug,urlSourceId,urlFeatureId} = useParams();
 
   const {
     mapHasInit,
@@ -28,10 +28,7 @@ const Map = (props) => {
     setMapHasInit,
     setMapFeatureState,
     featuresFilter,
-    layersDisabled,
     getHandlesByAnnotationPolygonId,
-    setLegendLayers,
-    setSidebarFeatures,
     setAnnotationsLayerIds
   } = useMap();
 
@@ -214,7 +211,6 @@ const Map = (props) => {
           //get size of the polygon at the current zoom
           const getPolygonSize = polygon => {
             const bbox = turf.bbox(polygon);
-            const bboxPolygon = turf.bboxPolygon(bbox);
 
             const p1 = [bbox[0],bbox[3]];
             const p2 = [bbox[2],bbox[1]];
@@ -247,7 +243,6 @@ const Map = (props) => {
 
           //get the minimum zoom level for a polygon, based on a minimum size (in pixels) of the polygon's bounding box.
           const getPolygonMinimumZoom = polygon => {
-            const polygonSize = getPolygonSize(polygon);
             const minPixels = 15;
             let targetZoom = undefined;
             for (let zoomLevel = 0; zoomLevel < 23; zoomLevel++) {
@@ -258,9 +253,7 @@ const Map = (props) => {
               }
 
             }
-            const size = getPolygonSizeForZoomlevel(polygon,targetZoom);
             return targetZoom;
-
           }
 
 

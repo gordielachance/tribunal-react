@@ -1,6 +1,5 @@
 import React,{useState} from "react";
-import { Link } from 'react-router-dom';
-import {getWpIframePostUrl,WP_POST_ID_HOME,WP_POST_ID_AGENDA,WP_POST_ID_CONTACT} from "./../Constants";
+import {getWpIframePostUrl,WP_POST_ID_HOME,WP_POST_ID_CONTACT} from "./../Constants";
 import PageMenu from "./PageMenu";
 import {DEBUG,ImageLogo} from "../Constants";
 

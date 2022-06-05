@@ -1,5 +1,4 @@
 import { Icon } from 'semantic-ui-react';
-import { Link } from 'react-router-dom';
 import { useMap } from './MapContext';
 import classNames from "classnames";
 
@@ -42,8 +41,6 @@ const MapSettingsLayers = (props) => {
     mapboxMap,
     toggleMapLayer,
   } = useMap();
-
-  const features = (props.features || []);
 
   const allowedLayers = ['creations','annotationsHandles','events'];
   const initialLayers = mapData?.layers ?
