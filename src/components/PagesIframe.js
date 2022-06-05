@@ -9,18 +9,17 @@ const PageIframe = (props) => {
 
   return(
     <div id={props.id} className="page iframe-page">
-      <div className="page-content">
-        <div className="page-header">
-          <h1>{props.title}</h1>
-          <PageMenu/>
-        </div>
-        <iframe
-        id={"iframe-" + props.id}
-        title={props.title}
-        src={props.url}
-        onLoad={()=>setLoading(false)}
-        />
+      <div className="page-header">
+        <h1>{props.title}</h1>
+        <PageMenu/>
       </div>
+      <iframe
+      id={"iframe-" + props.id}
+      className="page-content"
+      title={props.title}
+      src={props.url}
+      onLoad={()=>setLoading(false)}
+      />
     </div>
 
   )

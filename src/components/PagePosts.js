@@ -29,7 +29,6 @@ const PagePosts = (props) => {
         onClose={handleCloseModal}
         />
       }
-      <div className="page-content">
         <div className="page-header">
           <h1>{props.title}</h1>
           <PageMenu/>
@@ -41,7 +40,7 @@ const PagePosts = (props) => {
             loading ?
             <Loader active />
             :
-            <ul className="posts-list">
+            <ul className="page-content posts-list">
               {
                 (props.posts || []).map((post,key) => {
 
@@ -73,7 +72,6 @@ const PagePosts = (props) => {
 
         </>
         }
-      </div>
     </div>
   )
 }

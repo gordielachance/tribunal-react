@@ -75,8 +75,9 @@ h2,h3,h4,h5,h6{
 
 
 .page{
-  min-width: 100%;
-  position:relative;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
   .page-header{
     h1{
       font-size:5em;
@@ -93,11 +94,6 @@ h2,h3,h4,h5,h6{
       height:100%;
       border:0 none;
       flex:1;
-    }
-    > .page-content{
-      width: 100%;
-      min-height: 100vh;
-      position: relative;
     }
   }
 
@@ -127,27 +123,30 @@ h2,h3,h4,h5,h6{
   }
 
   &#singleMapPage{
-    > .page-content{
-      width:100vw;
-      height:100vh;
+    width:100vw;
+    height:100vh;
+    .page-content{
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
       > .site-logo{
         position:absolute;
       }
     }
+
   }
 
   &:not(#singleMapPage){
     padding:3em;
     min-height: calc(100vh - 6em);
-    > .page-content{
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        .page-header{
-          padding-top: 1em;
-          padding-bottom:3em;
-        }
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .page-header{
+      flex: 1;
+      flex-basis: 20vh;
+      flex-grow: 0;
     }
   }
 
