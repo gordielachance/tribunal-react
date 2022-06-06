@@ -9,6 +9,7 @@ import PageAgenda from "./components/PageAgenda";
 import PageCredits from "./components/PageCredits";
 import PagePosts from "./components/PagePosts";
 import PageSingleMap from "./components/PageSingleMap";
+import Page404 from "./components/Page404";
 import {DEBUG} from "./Constants";
 
 import classNames from "classnames";
@@ -75,15 +76,10 @@ export const getMenuAxisItems = path => {
   }
 }
 
-function Layout() {
+const Layout = props => {
 
   const location = useLocation();
   const {verticalScreen,mobileScreen} = useApp();
-
-
-  const NotFound = () => (
-    <h2>404 Page Not Found</h2>
-  );
 
   const singleMapPage = <PageSingleMap />;
 
@@ -107,12 +103,12 @@ function Layout() {
         </Route>
         <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">
-          <Route index element={<PageMaps/>} />
+          <Route index element={<Page404/>} />
           <Route path=":mapPostId/:mapPostSlug" element={singleMapPage} />
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={singleMapPage} />
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={singleMapPage} />
         </Route>
-        <Route path='*' component={NotFound} />
+        <Route path='*' element={<Page404/>} />
       </Routes>
     </div>
   );
