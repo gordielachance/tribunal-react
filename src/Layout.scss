@@ -85,8 +85,8 @@ h2,h3,h4,h5,h6{
       line-height: .8em;
     }
   }
-  &.posts-page{
-    .posts-list{
+  .page-content{
+    &.posts-list{
       li{
         display:flex;
         .post-thumbnail{
@@ -135,6 +135,9 @@ h2,h3,h4,h5,h6{
       flex: 1;
       flex-basis: 20vh;
       flex-grow: 0;
+    }
+    .page-content{
+      max-width:900px;
     }
   }
 
