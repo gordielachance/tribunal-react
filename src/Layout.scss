@@ -1,0 +1,271 @@
+@import "./_shared";
+
+.slideRight-enter {
+  transform: translateX(100%);
+}
+.slideRight-enter-active {
+  transform: translateX(0%);
+  transition: transform 500ms;
+}
+.slideRight-exit {
+  transform: translateX(0%);
+}
+.slideRight-exit-active {
+  transform: translateX(-100%);
+  transition: transform 500ms;
+}
+
+.slideLeft-enter {
+  transform: translateX(-100%);
+}
+.slideLeft-enter-active {
+  transform: translateX(0%);
+  transition: transform 500ms;
+}
+.slideLeft-exit {
+  transform: translateX(0%);
+}
+.slideLeft-exit-active {
+  transform: translateX(100%);
+  transition: transform 500ms;
+}
+
+.slideDown-enter {
+  transform: translateY(100%);
+}
+.slideDown-enter-active {
+  transform: translateY(0%);
+  transition: transform 500ms;
+}
+.slideDown-exit {
+  transform: translateY(0%);
+}
+.slideDown-exit-active {
+  transform: translateY(-100%);
+  transition: transform 500ms;
+}
+
+.slideUp-enter {
+  transform: translateY(-100%);
+}
+.slideUp-enter-active {
+  transform: translateY(0%);
+  transition: transform 500ms;
+}
+.slideUp-exit {
+  transform: translateY(0%);
+}
+.slideUp-exit-active {
+  transform: translateY(100%);
+  transition: transform 500ms;
+}
+
+//////////////////////
+
+body{
+  @extend .brizeux;
+}
+
+h1{
+  @extend .migrena;
+}
+h2,h3,h4,h5,h6{
+  @extend .brizeux;
+}
+
+
+.page{
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  .page-header{
+    h1{
+      font-size:5em;
+      text-align:center;
+      line-height: .8em;
+    }
+  }
+  .page-content{
+    &.posts-list{
+      li{
+        display:flex;
+        .post-thumbnail{
+          width:100px;
+          height:100px;
+          aspect-ratio: 1 / 1;
+          margin-right:2em;
+          flex-shrink:0;
+          background:rgba(0,0,0,0.05);
+        }
+        .post-details{
+          h3.post-title{
+            margin:0;
+          }
+        }
+
+        &:not(:last-child){
+          margin-bottom:1em;
+        }
+      }
+    }
+  }
+
+  &#singleMapPage{
+    width:100vw;
+    height:100vh;
+    .page-content{
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      > .site-logo{
+        position:absolute;
+      }
+    }
+
+  }
+
+  &:not(#singleMapPage){
+    padding:3em;
+    min-height: calc(100vh - 6em);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .page-header{
+      flex: 1;
+      flex-basis: 20vh;
+      flex-grow: 0;
+    }
+    .page-content{
+      max-width:900px;
+    }
+  }
+
+  &#homePage{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    #homeLogo{
+      margin-bottom: 3em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      img{
+        height: 20vh;
+        width:auto;
+      }
+    }
+    #homeContent{
+      flex: 1;
+      columns:2;
+      display:flex;
+      align-items: center;
+      max-width: 1000px;
+      margin: 0 auto;
+      .mobile &{
+        flex-direction:column;
+      }
+      > * {
+        flex:1;
+        height:100%;
+        position:relative;
+        min-width:50%;
+        display: flex;
+          &#homeText{
+            line-height:3em;
+            text-align: justify;
+            overflow: hidden;
+            max-height: 50vh;
+            display: flex;
+            align-items: center;
+          }
+      }
+
+
+    }
+  }
+
+  &#agendaPage{
+    .page-header h1,a {
+      color:$colorB;
+    }
+  }
+
+  &#creationsPage{
+    .page-header h1,a {
+      color:$colorC;
+    }
+  }
+
+  &#creditsPage{
+
+    .page-header h1,a {
+      color:$colorD;
+    }
+  }
+
+  &#mapListPage{
+    .page-header h1,a {
+      color:$colorA;
+    }
+
+    #maps-list-container{
+      overflow:visible;
+    }
+  }
+  &:not(#homePage){
+    .pageMenu{
+      a{
+        color:black;
+      }
+    }
+  }
+
+}
+
+
+
+
+ul.pageMenu{
+  text-align: center;
+  padding: 1em 0;
+  border-top: 1px solid black;
+  font-size: 1.3em;
+  li{
+    display:inline-block;
+    padding:0 .5em;
+    &.active{
+      display:none!important;
+    }
+    &:not(:hover){
+      opacity:.8
+    }
+
+
+  }
+  &#homeMenu{
+    @extend .migrena;
+    font-size: 2.5em;
+    border:none;
+    display:flex;
+    flex-direction: column;
+
+    li{
+      flex:1;
+      display:block;
+      &[data-path="/cartes"] a{
+        color:$colorA;
+      }
+      &[data-path="/agenda"] a{
+        color:$colorB;
+      }
+      &[data-path="/creations"] a{
+        color:$colorC;
+      }
+      &[data-path="/credits"] a{
+        color:$colorD;
+      }
+    }
+  }
+
+}
