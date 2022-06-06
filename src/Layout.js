@@ -2,7 +2,11 @@ import { Routes,Route,useLocation } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
-import {PageHome,PageCredits} from "./components/PagesIframe";
+import PageHome from "./components/PageHome";
+import PageMaps from "./components/PageMaps";
+import PageCreations from "./components/PageCreations";
+import PageAgenda from "./components/PageAgenda";
+import PageCredits from "./components/PageCredits";
 import PagePosts from "./components/PagePosts";
 import PageSingleMap from "./components/PageSingleMap";
 import {DEBUG} from "./Constants";
@@ -81,10 +85,6 @@ function Layout() {
     <h2>404 Page Not Found</h2>
   );
 
-  const {mapPosts,creationPosts,agendaPosts} = useApp();
-
-  const agendaPage = <PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>;
-  const creationPage = <PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>;
   const singleMapPage = <PageSingleMap />;
 
   return (
@@ -96,18 +96,18 @@ function Layout() {
     })}
     >
      <Routes location={location}>
-        <Route path="/" element={<PageHome />} />
+        <Route path="/" element={<PageHome/>} />
         <Route path="/agenda">
-          <Route index element={agendaPage} />
-          <Route path=":urlPostId" element={agendaPage} />
+          <Route index element={<PageAgenda/>} />
+          <Route path=":urlPostId" element={<PageAgenda/>} />
         </Route>
         <Route path="/creations">
-          <Route index element={creationPage} />
-          <Route path=":urlPostId" element={creationPage} />
+          <Route index element={<PageCreations/>} />
+          <Route path=":urlPostId" element={<PageCreations/>} />
         </Route>
         <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">
-          <Route index element={<PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>} />
+          <Route index element={<PageMaps/>} />
           <Route path=":mapPostId/:mapPostSlug" element={singleMapPage} />
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={singleMapPage} />
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={singleMapPage} />

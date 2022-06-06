@@ -63,5 +63,15 @@ export default class DatabaseAPI extends React.Component {
     .catch(error=>console.error("ERROR GETTING MAP",post_id,error))
   }
 
+  static async getPage(post_id){
+    const config = {
+     method: 'get',
+     url: `/wp/v2/pages/${post_id}`,
+    }
+    return databaseAPI.request(config)
+    .then(resp => resp.data)
+    .catch(error=>console.error("ERROR GETTING SINGLE PAGE",post_id,error))
+  }
+
 
 }

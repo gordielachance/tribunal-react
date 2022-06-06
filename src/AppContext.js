@@ -8,13 +8,17 @@ import useWindowDimensions from './components/ScreenSize';
 const AppContext = createContext();
 
 export function AppProvider({children}){
-	const [tags,setTags] = useState();
-  const [mapPosts,setMapPosts] = useState();
-	const [creationPosts,setCreationPosts] = useState();
-	const [agendaPosts,setAgendaPosts] = useState();
+
 	const screenSize = useWindowDimensions();
   const [verticalScreen,setVerticalScreen] = useState();
   const [mobileScreen,setMobileScreen] = useState();
+
+	const [tags,setTags] = useState();
+	const [homePost,setHomePost] = useState();
+	const [creditsPost,setCreditsPost] = useState();
+  const [mapPosts,setMapPosts] = useState();
+	const [creationPosts,setCreationPosts] = useState();
+	const [agendaPosts,setAgendaPosts] = useState();
 
 	//check is vertical
   useEffect(()=>{
@@ -23,69 +27,6 @@ export function AppProvider({children}){
     setVerticalScreen(isVertical);
     setMobileScreen(isMobile);
   },[screenSize]);
-
-	//load maps on init
-  useEffect(() => {
-
-		let isSubscribed = true;
-
-		const fetchData = async () => {
-	    DEBUG && console.info("GETTING MAPS...");
-	    const data = await DatabaseAPI.getMaps();
-			if (isSubscribed) {
-				DEBUG && console.info("...MAPS LOADED",data);
-	      setMapPosts(data);
-	    }
-		}
-
-	  fetchData();
-
-		//clean up fn
-		return () => isSubscribed = false;
-
-  }, []);
-
-	//load creations on init
-	useEffect(() => {
-
-		let isSubscribed = true;
-
-		const fetchData = async () => {
-	    DEBUG && console.info("GETTING CREATIONS...");
-	    const data = await DatabaseAPI.getCreations();
-			if (isSubscribed) {
-				DEBUG && console.info("...CREATIONS LOADED",data);
-	      setCreationPosts(data);
-	    }
-		}
-
-	  fetchData();
-
-		//clean up fn
-		return () => isSubscribed = false;
-
-  }, []);
-
-	//load events on init
-	useEffect(() => {
-
-		let isSubscribed = true;
-
-		const fetchData = async () => {
-	    DEBUG && console.info("GETTING EVENTS...");
-	    const data = await DatabaseAPI.getEvents();
-			if (isSubscribed) {
-				DEBUG && console.info("...EVENTS LOADED",data);
-	      setAgendaPosts(data);
-	    }
-		}
-
-	  fetchData();
-
-		//clean up fn
-		return () => isSubscribed = false;
-
-  }, []);
 
 	//load tags on init
 	useEffect(() => {
@@ -113,9 +54,16 @@ export function AppProvider({children}){
   // Learn more in http://kcd.im/optimize-context
   const value = {
     tags:tags,
+		homePost:homePost,
+		setHomePost:setHomePost,
+		creditsPost:creditsPost,
+		setCreditsPost:setCreditsPost,
     mapPosts:mapPosts,
+		setMapPosts:setMapPosts,
 		creationPosts:creationPosts,
+		setCreationPosts:setCreationPosts,
 		agendaPosts:agendaPosts,
+		setAgendaPosts:setAgendaPosts,
 		mobileScreen:mobileScreen,
 		verticalScreen:verticalScreen
 	};
