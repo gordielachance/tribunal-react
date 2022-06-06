@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from "react";
 import { useParams } from 'react-router-dom';
 import DatabaseAPI from "../databaseAPI/api";
-
+import {DEBUG} from "../Constants";
 import { MapProvider } from "./SingleMap/MapContext";
 import MapPost from "./SingleMap/MapPost";
 
@@ -22,6 +22,7 @@ const PageSingleMap = (props) => {
     const fetchData = async () => {
 	    const data = await DatabaseAPI.getMapPost(mapPostId);
 			if (isSubscribed) {
+        DEBUG && console.log("GOT MAP POST",mapPostId,JSON.parse(JSON.stringify(data || [])))
         setPost(data);
         setLoading(false);
 	    }

@@ -197,7 +197,7 @@ const Map = (props) => {
         //init mapbox sources
         for (var key in mapData.sources) {
           const sourceData = mapData.sources[key];
-          console.log("ADD SOURCE",key,sourceData);
+          DEBUG && console.log("ADD SOURCE",key,sourceData);
           mapboxMap.addSource(key,sourceData);
         }
 
