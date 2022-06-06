@@ -44,8 +44,6 @@ const PagePosts = (props) => {
               {
                 (props.posts || []).map((post,key) => {
 
-                  const post_url = post.guid.react.replace(window.location.origin, "");
-
                   return(
                     <li post_id={post.id} key={post.id}>
                       <div className="post-thumbnail">
@@ -56,7 +54,7 @@ const PagePosts = (props) => {
                       </div>
                       <div className="post-details">
                         <h3 className="post-title">
-                          <Link to={post_url}>{post.title.react}</Link>
+                          <Link to={post.guid.react}>{post.title.react}</Link>
                         </h3>
                         <div>
                           {post.excerpt.react}
