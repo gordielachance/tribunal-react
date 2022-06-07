@@ -1,0 +1,67 @@
+@import "../_shared";
+
+ul.pageMenu{
+  text-align: center;
+  padding: 1em 0;
+  border-top: 1px solid black;
+  font-size: 1.3em;
+  li{
+    display:inline-block;
+    padding:0 .5em;
+    &.active{
+      display:none!important;
+    }
+    &:not(:hover){
+      opacity:.8
+    }
+
+
+  }
+  &#homeMenu{
+    @extend .migrena;
+    font-size: 2.5em;
+    border:none;
+    display:flex;
+    flex-direction: column;
+
+    li{
+      flex:1;
+      display:block;
+      &[data-path="/cartes"] a{
+        color:$colorA;
+      }
+      &[data-path="/agenda"] a{
+        color:$colorB;
+      }
+      &[data-path="/creations"] a{
+        color:$colorC;
+      }
+      &[data-path="/credits"] a{
+        color:$colorD;
+      }
+    }
+  }
+
+}
+
+.page:not(#homePage){
+  .pageMenu{
+    a{
+      color:black;
+    }
+  }
+}
+
+.nav-arrow{
+  width:1em;
+  aspect-ratio: 1 / 1;
+  &.down{
+    transform: rotate(90deg);
+  }
+  &.up{
+    transform: rotate(-90deg);
+  }
+  &.left{
+    transform: rotate(180deg);
+  }
+}

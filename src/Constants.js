@@ -13,6 +13,7 @@ export const WP_POST_ID_CONTACT = 20;
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 
 export { default as ImageLogo } from './images/logo.svg';
+export { default as ImageArrow } from './images/arrow.svg';
 
 const getWpIframeUrl = url => {
   url = new URL(url);
