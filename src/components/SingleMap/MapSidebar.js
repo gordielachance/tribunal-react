@@ -8,14 +8,14 @@ import MapSettings from "./MapSettings";
 import FeaturesList from "./FeaturesList";
 import {TdpLogoLink} from "./MapPost";
 import PageMenu from "../PageMenu";
+import './MapSidebar.scss';
 
 
 const MapSidebar = (props) => {
 
   const {mobileScreen} = useApp();
 
-  const [isActive, setisActive] = useState(!mobileScreen);
-  const [isFullScreen, setIsFullScreen] = useState(mobileScreen);
+  const [isActive, setisActive] = useState();
 
   const [section,setSection] = useState('features');
 
@@ -27,12 +27,11 @@ const MapSidebar = (props) => {
     mapHasInit
   } = useMap();
 
-  //on sidebar features first init
+  //open sidebar on init ?
   useEffect(()=>{
-    if (mobileScreen){
-      setIsFullScreen(true);
-    }
-
+    if (mobileScreen === undefined) return;
+    if (isActive !== undefined) return; //ignore once have been defined
+    setisActive(!mobileScreen);
   },[mobileScreen])
 
   //on sidebar features first init
@@ -63,7 +62,6 @@ const MapSidebar = (props) => {
         sidebar:  true,
         active:   isActive,
         isLoading:  loading,
-        fullScreen: isFullScreen
       })}
       >
         <Dimmer.Dimmable dimmed={loading} id="sidebar-container">
@@ -110,7 +108,6 @@ const MapSidebar = (props) => {
                 onSortBy={props.onSortBy}
                 disabledFormats={props.markerFormatsDisabled}
                 onDisableFormats={props.onDisableFormats}
-                fullScreen={isFullScreen}
                 />
               }
               {
@@ -119,36 +116,15 @@ const MapSidebar = (props) => {
                 features={props.features}
                 disabledTags={props.markerTagsDisabled}
                 sortBy={props.sortMarkerBy}
-                fullScreen={isFullScreen}
                 />
               }
             </div>
           </div>
         </Dimmer.Dimmable>
-        <div className="sidebar-toggle clickable" >
+        <div className="sidebar-toggle clickable" onClick={e=>{setisActive(!isActive)}}>
           <span>
           {
-            <>
-            {
-              //close sidebar
-              isActive ?
-                (!isFullScreen || mobileScreen) &&
-                <Icon name='chevron left' onClick={e=>{setisActive(false)}}/>
-              :
-              //open sidebar
-              <Icon name='chevron right' onClick={e=>{setisActive(true)}}/>
-            }
-            {
-            //open full
-            (!mobileScreen && isActive && !isFullScreen) &&
-            <Icon name='chevron right' onClick={e=>{setIsFullScreen(true)}}/>
-            }
-            {
-            //close full
-            (!mobileScreen && isActive && isFullScreen) &&
-            <Icon name='chevron left' onClick={e=>{setIsFullScreen(false)}}/>
-            }
-            </>
+            isActive ? <Icon name='chevron left' /> : <Icon name='chevron right'/>
           }
           </span>
         </div>
