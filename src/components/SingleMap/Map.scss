@@ -160,6 +160,6 @@
 #layout.mobile{
 
   #mapBottom{
-    width:calc(100% - #{$sidebarHandleWidth});
+    width:calc(100% - 2 * #{$sidebarHandleWidth});
   }
 }

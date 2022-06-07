@@ -10,14 +10,13 @@
   padding-right:$sidebarHandleWidth;
 
   .sidebar-toggle {
-    background:#666666;
-    border:2px solid #666666;
+    background:$colorE;
     position: absolute;
     height: 100%;
     width: $sidebarHandleWidth;
     top: 0;
     right:0;
-    color:white;
+    color:$annotationsColor;
     display: flex;
     justify-content: center;
     align-items: center;

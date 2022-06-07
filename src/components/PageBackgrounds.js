@@ -21,9 +21,9 @@ import { default as BG17 } from '../images/bg-17.svg';
 export const BGHome = (props) => {
   return(
     <div id="BGHome" className="imagesBG">
-      <img id="BG01" src={BG01}/>
-      <img id="BG02" src={BG02}/>
-      <img id="BG03" src={BG03}/>
+      <img alt="" id="BG01" src={BG01}/>
+      <img alt="" id="BG02" src={BG02}/>
+      <img alt="" id="BG03" src={BG03}/>
     </div>
   )
 }
@@ -31,9 +31,9 @@ export const BGHome = (props) => {
 export const BGAgenda = (props) => {
   return(
     <div id="BGAgenda" className="imagesBG">
-      <img id="BG04" src={BG04}/>
-      <img id="BG05" src={BG05}/>
-      <img id="BG06" src={BG06}/>
+      <img alt="" id="BG04" src={BG04}/>
+      <img alt="" id="BG05" src={BG05}/>
+      <img alt="" id="BG06" src={BG06}/>
     </div>
   )
 }
@@ -41,9 +41,9 @@ export const BGAgenda = (props) => {
 export const BGCredits = (props) => {
   return(
     <div id="BGCredits" className="imagesBG">
-      <img id="BG07" src={BG07}/>
-      <img id="BG08" src={BG08}/>
-      <img id="BG09" src={BG09}/>
+      <img alt="" id="BG07" src={BG07}/>
+      <img alt="" id="BG08" src={BG08}/>
+      <img alt="" id="BG09" src={BG09}/>
     </div>
   )
 }
@@ -51,10 +51,10 @@ export const BGCredits = (props) => {
 export const BGCreations = (props) => {
   return(
     <div id="BGCreations" className="imagesBG">
-      <img id="BG10" src={BG10}/>
-      <img id="BG11" src={BG11}/>
-      <img id="BG12" src={BG12}/>
-      <img id="BG13" src={BG13}/>
+      <img alt="" id="BG10" src={BG10}/>
+      <img alt="" id="BG11" src={BG11}/>
+      <img alt="" id="BG12" src={BG12}/>
+      <img alt="" id="BG13" src={BG13}/>
     </div>
   )
 }
@@ -62,10 +62,10 @@ export const BGCreations = (props) => {
 export const BGMaps = (props) => {
   return(
     <div id="BGMaps" className="imagesBG">
-      <img id="BG14" src={BG14}/>
-      <img id="BG15" src={BG15}/>
-      <img id="BG16" src={BG16}/>
-      <img id="BG17" src={BG17}/>
+      <img alt="" id="BG14" src={BG14}/>
+      <img alt="" id="BG15" src={BG15}/>
+      <img alt="" id="BG16" src={BG16}/>
+      <img alt="" id="BG17" src={BG17}/>
     </div>
   )
 }
