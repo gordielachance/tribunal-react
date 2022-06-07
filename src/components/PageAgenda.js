@@ -3,6 +3,7 @@ import { useApp } from './../AppContext';
 import DatabaseAPI from "../databaseAPI/api";
 import {DEBUG} from "../Constants";
 import PagePosts from "./PagePosts";
+import {BGAgenda} from "./PageBackgrounds";
 
 const PageAgenda = (props) => {
 
@@ -38,7 +39,10 @@ const PageAgenda = (props) => {
   }, [agendaPosts]);
 
   return(
-    <PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>
+    <>
+      <PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>
+      <BGAgenda/>
+    </>
   )
 }
 

@@ -96,6 +96,8 @@ h2,h3,h4,h5,h6{
           margin-right:2em;
           flex-shrink:0;
           background:rgba(0,0,0,0.05);
+          opacity:.8;
+
         }
         .post-details{
           h3.post-title{
@@ -153,6 +155,7 @@ h2,h3,h4,h5,h6{
       img{
         height: 20vh;
         width:auto;
+        min-width:200px;
       }
     }
     #homeContent{
@@ -222,11 +225,7 @@ h2,h3,h4,h5,h6{
   }
   &#404Page{
   }
-
 }
-
-
-
 
 ul.pageMenu{
   text-align: center;

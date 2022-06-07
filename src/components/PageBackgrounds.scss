@@ -1,0 +1,133 @@
+.imagesBG{
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+  pointer-events:none;
+  position:fixed;
+  z-index:-1;
+  img{
+    position:absolute;
+  }
+  &#BGHome{
+    #BG01{
+      width:50%;
+      max-width:800px;
+      min-width:300px;
+      bottom:0;
+      left:0;
+    }
+    #BG02{
+      width:30%;
+      max-width:400px;
+      min-width:150px;
+      top:0;
+      right:0;
+    }
+    #BG03{
+      width:70%;
+      max-width:600px;
+      bottom:0;
+      right:0;
+    }
+  }
+  &#BGAgenda{
+    #BG04{
+      width:20%;
+      min-width:150px;
+      max-width:350px;
+      top:0;
+      left:0;
+    }
+    #BG05{
+      height:100%;
+      right:0;
+    }
+    #BG06{
+      width:30%;
+      max-width:400px;
+      min-width:250px;
+      bottom:0;
+      right:0;
+    }
+  }
+  &#BGCredits{
+    #BG07{
+      width:100%;
+      min-width:900px;
+      bottom:0;
+      left:0;
+      object-position: left bottom;
+    }
+    #BG08{
+      width:300px;
+      top:0;
+      left:0;
+    }
+    #BG09{
+      width:300px;
+      bottom:0;
+      right:0;
+    }
+  }
+  &#BGCreations{
+    #BG10{
+      width:40%;
+      max-width:500px;
+      bottom:0;
+      left:0;
+    }
+    #BG11{
+      width:40%;
+      top:0;
+      left:-15%;
+      max-width:600px;
+    }
+    #BG12{
+      max-height:100%;
+      right:0;
+      top:0;
+    }
+    #BG13{
+      top:0;
+      right:0;
+      height:50%;
+    }
+  }
+  &#BGMaps{
+    #BG14{
+      top: 0;
+      left: 0;
+      width: 40%;
+      max-width: 400px;
+    }
+    #BG15{
+      top: 0;
+      right: 0;
+      width: 40%;
+      max-width: 400px;
+      margin-right:-5%;
+    }
+    #BG16{
+      bottom: 0;
+      right: 0;
+      width: 40%;
+      max-width: 500px;
+    }
+    #BG17{
+      bottom: 0;
+      left: 0;
+      width: 25%;
+      max-width: 300px;
+      min-width: 150px;
+    }
+  }
+}
+
+#layout.mobile{
+  #BG02,
+  #BG04,
+  #BG15{
+    display:none;
+  }
+}

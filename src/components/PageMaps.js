@@ -3,6 +3,7 @@ import { useApp } from './../AppContext';
 import DatabaseAPI from "../databaseAPI/api";
 import {DEBUG} from "../Constants";
 import PagePosts from "./PagePosts";
+import {BGMaps} from "./PageBackgrounds";
 
 const PageMaps = (props) => {
 
@@ -38,7 +39,10 @@ const PageMaps = (props) => {
   }, [mapPosts]);
 
   return(
-    <PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>
+    <>
+      <PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>
+      <BGMaps/>
+    </>
   )
 }
 

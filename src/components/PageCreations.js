@@ -3,6 +3,8 @@ import { useApp } from './../AppContext';
 import DatabaseAPI from "../databaseAPI/api";
 import {DEBUG} from "../Constants";
 import PagePosts from "./PagePosts";
+import {BGCreations} from "./PageBackgrounds";
+
 
 const PageCreations = (props) => {
 
@@ -38,7 +40,10 @@ const PageCreations = (props) => {
   }, [creationPosts]);
 
   return(
-    <PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>
+    <>
+      <PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>
+      <BGCreations/>
+    </>
   )
 }
 

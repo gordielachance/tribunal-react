@@ -4,6 +4,7 @@ import PageMenu from "./PageMenu";
 import DatabaseAPI from "../databaseAPI/api";
 import { Loader,Dimmer } from 'semantic-ui-react';
 import {DEBUG,WP_POST_ID_HOME,ImageLogo} from "../Constants";
+import {BGHome} from "./PageBackgrounds";
 
 export const PageHome = (props) => {
 
@@ -45,6 +46,7 @@ export const PageHome = (props) => {
         <Loader />
       </Dimmer>
       <div id="homePage" className="page">
+
         <div id="homeLogo">
           <img src={ImageLogo}/>
         </div>
@@ -60,6 +62,7 @@ export const PageHome = (props) => {
           <PageMenu id="homeMenu"/>
         </div>
       </div>
+      <BGHome/>
     </Dimmer.Dimmable>
   )
 

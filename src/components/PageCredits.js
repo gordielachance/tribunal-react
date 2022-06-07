@@ -5,6 +5,7 @@ import PageMenu from "./PageMenu";
 import DatabaseAPI from "../databaseAPI/api";
 import {DEBUG} from "../Constants";
 import { Loader,Dimmer } from 'semantic-ui-react';
+import {BGCredits} from "./PageBackgrounds";
 
 const PageCredits = (props) => {
 
@@ -40,24 +41,26 @@ const PageCredits = (props) => {
   }, [creditsPost]);
 
   return(
-    <div id="creditsPage" className="page">
-      <div className="page-header">
-        <h1>Crédits</h1>
-        <PageMenu/>
+    <>
+      <div id="creditsPage" className="page">
+        <div className="page-header">
+          <h1>Crédits</h1>
+          <PageMenu/>
+        </div>
+        <Dimmer.Dimmable as="div" dimmed={loading} className="page-content">
+          <Dimmer active={loading} inverted>
+            <Loader />
+          </Dimmer>
+          {
+            creditsPost?.content.rendered &&
+            <div
+              dangerouslySetInnerHTML={{__html: creditsPost.content.rendered}}
+            />
+          }
+        </Dimmer.Dimmable>
       </div>
-      <Dimmer.Dimmable as="div" dimmed={loading} className="page-content">
-        <Dimmer active={loading} inverted>
-          <Loader />
-        </Dimmer>
-        {
-          creditsPost?.content.rendered &&
-          <div
-            dangerouslySetInnerHTML={{__html: creditsPost.content.rendered}}
-          />
-        }
-      </Dimmer.Dimmable>
-    </div>
-
+      <BGCredits/>
+    </>
   )
 }
 
