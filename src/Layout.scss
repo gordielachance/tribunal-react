@@ -156,29 +156,29 @@ h2,h3,h4,h5,h6{
       }
     }
     #homeContent{
-      flex: 1;
-      columns:2;
-      display:flex;
+      width: 100%;
+      max-width: 900px;
+      position:relative;
+      flex:1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       align-items: center;
-      max-width: 1000px;
-      margin: 0 auto;
-      .mobile &{
-        flex-direction:column;
-      }
+      justify-content:center;
       > * {
-        flex:1;
-        height:100%;
-        position:relative;
-        min-width:50%;
-        display: flex;
-          &#homeText{
-            line-height:3em;
+        padding:1em;
+        &#homeText{
+          >div {
             text-align: justify;
-            overflow: hidden;
-            max-height: 50vh;
-            display: flex;
-            align-items: center;
+            line-height:2.5em;
+            > *{
+              line-height:inherit!important;
+            }
           }
+        }
+        &#homeMenu{
+          margin:0;
+          padding:0;
+        }
       }
 
 
@@ -270,4 +270,12 @@ ul.pageMenu{
     }
   }
 
+}
+
+#layout:not(.mobile){
+  #homeText{
+    min-height:10em;
+    max-height:20em;
+    overflow-y:auto;
+  }
 }

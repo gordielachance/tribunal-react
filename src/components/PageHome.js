@@ -40,26 +40,27 @@ export const PageHome = (props) => {
 
 
   return (
-    <div id="homePage" className="page">
-      <div id="homeLogo">
-        <img src={ImageLogo}/>
+    <Dimmer.Dimmable as="div" dimmed={loading}>
+      <Dimmer active={loading} inverted>
+        <Loader />
+      </Dimmer>
+      <div id="homePage" className="page">
+        <div id="homeLogo">
+          <img src={ImageLogo}/>
+        </div>
+        <div id="homeContent">
+          <div id="homeText">
+          {
+            homePost?.content.rendered &&
+            <div
+              dangerouslySetInnerHTML={{__html: homePost.content.rendered}}
+            />
+          }
+          </div>
+          <PageMenu id="homeMenu"/>
+        </div>
       </div>
-      <div id="homeContent">
-      <Dimmer.Dimmable as="div" dimmed={loading} id="homeText">
-        <Dimmer active={loading} inverted>
-          <Loader />
-        </Dimmer>
-        {
-          homePost?.content.rendered &&
-          <div
-            dangerouslySetInnerHTML={{__html: homePost.content.rendered}}
-          />
-        }
-      </Dimmer.Dimmable>
-      <PageMenu id="homeMenu"/>
-      </div>
-    </div>
-
+    </Dimmer.Dimmable>
   )
 
 }
