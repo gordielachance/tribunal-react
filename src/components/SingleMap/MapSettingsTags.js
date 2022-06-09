@@ -1,11 +1,41 @@
+import React, { useEffect,useState }  from "react";
 import { Icon,Popup } from 'semantic-ui-react';
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import {getFeaturesTags,getIdsForTag} from "./MapFunctions";
 
+const SingleListTag = props => {
+  const tagNameEl = <span>{props.wpTag.name}</span>;
+  const [showDescription,setShowDescription] = useState(false);
+  return(
+    <>
+      <div className="singleTagHeader">
+        <Icon name="check" onClick={props.onClick}/>
+      {
+        <span
+        onClick={props.onClick}
+        onMouseEnter={props.onEnter}
+        onMouseLeave={props.onLeave}
+        >{tagNameEl}
+        </span>
+      }
+      {
+        props.wpTag.description &&
+        <span className="tagDescriptionHandle" onClick={(e)=>setShowDescription(!showDescription)}><Icon name="info circle"/></span>
+      }
+      </div>
+      {
+        showDescription &&
+        <div className="singleTagDescription">{props.wpTag.description}</div>
+      }
+    </>
+  )
+}
+
 const MapSettingsTags = props => {
 
   const {tags} = useApp();
+
   const {
     mapData,
     markerTagsDisabled,
@@ -43,28 +73,19 @@ const MapSettingsTags = props => {
       <ul id="tags-list" className="features-selection">
         {
           getFeaturesTags(allFeatures).map(function(slug,k) {
-
             const wpTag = tags.find(term=>term.slug===slug);
-            const count = getIdsForTag(slug,allFeatures).length;
-
-            const tagNameEl = <span>{wpTag.name}</span>;
 
             return(
               <li
               key={slug}
               className={!isDisabled(slug) ? 'active' : ''}
-              onClick={e=>{handleClick(slug)}}
-              onMouseEnter={e=>toggleHoverTag(slug,true)}
-              onMouseLeave={e=>toggleHoverTag(slug,false)}
               >
-                <span><Icon name="check"/></span>
-                {
-                  wpTag.description ?
-                    <Popup content={wpTag.description} trigger={tagNameEl} />
-                  :
-                  tagNameEl
-                }
-                <span className="count">{count}</span>
+                <SingleListTag
+                wpTag={wpTag}
+                onClick={e=>handleClick(slug)}
+                onEnter={e=>toggleHoverTag(slug,true)}
+                onLeave={e=>toggleHoverTag(slug,false)}
+                />
               </li>
             )
           })

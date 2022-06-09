@@ -117,11 +117,8 @@
 
 ul.features-selection{
   li{
-    opacity:.75;
+    opacity:.9;
     &:hover{
-      opacity:.85;
-    }
-    &.active{
       opacity:1;
     }
   }
@@ -141,9 +138,19 @@ ul.features-selection{
     columns: auto 200px;
     li{
       break-inside: avoid;
-      display:flex;
       padding: 0.25em 0;
       @extend .clickable;
+    }
+    &#tags-list{
+      .singleTagDescription{
+        font-size:.8em;
+        line-height:1em;
+        padding:.5em 0;
+      }
+      .tagDescriptionHandle{
+        margin-left:.25em;
+        opacity:.5;
+      }
     }
   }
 }
@@ -166,17 +173,13 @@ ul.features-selection{
 #map-settings-tags,
 #map-settings-formats{
   li{
-    .icon{
+    .icon.check{
       opacity:.25;
     }
     &.active{
-      .icon{
+      .icon.check{
         opacity:1;
       }
-    }
-    .count{
-      margin-left:.5em;
-      color:grey;
     }
   }
 
