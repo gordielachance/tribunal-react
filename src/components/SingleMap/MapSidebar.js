@@ -17,7 +17,7 @@ const MapSidebar = (props) => {
 
   const [isActive, setisActive] = useState();
 
-  const [section,setSection] = useState('features');
+  const [section,setSection] = useState('settings');
 
 
   const [loading,setLoading] = useState(true);
@@ -89,10 +89,10 @@ const MapSidebar = (props) => {
                   </Menu.Item>
 
                   <Menu.Item
-                    id="map-menu-features"
+                    id="map-menu-index"
                     name='Index'
-                    active={section === 'features'}
-                    onClick={e=>setSection('features')}
+                    active={section === 'index'}
+                    onClick={e=>setSection('index')}
                   >
                   <Icon name="circle"/>
                   Index
@@ -111,7 +111,7 @@ const MapSidebar = (props) => {
                 />
               }
               {
-                (section === 'features') &&
+                (section === 'index') &&
                 <FeaturesList
                 features={props.features}
                 disabledTags={props.markerTagsDisabled}
