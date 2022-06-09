@@ -29,7 +29,9 @@ const LayerLegendItem = props => {
       active:props.active
     })}
     data-layerid={props.layerId}>
-      <span className="layer-icon"><Icon name="circle" /></span>{layerText}
+        <nobr>
+          <span className="layer-icon"><Icon name="circle" /></span>{layerText}
+        </nobr>
       </span>
   )
 }
