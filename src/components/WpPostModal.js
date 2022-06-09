@@ -1,7 +1,9 @@
 import React, {useState,useEffect,useRef} from 'react';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
-
+import classNames from "classnames";
 import {DEBUG,getWpIframePostUrl} from "../Constants";
+import {BGPopup} from "./PageBackgrounds";
+import { useApp } from '../AppContext';
 
 //broken: /http://localhost:3000/carte/944/new-demo-map/creation/925/jette-geographie-des-prejuges
 //ok: http://localhost:3000/carte/944/new-demo-map/creation/892/prejuquoi
@@ -11,6 +13,7 @@ const WpPostModal = (props) => {
   const [title,setTitle] = useState('...');
   const [loading,setLoading] = useState(false);
   const [url,setUrl] = useState();
+  const {verticalScreen,mobileScreen} = useApp();
 
   useEffect(()=>{
 
@@ -40,7 +43,10 @@ const WpPostModal = (props) => {
 
   return(
     <Modal
-      className="marker-modal"
+      className={classNames({
+        'post-modal': true,
+        mobile: mobileScreen
+      })}
       closeIcon
       open={true}
       onClose={props.onClose}
@@ -64,8 +70,8 @@ const WpPostModal = (props) => {
               onLoad={handleLoaded}
               />
             }
-
           </Modal.Description>
+          <BGPopup/>
         </Dimmer.Dimmable>
     </Modal>
   )

@@ -17,6 +17,10 @@ import { default as BG14 } from '../images/bg-14.svg';
 import { default as BG15 } from '../images/bg-15.svg';
 import { default as BG16 } from '../images/bg-16.svg';
 import { default as BG17 } from '../images/bg-17.svg';
+import { default as BG18 } from '../images/bg-18.svg';
+import { default as BG19 } from '../images/bg-19.svg';
+import { default as BG20 } from '../images/bg-20.svg';
+import { default as BG21 } from '../images/bg-21.svg';
 
 export const BGHome = (props) => {
   return(
@@ -66,6 +70,17 @@ export const BGMaps = (props) => {
       <img alt="" id="BG15" src={BG15}/>
       <img alt="" id="BG16" src={BG16}/>
       <img alt="" id="BG17" src={BG17}/>
+    </div>
+  )
+}
+
+export const BGPopup = (props) => {
+  return(
+    <div id="BGPopup" className="imagesBG">
+      <img alt="" id="BG18" src={BG18}/>
+      <img alt="" id="BG19" src={BG19}/>
+      <img alt="" id="BG20" src={BG20}/>
+      <img alt="" id="BG21" src={BG21}/>
     </div>
   )
 }
