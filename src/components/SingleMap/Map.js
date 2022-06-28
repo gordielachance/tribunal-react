@@ -194,177 +194,194 @@ const Map = (props) => {
       if(mapData !== undefined){
         mapboxMap.on('load', () => {
 
-        //init mapbox sources
-        for (var key in mapData.sources) {
-          const sourceData = mapData.sources[key];
-          DEBUG && console.log("ADD SOURCE",key,sourceData);
-          mapboxMap.addSource(key,sourceData);
-        }
+          //add raster layers
+          const getRastersDatas = () => {
+            /*
+            set polygon minzoom properties
+            */
 
-        //add raster layers
+            //get size of the polygon at the current zoom
+            const getPolygonSize = polygon => {
+              const bbox = turf.bbox(polygon);
 
-        const addRasterLayers = () => {
-          /*
-          set polygon minzoom properties
-          */
+              const p1 = [bbox[0],bbox[3]];
+              const p2 = [bbox[2],bbox[1]];
 
-          //get size of the polygon at the current zoom
-          const getPolygonSize = polygon => {
-            const bbox = turf.bbox(polygon);
+              const p1Pixels = mapboxMap.project(p1);
+              const p2Pixels = mapboxMap.project(p2);
 
-            const p1 = [bbox[0],bbox[3]];
-            const p2 = [bbox[2],bbox[1]];
+              const pixelWidth = (p2Pixels.x - p1Pixels.x);
+              const pixelHeight = (p2Pixels.y - p1Pixels.y);
 
-            const p1Pixels = mapboxMap.project(p1);
-            const p2Pixels = mapboxMap.project(p2);
+              const zoomLevel = mapboxMap.getZoom();
 
-            const pixelWidth = (p2Pixels.x - p1Pixels.x);
-            const pixelHeight = (p2Pixels.y - p1Pixels.y);
-
-            const zoomLevel = mapboxMap.getZoom();
-
-            return {
-              x:pixelWidth,
-              y:pixelHeight,
-              zoomLevel:zoomLevel
-            }
-
-          }
-
-          const getPolygonSizeForZoomlevel = (polygon,zoomLevel) => {
-
-            const polygonSize = getPolygonSize(polygon);
-
-            const currentZoom = polygonSize.zoomLevel;
-            const zoomCorrection = Math.pow(2, currentZoom) / Math.pow(2, zoomLevel);
-            return {x:polygonSize.x/zoomCorrection,y:polygonSize.y/zoomCorrection,zoomLevel:zoomLevel};
-
-          }
-
-          //get the minimum zoom level for a polygon, based on a minimum size (in pixels) of the polygon's bounding box.
-          const getPolygonMinimumZoom = polygon => {
-            const minPixels = 15;
-            let targetZoom = undefined;
-            for (let zoomLevel = 0; zoomLevel < 23; zoomLevel++) {
-              const size = getPolygonSizeForZoomlevel(polygon,zoomLevel);
-              if ( (size.x > minPixels) || (size.y > minPixels) ){
-                targetZoom = zoomLevel;
-                break;
+              return {
+                x:pixelWidth,
+                y:pixelHeight,
+                zoomLevel:zoomLevel
               }
 
             }
-            return targetZoom;
-          }
 
+            const getPolygonSizeForZoomlevel = (polygon,zoomLevel) => {
 
-          //init mapbox annotation images
-          const getRasterDatas = (feature) => {
+              const polygonSize = getPolygonSize(polygon);
 
-            const postId = feature.properties.post_id;
-            const imageUrl = feature.properties.image_url;
-            const imageBbox = feature.properties.image_bbox;
+              const currentZoom = polygonSize.zoomLevel;
+              const zoomCorrection = Math.pow(2, currentZoom) / Math.pow(2, zoomLevel);
+              return {x:polygonSize.x/zoomCorrection,y:polygonSize.y/zoomCorrection,zoomLevel:zoomLevel};
 
-            //compute minimum zoom and store as a prop
-            const minzoom = getPolygonMinimumZoom(feature);
-            feature.properties.minzoom = minzoom;
+            }
 
-            const imagePolygon = turf.bboxPolygon(imageBbox);
-            let coordinates = imagePolygon.geometry.coordinates[0];
-            coordinates.pop();//remove last item of the polygon (the closing vertex)
+            //get the minimum zoom level for a polygon, based on a minimum size (in pixels) of the polygon's bounding box.
+            const getPolygonMinimumZoom = polygon => {
+              const minPixels = 15;
+              let targetZoom = undefined;
+              for (let zoomLevel = 0; zoomLevel < 23; zoomLevel++) {
+                const size = getPolygonSizeForZoomlevel(polygon,zoomLevel);
+                if ( (size.x > minPixels) || (size.y > minPixels) ){
+                  targetZoom = zoomLevel;
+                  break;
+                }
 
-            const sourceId = "annotation-source-"+postId;
-            const layerId = "annotation-layer-"+postId;
-
-            return {
-              polygon_id:feature.properties.id,
-              source:{
-                id:sourceId,
-                type: 'image',
-                url: imageUrl,
-                coordinates: coordinates
-              },
-              layer:{
-                id: layerId,
-                source: sourceId,
-                type: "raster",
-                //"minzoom":minzoom
               }
+              return targetZoom;
             }
+
+
+            //init mapbox annotation images
+            const getSingleRasterDatas = (feature) => {
+
+              const postId = feature.properties.post_id;
+              const imageUrl = feature.properties.image_url;
+              const imageBbox = feature.properties.image_bbox;
+
+              //compute minimum zoom and store as a prop
+              const minzoom = getPolygonMinimumZoom(feature);
+              feature.properties.minzoom = minzoom;
+
+              const imagePolygon = turf.bboxPolygon(imageBbox);
+              let coordinates = imagePolygon.geometry.coordinates[0];
+              coordinates.pop();//remove last item of the polygon (the closing vertex)
+
+              const sourceId = "annotation-source-"+postId;
+              const layerId = "annotation-layer-"+postId;
+
+              return {
+                polygon_id:feature.properties.id,
+                source:{
+                  id:sourceId,
+                  type: 'image',
+                  url: imageUrl,
+                  coordinates: coordinates
+                },
+                layer:{
+                  id: layerId,
+                  source: sourceId,
+                  type: "raster",
+                  //"minzoom":minzoom
+                }
+              }
+
+            }
+
+            const polygonFeatures = (mapData.sources?.annotations?.data.features || []);
+
+            const sourceIds = [];
+
+            return polygonFeatures.map(feature => {
+              const datas = getSingleRasterDatas(feature);
+              feature.properties.image_layer = datas.layer.id;
+              return datas;
+            })
+
+            .filter(data => {  //Ignore duplicates
+
+              const sourceId = data.source.id;
+
+              if ( sourceIds.includes(sourceId) ){
+                DEBUG && console.log(`Source "${sourceId}" already exists.`);
+                return false;
+              }
+
+              sourceIds.push(data.source.id);
+              return true;
+
+            })
+
+
 
           }
+          const rastersDatas = getRastersDatas();
+          const rastersLayers = rastersDatas.map(rasterData => rasterData.layer);
+          const rastersLayerIds = rastersLayers.map(rasterLayer => rasterLayer.id);
+          setAnnotationsLayerIds(rastersLayerIds); //keep a track of the whole set of layer Ids; we'll need this to toggle all the rasters.
 
-          const polygonFeatures = (mapData.sources?.annotations?.data.features || []);
-
-          const sourceIds = [];
-
-          const rasterDatas = polygonFeatures.map(feature => {
-            const datas = getRasterDatas(feature);
-            feature.properties.image_layer = datas.layer.id;
-            return datas;
-          })
-
-          .filter(data => {  //Ignore duplicates
-
-            const sourceId = data.source.id;
-
-            if ( sourceIds.includes(sourceId) ){
-              DEBUG && console.log(`Source "${sourceId}" already exists.`);
-              return false;
-            }
-
-            sourceIds.push(data.source.id);
-            return true;
-
-          })
-
-          //append
-          rasterDatas.forEach(data => {
+          //add raster sources to collection
+          rastersDatas.forEach(data => {
             const sourceData = {...data.source};delete sourceData.id;//remove ID since to avoid bug
-            mapboxMap.addSource(data.source.id,sourceData);
-            mapboxMap.addLayer(data.layer);
+            mapData.sources[data.source.id] = sourceData;
           })
 
-          return rasterDatas.map(rasterData => rasterData.layer.id);
-
-        }
-        const layerIds = addRasterLayers();
-
-        setAnnotationsLayerIds(layerIds); //keep a track of the whole set of layer Ids; we'll need this to toggle all the rasters.
-
-        //init mapbox layers
-        for (var key in mapData.layers) {
-          //conform data for mapbox layers
-          const layerData = {
-            ...mapData.layers[key],
-            id:key
+          //init mapbox sources
+          for (var sourceId in mapData.sources) {
+            const sourceData = mapData.sources[sourceId];
+            DEBUG && console.log("ADD SOURCE",sourceId,sourceData);
+            mapboxMap.addSource(sourceId,sourceData);
           }
-          DEBUG && console.log("ADD LAYER",key,layerData);
-          mapboxMap.addLayer(layerData);
-        }
 
-        //list all layers
-        DEBUG && console.log("ALL MAP LAYERS INITIALIZED",mapboxMap.getStyle().layers.length);
 
-        mapboxMap.resize(); // fit to container
+          let allLayers = [];
 
-        // Add search
-        mapboxMap.addControl(
-          new MapboxGeocoder({
-            accessToken: MAPBOX_TOKEN,
-            mapboxgl: mapboxgl
+          //conform input data
+          for (var key in mapData.layers) {
+            //conform data for mapbox layers
+            const layerData = {
+              ...mapData.layers[key],
+              id:key
+            }
+            allLayers.push(layerData);
+          }
+
+          //get basemap layer (we need to inject the rasters between the basemap and the other layers)
+          const baseMapLayer = allLayers.find(layer => layer.id === 'basemap');
+
+          //add rasters at the beginning of the array
+          allLayers = [...rastersLayers,...allLayers];
+
+          //move basemap at the very beginning of the array (should show BELOW the rasters)
+          allLayers = allLayers.filter(item => item !== baseMapLayer);
+          allLayers.unshift(baseMapLayer);
+
+          //init mapbox layers
+          allLayers.forEach(layer => {
+            mapboxMap.addLayer(layer);
+            DEBUG && console.log("ADD LAYER",layer.id,layer);
           })
-        );
 
-        // Add navigation control (the +/- zoom buttons)
-        mapboxMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+          //list all layers
+          DEBUG && console.log("ALL MAP LAYERS INITIALIZED",mapboxMap.getStyle().layers.length);
 
-        initMapListeners(mapboxMap);
+          mapboxMap.resize(); // fit to container
 
-        mapboxMap.once('idle',(e)=>{
-          setMapHasInit(true);
-        })
+          // Add search
+          mapboxMap.addControl(
+            new MapboxGeocoder({
+              accessToken: MAPBOX_TOKEN,
+              mapboxgl: mapboxgl
+            })
+          );
 
-      });
+          // Add navigation control (the +/- zoom buttons)
+          mapboxMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+          initMapListeners(mapboxMap);
+
+          mapboxMap.once('idle',(e)=>{
+            setMapHasInit(true);
+          })
+
+        });
       }
 
       mapboxMap.on('moveend', (e) => {
