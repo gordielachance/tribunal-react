@@ -10,12 +10,17 @@ const LayerLegendItem = props => {
       case 'creations':
         return 'Créations'
       break;
-      case 'annotationsHandles'://TOUFIX SHOULD BE 'annotations'
+      case 'annotationsHandles':
         return 'Géographie subjective'
       break;
       case 'events':
         return 'Évènements'
       break;
+      case 'partners':
+        return 'Partenaires'
+      break;
+      default:
+        return layerId
     }
   }
 
@@ -44,7 +49,7 @@ const MapSettingsLayers = (props) => {
     toggleMapLayer,
   } = useMap();
 
-  const allowedLayers = ['creations','annotationsHandles','events'];
+  const allowedLayers = ['creations','annotationsHandles','events','partners'];
   const initialLayers = mapData?.layers ?
     Object.keys(mapData.layers).map(function(key, index) {
       return key;
