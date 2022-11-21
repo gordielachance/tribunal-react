@@ -42,9 +42,15 @@ export const menuItems = [
     path:'/',
     name:'menu'
   },
+  /*
   {
     path:'/cartes',
     name:'Cartes'
+  },
+  */
+  {
+    path:'/cartes/944/carte-principale',
+    name:'Carte'
   },
   {
     path:'/agenda',
