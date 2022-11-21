@@ -77,6 +77,12 @@
     }
   }
 
+  &[data-source="partners"]{
+    .feature-icon{
+      color: $partnersColor;
+    }
+  }
+
   .feature-header{
 
     .feature-title{

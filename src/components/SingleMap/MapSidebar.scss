@@ -210,6 +210,11 @@ ul.features-selection{
             color: $eventsColor;
           }
         }
+        &[data-layerid="partners"]{
+          .layer-icon{
+            color: $partnersColor;
+          }
+        }
       }
 
     }
