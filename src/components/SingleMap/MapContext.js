@@ -561,10 +561,11 @@ export function MapProvider({children}){
     if (mapboxMap === undefined) return;
     DEBUG && console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
 
-    mapboxMap.setFilter("creations",featuresFilter);
-    mapboxMap.setFilter("annotationsHandles",featuresFilter);
-		mapboxMap.setFilter("annotationsFill",featuresFilter);
-		mapboxMap.setFilter("annotationsStroke",featuresFilter);
+		const layers = ['creations','annotationsHandles','annotationsFill','annotationsStroke','events','partners'];
+
+		layers.forEach(layerId=>{
+      mapboxMap.setFilter(layerId,featuresFilter);
+    })
 
   },[featuresFilter])
 
@@ -583,6 +584,7 @@ export function MapProvider({children}){
   },[layersDisabled])
 
 	useEffect(()=>{
+
 		if (!mapHasInit) return;
 		DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 
