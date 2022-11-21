@@ -184,24 +184,25 @@ export function MapProvider({children}){
 		let newDisabled = [...(layersDisabled || [])];
     const index = newDisabled.indexOf(layerId);
 
+		//default bool
 		if (bool === undefined){
-			bool = (index === -1);
+			bool = (index !== -1);
 		}
 
-		if (bool) {
+		DEBUG && console.log("TOGGLE MAP LAYER",layerId,bool);
+
+		if (!bool) {
 			newDisabled.push(layerId);
+			if (layerId === 'annotationsHandles'){	//include raster layers
+				newDisabled = newDisabled.concat(annotationsLayerIds);
+			}
+
     }else{
       newDisabled.splice(index, 1);
-    }
-
-		//include or exclude raster layers
-		if (layerId === 'annotationsHandles'){
-			if (bool){
-				newDisabled = newDisabled.concat(annotationsLayerIds);
-			}else{
+			if (layerId === 'annotationsHandles'){	//exclude raster layers
 				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));
 			}
-		}
+    }
 
 		setLayersDisabled(newDisabled);
 	}
@@ -558,7 +559,7 @@ export function MapProvider({children}){
   //set global marker filters
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
+    DEBUG && console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
 
     mapboxMap.setFilter("creations",featuresFilter);
     mapboxMap.setFilter("annotationsHandles",featuresFilter);
