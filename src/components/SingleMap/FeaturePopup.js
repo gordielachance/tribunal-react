@@ -6,7 +6,7 @@ import { CreationCard } from "./CreationCard";
 import { useMap } from './MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
-import {getFeatureUrl} from "../../Constants";
+import {getFeatureUrl,getMapUrl} from "../../Constants";
 
 const FeaturePopupContent = (props) => {
 
@@ -14,11 +14,6 @@ const FeaturePopupContent = (props) => {
   const {mapPostSlug,mapPostId} = useParams();
 
   const hasMore = props.feature?.properties.has_more;
-
-  const handleClick = () => {
-    const url = getFeatureUrl(mapPostId,mapPostSlug,props.feature.properties.source,props.feature.properties.id,'full');
-    navigate(url);
-  }
 
   return (
     <div className="feature-popup">
@@ -29,7 +24,7 @@ const FeaturePopupContent = (props) => {
       {
         hasMore &&
         <div className="popup-actions">
-          <Button onClick={handleClick}>Ouvrir</Button>
+          <Button onClick={props.onClick}>Ouvrir</Button>
         </div>
       }
 
@@ -50,12 +45,19 @@ const FeaturePopup = props => {
     anchor:'bottom'
   }
 
-  const handleClose = e => {
+  const handleClose = () => {
+    //TOUFIX URGENT something fucks up when opening the popup, there is probably a conflict in the flow.
     /*
     if (JSON.stringify(activeFeature) !== JSON.stringify(props.feature)) return;
     const url = getMapUrl(mapPostId,mapPostSlug);
     navigate(url);
     */
+  }
+
+  const handleOpen = e => {
+    e.preventDefault();
+    const url = getFeatureUrl(mapPostId,mapPostSlug,props.feature.properties.source,props.feature.properties.id,'full');
+    navigate(url);
   }
 
   return (
@@ -67,7 +69,7 @@ const FeaturePopup = props => {
         settings={popupSettings}
         onClose={handleClose}
         >
-          <FeaturePopupContent feature={props.feature}/>
+          <FeaturePopupContent feature={props.feature} onClick={handleOpen}/>
         </MapPopup>
       }
 
