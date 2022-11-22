@@ -193,14 +193,16 @@ export function MapProvider({children}){
 
 		if (!bool) {
 			newDisabled.push(layerId);
-			if (layerId === 'annotationsHandles'){	//include raster layers
-				newDisabled = newDisabled.concat(annotationsLayerIds);
+			if (layerId === 'annotationsHandles'){
+				newDisabled = newDisabled.concat(annotationsLayerIds);//also exclude raster layers
+				newDisabled = newDisabled.concat(['annotationsFill','annotationsStroke']);
 			}
 
     }else{
       newDisabled.splice(index, 1);
-			if (layerId === 'annotationsHandles'){	//exclude raster layers
-				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));
+			if (layerId === 'annotationsHandles'){
+				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));//also include raster layers
+				newDisabled = newDisabled.filter(x => !['annotationsFill','annotationsStroke'].includes(x));
 			}
     }
 
