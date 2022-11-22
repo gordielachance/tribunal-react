@@ -586,7 +586,6 @@ export function MapProvider({children}){
 	useEffect(()=>{
 
 		if (!mapHasInit) return;
-		DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 
 		//hide old
 		if (prevActiveFeature.current){
@@ -595,6 +594,7 @@ export function MapProvider({children}){
 
 		//show new
 		if (activeFeature){
+			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 			setMapFeatureState(activeFeature,'active',true);
 		}
 

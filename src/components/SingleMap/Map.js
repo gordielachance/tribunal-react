@@ -151,17 +151,14 @@ const Map = (props) => {
 
   },[mapData,urlSourceId,urlFeatureId])
 
-
-
   //set active marker from URL
   useEffect(()=>{
 
     if (!mapHasInit) return;
 
-    //first, unset active feature so popup gets removed
-    setActiveFeature();
 
     const urlFeature = getUrlFeature();
+    setActiveFeature(urlFeature);
 
     if (urlFeature){
 
@@ -169,11 +166,6 @@ const Map = (props) => {
       mapboxMap.easeTo({
         //center: [-75,43],
         center: urlFeature.geometry.coordinates
-      })
-
-      //once done, set marker as active
-      mapboxMap.once('idle',(e)=>{
-        setActiveFeature(urlFeature);
       })
 
     }
@@ -452,13 +444,12 @@ const Map = (props) => {
 
   },[featuresFilter])
 
-
-
   return (
     <div id="map-container">
       {
         activeFeature &&
-        <FeaturePopup feature={activeFeature}/>
+        <FeaturePopup
+        feature={activeFeature}/>
       }
       <div
       id="map"

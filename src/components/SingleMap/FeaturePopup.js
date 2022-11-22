@@ -1,80 +1,82 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import { Button } from 'semantic-ui-react';
 
-import MapPopup from "./MapPopup";
 import { CreationCard } from "./CreationCard";
 import { useMap } from './MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
-import {getFeatureUrl,getMapUrl} from "../../Constants";
-
-const FeaturePopupContent = (props) => {
-
-  const navigate = useNavigate();
-  const {mapPostSlug,mapPostId} = useParams();
-
-  const hasMore = props.feature?.properties.has_more;
-
-  return (
-    <div className="feature-popup">
-      <CreationCard
-      feature={props.feature}
-      highlightTags={true}
-      />
-      {
-        hasMore &&
-        <div className="popup-actions">
-          <Button onClick={props.onClick}>Ouvrir</Button>
-        </div>
-      }
-
-    </div>
-  );
-}
+import {DEBUG,getFeatureUrl,getMapUrl} from "../../Constants";
 
 const FeaturePopup = props => {
 
   const navigate = useNavigate();
   const {mapPostSlug,mapPostId} = useParams();
+  const {mapboxMap} = useMap();
+  const popupRef = useRef();
 
-  const {
-    activeFeature
-  } = useMap();
-
-  let popupSettings = {
+  //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
+  const popup = new mapboxgl.Popup({
     anchor:'bottom'
-  }
+  })
 
+  /*
+  It seems that mapbox fires the popup close event when the user clicks the icon,
+  but also when it is destroyed.
+  So we need to ensure that we don't redirect to the map URL twice.
+  */
   const handleClose = () => {
-    //TOUFIX URGENT something fucks up when opening the popup, there is probably a conflict in the flow.
-    /*
-    if (JSON.stringify(activeFeature) !== JSON.stringify(props.feature)) return;
+
+    DEBUG && console.log("CLOSE FEATURE POPUP",props.feature.properties.id);
     const url = getMapUrl(mapPostId,mapPostSlug);
     navigate(url);
-    */
   }
 
   const handleOpen = e => {
+    DEBUG && console.log("HANDLE OPEN",props.feature.properties.id);
     e.preventDefault();
     const url = getFeatureUrl(mapPostId,mapPostSlug,props.feature.properties.source,props.feature.properties.id,'full');
     navigate(url);
   }
 
-  return (
-    <>
-      {
-        props.feature &&
-        <MapPopup
-        lngLat={props.feature.geometry.coordinates}
-        settings={popupSettings}
-        onClose={handleClose}
-        >
-          <FeaturePopupContent feature={props.feature} onClick={handleOpen}/>
-        </MapPopup>
-      }
+  //on init
+  useEffect(() => {
+    if (mapboxMap === undefined) return;
 
-    </>
+    if (props.feature){
+      popup
+      .setLngLat(props.feature.geometry.coordinates)
+      .setDOMContent(popupRef.current)
+      .addTo(mapboxMap)
+      .once('close',handleClose)
+    }
+
+    return () => {
+      popup.remove();
+    };
+
+  }, [props.feature]);
+
+  return (
+    <div style={{ display: "none" }}>
+      <div ref={popupRef}>
+        <div className="feature-popup">
+          <CreationCard
+          feature={props.feature}
+          highlightTags={true}
+          />
+          {
+            props.feature.properties.has_more &&
+            <div className="popup-actions">
+              <Button onClick={handleOpen}>Ouvrir</Button>
+            </div>
+          }
+
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default FeaturePopup;
+//TOUFIX TOUCHECK use react.memo ?
