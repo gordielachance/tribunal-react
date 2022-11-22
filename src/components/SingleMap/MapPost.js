@@ -35,6 +35,13 @@ const MapPost = (props) => {
     //get visible features on map for use in the sidebar
 
     const getVisibleFeatures = (layerIds) => {
+
+      //ensure layer exists or query will fail
+      if (mapboxMap === undefined) return;
+      layerIds = layerIds.filter(layerId => {
+        return ( mapboxMap.getLayer(layerId) )
+      })
+
       let features = mapboxMap.queryRenderedFeatures({
         layers: layerIds,
         filter: featuresFilter
