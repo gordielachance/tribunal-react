@@ -467,10 +467,14 @@ export function MapProvider({children}){
 					const targetId = handle.properties.id;
 					const polygonId = targetId;
 					const polygon = newMapData.sources.annotations.data.features.find(feature => (feature.properties.id === polygonId));
-					handle.properties = {
-						...polygon.properties,
-						...handle.properties
+
+					if (polygon){
+						handle.properties = {
+							...polygon.properties,
+							...handle.properties
+						}
 					}
+
 					return handle;
 				})
 			}
