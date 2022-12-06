@@ -128,7 +128,7 @@ const FeaturesList = props => {
   const handleClick = feature => {
     switch(feature.source){
       case 'creations':
-        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id,'full'));
+        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id) + '/full');
       break;
       default:
         navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));

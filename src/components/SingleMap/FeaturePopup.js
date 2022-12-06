@@ -15,6 +15,9 @@ const FeaturePopup = props => {
   const {mapboxMap} = useMap();
   const popupRef = useRef();
 
+  const feature_url = getFeatureUrl(mapPostId,mapPostSlug,props.feature.properties.source,props.feature.properties.id);
+
+
   //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
   const popup = new mapboxgl.Popup({
     anchor:'bottom'
@@ -35,8 +38,7 @@ const FeaturePopup = props => {
   const handleOpen = e => {
     DEBUG && console.log("HANDLE OPEN",props.feature.properties.id);
     e.preventDefault();
-    const url = getFeatureUrl(mapPostId,mapPostSlug,props.feature.properties.source,props.feature.properties.id,'full');
-    navigate(url);
+    navigate(feature_url + '/full');
   }
 
   //on init
