@@ -277,7 +277,7 @@ const Map = (props) => {
 
             }
 
-            const polygonFeatures = (mapData.sources?.annotations?.data.features || []);
+            const polygonFeatures = (mapData.sources?.annotationPolygons?.data.features || []);
 
             const sourceIds = [];
 
@@ -413,7 +413,7 @@ const Map = (props) => {
 
     mapboxMap.once('idle',(e)=>{
 
-      const allPolygons = mapData.sources.annotations.data.features || [];
+      const allPolygons = mapData.sources.annotationPolygons.data.features || [];
 
       const visiblePolygons = mapboxMap.queryRenderedFeatures({
         layers: ['annotationsFill'],

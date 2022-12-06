@@ -46,7 +46,7 @@ export function MapProvider({children}){
 		if (!handleFeature){
 			throw "Missing 'handleFeature' parameter.";
 		}
-		const sourceCollection = mapData?.sources.annotations?.data.features;
+		const sourceCollection = mapData?.sources.annotationPolygons?.data.features;
 		const polygonId = handleFeature.properties.id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
 	}
@@ -146,7 +146,7 @@ export function MapProvider({children}){
   const toggleHoverTag = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByTag(allFeatures,slug);
@@ -168,7 +168,7 @@ export function MapProvider({children}){
 	const toggleHoverFormat = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByFormat(allFeatures,slug);
@@ -241,7 +241,7 @@ export function MapProvider({children}){
 
 						//TOUFIX URGENT ONLY VISIBLE FEATURES
 						const creationFeatures = mapData?.sources.creations?.data.features || [];
-					  const handlesFeatures = mapData?.sources.annotations?.data.features || [];
+					  const handlesFeatures = mapData?.sources.annotationPolygons?.data.features || [];
 					  const allPoints = creationFeatures.concat(handlesFeatures);
 
 						//get this feature within the new array
@@ -387,20 +387,20 @@ export function MapProvider({children}){
 				return {
 		      data:{
 		        type:'FeatureCollection',
-		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotations.data.features)
+		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotationPolygons.data.features)
 		      },
 		      promoteId:'id',
 		      type:'geojson'
 		    }
 			}
-			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotations.data.features);
+			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotationPolygons.data.features);
 		}
 
 		/*
 		if (newMapDatasources.annotations ){
 
-			const allPolygons = newMapData.sources.annotations.data.features || [];
-			const allHandles = newMapDatasources.annotations.data.features || [];
+			const allPolygons = newMapData.sources.annotationPolygons.data.features || [];
+			const allHandles = newMapDatasources.annotationPolygons.data.features || [];
 
 			//remove polygons that does not have handles
 
@@ -419,7 +419,7 @@ export function MapProvider({children}){
 				return polygons;
 			}
 
-			newMapData.sources.annotations.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
+			newMapData.sources.annotationPolygons.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
 
 			//remove handles that does not have polygons
 			const filterHandlesWithPolygons = (handles,polygons) => {
@@ -437,7 +437,7 @@ export function MapProvider({children}){
 				return handles;
 			}
 
-			newMapDatasources.annotations.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
+			newMapDatasources.annotationPolygons.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
 
 
 		}
@@ -466,7 +466,7 @@ export function MapProvider({children}){
 				return handles.map(handle => {
 					const targetId = handle.properties.id;
 					const polygonId = targetId;
-					const polygon = newMapData.sources.annotations.data.features.find(feature => (feature.properties.id === polygonId));
+					const polygon = newMapData.sources.annotationPolygons.data.features.find(feature => (feature.properties.id === polygonId));
 
 					if (polygon){
 						handle.properties = {
