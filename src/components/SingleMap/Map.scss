@@ -54,6 +54,16 @@
     width:100%;
     height:100%;
   }
+  .description{
+    position:relative;
+    z-index:1;
+  }
+  #BGPopup{
+    position:absolute;
+    top:0;
+    left:0;
+  }
+
 }
 
 .feature-card{
