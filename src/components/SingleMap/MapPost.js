@@ -49,7 +49,7 @@ const MapPost = (props) => {
       return getUniqueMapFeatures(features);
     }
 
-    const features = getVisibleFeatures(['creations','annotationsHandles','events','partners']);
+    const features = getVisibleFeatures(['creations','annotations','events','partners']);
 
     setSidebarFeatures(features);
   }

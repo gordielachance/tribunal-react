@@ -37,7 +37,7 @@ export function MapProvider({children}){
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
-		const sourceCollection = mapData?.sources.annotationsHandles.data.features || [];
+		const sourceCollection = mapData?.sources.annotations.data.features || [];
     const handleFeatures = sourceCollection.filter(feature => feature.properties.id === feature_id);
 		return handleFeatures;
 	}
@@ -193,14 +193,14 @@ export function MapProvider({children}){
 
 		if (!bool) {
 			newDisabled.push(layerId);
-			if (layerId === 'annotationsHandles'){
+			if (layerId === 'annotations'){
 				newDisabled = newDisabled.concat(annotationsLayerIds);//also exclude raster layers
 				newDisabled = newDisabled.concat(['annotationsFill','annotationsStroke']);
 			}
 
     }else{
       newDisabled.splice(index, 1);
-			if (layerId === 'annotationsHandles'){
+			if (layerId === 'annotations'){
 				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));//also include raster layers
 				newDisabled = newDisabled.filter(x => !['annotationsFill','annotationsStroke'].includes(x));
 			}
@@ -393,7 +393,7 @@ export function MapProvider({children}){
 		      type:'geojson'
 		    }
 			}
-			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotationPolygons.data.features);
+			newMapData.sources.annotations = buildAnnotationHandlesSource(newMapData.sources.annotationPolygons.data.features);
 		}
 
 		/*
@@ -460,7 +460,7 @@ export function MapProvider({children}){
 
 		})
 
-		if (newMapData.sources.annotationsHandles ){
+		if (newMapData.sources.annotations ){
 
 			const copyPolygonProperties = handles => {
 				return handles.map(handle => {
@@ -479,7 +479,7 @@ export function MapProvider({children}){
 				})
 			}
 
-				newMapData.sources.annotationsHandles.data.features = copyPolygonProperties(newMapData.sources.annotationsHandles.data.features);
+				newMapData.sources.annotations.data.features = copyPolygonProperties(newMapData.sources.annotations.data.features);
 		}
 
 		DEBUG && console.log("***MAP DATA***",newMapData);
@@ -567,7 +567,7 @@ export function MapProvider({children}){
     if (mapboxMap === undefined) return;
     DEBUG && console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
 
-		const layers = ['creations','annotationsHandles','annotationsFill','annotationsStroke','events','partners'];
+		const layers = ['creations','annotations','annotationsFill','annotationsStroke','events','partners'];
 
 		layers.forEach(layerId=>{
       mapboxMap.setFilter(layerId,featuresFilter);

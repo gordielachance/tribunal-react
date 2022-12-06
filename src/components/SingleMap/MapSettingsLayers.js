@@ -10,7 +10,7 @@ const LayerLegendItem = props => {
       case 'creations':
         return 'Créations'
       break;
-      case 'annotationsHandles':
+      case 'annotations':
         return 'Géographie subjective'
       break;
       case 'events':
@@ -49,7 +49,7 @@ const MapSettingsLayers = (props) => {
     toggleMapLayer,
   } = useMap();
 
-  const allowedLayers = ['creations','annotationsHandles','events','partners'];
+  const allowedLayers = ['creations','annotations','events','partners'];
   const initialLayers = mapData?.layers ?
     Object.keys(mapData.layers).map(function(key, index) {
       return key;

@@ -195,7 +195,7 @@ ul.features-selection{
 
       &.active{
         color:black;
-        &[data-layerid="annotationsHandles"]{
+        &[data-layerid="annotations"]{
           .layer-icon{
             color: $annotationsColor;
           }
