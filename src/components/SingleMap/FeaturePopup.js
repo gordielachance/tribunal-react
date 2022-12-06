@@ -23,16 +23,22 @@ const FeaturePopup = props => {
     anchor:'bottom'
   })
 
-  /*
-  It seems that mapbox fires the popup close event when the user clicks the icon,
-  but also when it is destroyed.
-  So we need to ensure that we don't redirect to the map URL twice.
-  */
   const handleClose = () => {
+    /*
+    It seems that mapbox fires the popup close event when the user clicks the icon,
+    but also when it is destroyed.
+    So we need to ensure that we don't redirect to the map URL twice.
+    */
+
+    /*
+
+    console.log("URL FEATURE",urlSourceId, urlFeatureId);
+    console.log("CURRENT FEATURE",props.feature.properties.source,props.feature.properties.id);
 
     DEBUG && console.log("CLOSE FEATURE POPUP",props.feature.properties.id);
     const url = getMapUrl(mapPostId,mapPostSlug);
     navigate(url);
+    */
   }
 
   const handleOpen = e => {
@@ -50,7 +56,7 @@ const FeaturePopup = props => {
       .setLngLat(props.feature.geometry.coordinates)
       .setDOMContent(popupRef.current)
       .addTo(mapboxMap)
-      .once('close',handleClose)
+      .on('close',handleClose)
     }
 
     return () => {
