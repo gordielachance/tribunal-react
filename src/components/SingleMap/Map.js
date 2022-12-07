@@ -60,7 +60,7 @@ const Map = (props) => {
       let hoveredFeature = undefined;
 
       //Update cursors IN
-      map.on('mousemove',['creations','annotationsHandles','events'], e => {
+      map.on('mousemove',['creations','annotations','events','partners'], e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
 
@@ -73,7 +73,7 @@ const Map = (props) => {
       });
 
       //Update cursors OUT
-      map.on('mouseleave',['creations','annotationsHandles','events'], e => {
+      map.on('mouseleave',['creations','annotations','events','partners'], e => {
         map.getCanvas().style.cursor = '';
         //Toggle 'hover'
         if(hoveredFeature){
@@ -82,7 +82,7 @@ const Map = (props) => {
       });
 
       //open (add) popup when clicking marker
-      map.on('click',['creations','annotationsHandles','events'], e => {
+      map.on('click',['creations','annotations','events','partners'], e => {
         if (e.features.length === 0) return;
         const feature = e.features[0];
         navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
@@ -151,17 +151,14 @@ const Map = (props) => {
 
   },[mapData,urlSourceId,urlFeatureId])
 
-
-
   //set active marker from URL
   useEffect(()=>{
 
     if (!mapHasInit) return;
 
-    //first, unset active feature so popup gets removed
-    setActiveFeature();
 
     const urlFeature = getUrlFeature();
+    setActiveFeature(urlFeature);
 
     if (urlFeature){
 
@@ -169,11 +166,6 @@ const Map = (props) => {
       mapboxMap.easeTo({
         //center: [-75,43],
         center: urlFeature.geometry.coordinates
-      })
-
-      //once done, set marker as active
-      mapboxMap.once('idle',(e)=>{
-        setActiveFeature(urlFeature);
       })
 
     }
@@ -285,7 +277,7 @@ const Map = (props) => {
 
             }
 
-            const polygonFeatures = (mapData.sources?.annotations?.data.features || []);
+            const polygonFeatures = (mapData.sources?.annotationPolygons?.data.features || []);
 
             const sourceIds = [];
 
@@ -421,7 +413,7 @@ const Map = (props) => {
 
     mapboxMap.once('idle',(e)=>{
 
-      const allPolygons = mapData.sources.annotations.data.features || [];
+      const allPolygons = mapData.sources.annotationPolygons.data.features || [];
 
       const visiblePolygons = mapboxMap.queryRenderedFeatures({
         layers: ['annotationsFill'],
@@ -452,14 +444,9 @@ const Map = (props) => {
 
   },[featuresFilter])
 
-
-
   return (
     <div id="map-container">
-      {
-        activeFeature &&
-        <FeaturePopup feature={activeFeature}/>
-      }
+      <FeaturePopup/>
       <div
       id="map"
       ref={mapContainerRef}

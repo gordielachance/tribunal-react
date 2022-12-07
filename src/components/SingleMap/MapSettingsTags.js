@@ -6,7 +6,7 @@ import {getFeaturesTags,getIdsForTag} from "./MapFunctions";
 
 const SingleListTag = props => {
   const tagNameEl = <span>{props.wpTag.name}</span>;
-  const [showDescription,setShowDescription] = useState(false);
+  const [showDescription,setShowDescription] = useState(true);
   return(
     <>
       <div className="singleTagHeader">
@@ -20,7 +20,7 @@ const SingleListTag = props => {
         </span>
       }
       {
-        props.wpTag.description &&
+        (props.wpTag.description && !showDescription) &&
         <span className="tagDescriptionHandle" onClick={(e)=>setShowDescription(!showDescription)}><Icon name="info circle"/></span>
       }
       </div>
@@ -44,7 +44,7 @@ const MapSettingsTags = props => {
   } = useMap();
 
   const creationFeatures = mapData?.sources.creations?.data.features || [];
-  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
   const allFeatures = creationFeatures.concat(annotationFeatures);
 
   const handleClick = slug => {

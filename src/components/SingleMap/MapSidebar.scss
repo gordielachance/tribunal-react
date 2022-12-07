@@ -77,6 +77,11 @@
           &:not(:last-child){
             border-bottom: 1px solid lightgrey;
           }
+
+          &.active{
+            background-color: rgba(0,0,0,0.05);
+          }
+
           transition:background-color .25s;
 
           .sorted-value{
@@ -195,7 +200,7 @@ ul.features-selection{
 
       &.active{
         color:black;
-        &[data-layerid="annotationsHandles"]{
+        &[data-layerid="annotations"]{
           .layer-icon{
             color: $annotationsColor;
           }
@@ -208,6 +213,11 @@ ul.features-selection{
         &[data-layerid="events"]{
           .layer-icon{
             color: $eventsColor;
+          }
+        }
+        &[data-layerid="partners"]{
+          .layer-icon{
+            color: $partnersColor;
           }
         }
       }

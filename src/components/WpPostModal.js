@@ -64,7 +64,7 @@ const WpPostModal = (props) => {
             {
               url &&
               <iframe
-              id="marker-iframe"
+              id="feature-iframe"
               ref={iframeContent}
               src={url}
               onLoad={handleLoaded}

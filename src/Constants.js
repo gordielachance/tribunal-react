@@ -2,8 +2,8 @@ export const APP_VERSION = '113';//when updated, the local data will be cleared
 const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 export const DEBUG = IS_LOCAL;
 
-//export const WP_URL = IS_LOCAL ? 'http://tribunaldp.local' : 'https://datas.tribunaldesprejuges.org'
-export const WP_URL = 'https://datas.tribunaldesprejuges.org';
+//export const WP_URL = IS_LOCAL ? 'http://tribunaldesprejuges.local' : 'https://datas.tribunaldesprejuges.org';//WIN
+export const WP_URL = IS_LOCAL ? 'http://tribunaldp.local' : 'https://datas.tribunaldesprejuges.org';//LINUX
 
 
 export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
@@ -31,11 +31,12 @@ export const getMapUrl = (id,slug) => {
   return `/cartes/${id}/${slug}`;
 }
 
-export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId,action) => {
+export const getUniqueFeatureId = feature => {
+  return `${feature.properties.source}-${feature.properties.id}`;
+}
+
+export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId) => {
   const mapUrl = getMapUrl(mapId,mapSlug);
   let url = mapUrl + `/${sourceId}/${featureId}`;
-  if (action !== undefined){
-    url = url + '/' + action;
-  }
   return url;
 }

@@ -1,4 +1,4 @@
-import { Routes,Route,useLocation } from 'react-router-dom';
+import { Routes,Route,useLocation,matchRoutes } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
@@ -15,65 +15,100 @@ import {DEBUG} from "./Constants";
 import classNames from "classnames";
 import { useApp } from './AppContext';
 
-//arrays of pages on the two axis
-export const menuItems = {
+export const axisPaths = {
+  root:{
+    path:'/'
+  },
   horizontal:[
     {
-      path:'/',
-      name:'menu'
-    },
-    {
-      path:'/cartes',
-      name:'Cartes'
+      path:'/cartes/*'
     }
   ],
   vertical:[
     {
-      path:'/',
-      name:'menu'
+      path:'/agenda/*'
     },
     {
-      path:'/agenda',
-      name:'Agenda'
+      path:'/creations/*'
     },
     {
-      path:'/creations',
-      name:'Créations'
-    },
-    {
-      path:'/credits',
-      name:'Crédits'
+      path:'/credits/*'
     }
   ]
 }
 
-//get the first-level path; like '/cartes' from '/cartes/944/test'
-export const getFirstLevelPath = pagePath => {
-  const match = pagePath.match(new RegExp('^/([^/]+)?'));
-  return match[0];
+export const menuItems = [
+  {
+    path:'/',
+    name:'menu'
+  },
+  /*
+  {
+    path:'/cartes',
+    name:'Cartes'
+  },
+  */
+  {
+    path:'/cartes/944/carte-principale',
+    name:'Carte'
+  },
+  {
+    path:'/agenda',
+    name:'Agenda'
+  },
+  {
+    path:'/creations',
+    name:'Créations'
+  },
+  {
+    path:'/credits',
+    name:'Crédits'
+  }
+]
+
+export const getMenuIndex = location => {
+
+  const routes = [axisPaths.root].concat(axisPaths.horizontal).concat(axisPaths.vertical);
+  const routesMatch = matchRoutes(routes, location);
+  const match = routesMatch ? routesMatch[0] : undefined;
+  if (!match) return;
+  const index = routes.indexOf(match.route);
+  return index;
 }
 
 //Select the axis depending of the page path
-export const isHorizontalPage = pagePath => {
-  const firstLevelPath = getFirstLevelPath(pagePath);
-
-  const horizontalPaths = menuItems.horizontal.map(item=>item.path);
-  const xPageIndex = horizontalPaths.indexOf(firstLevelPath);
-  return xPageIndex > -1;
+export const isHorizontalPage = location => {
+  const routes = axisPaths.horizontal;
+  const routesMatch = matchRoutes(routes, location);
+  return routesMatch ? true : false;
 }
+
 export const isHorizontalTransition = (path,currentPath) => {
   return (path === '/') ? isHorizontalPage(currentPath) : isHorizontalPage(path);
 }
 
-export const getMenuAxisItems = path => {
-  const horizontal = isHorizontalPage(path);
-  if (path === '/'){
-    const allItems = menuItems.horizontal.concat(menuItems.vertical.slice(1));
-    const allPaths = [...new Set(allItems.map(item=>item.path))];
-    return allItems;
+export const getMenuAxisItems = location => {
+
+  if (location === '/'){
+    return menuItems;
   }else{
-    return horizontal ? menuItems.horizontal : menuItems.vertical;
+    const horizontalItems = menuItems.filter(item => {
+      return ( isHorizontalPage(item.path) && (item.path !== '/') )
+    });
+    const verticalItems = menuItems.filter(item => {
+      return ( !isHorizontalPage(item.path) && (item.path !== '/') )
+    });
+
+    let items = isHorizontalPage(location) ? horizontalItems : verticalItems;
+
+    //add root
+    return [
+      menuItems[0],
+      ...items
+    ]
+
   }
+
 }
 
 const Layout = props => {

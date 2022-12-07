@@ -31,10 +31,17 @@ const MapPost = (props) => {
 	const [sidebarFeatures,setSidebarFeatures] = useState();
   const [modalPostId,setModalPostId] = useState();
 
-  const populateVisibleFeatures = e => {
+  const updateSidebarFeatures = e => {
     //get visible features on map for use in the sidebar
 
     const getVisibleFeatures = (layerIds) => {
+
+      //ensure layer exists or query will fail
+      if (mapboxMap === undefined) return;
+      layerIds = layerIds.filter(layerId => {
+        return ( mapboxMap.getLayer(layerId) )
+      })
+
       let features = mapboxMap.queryRenderedFeatures({
         layers: layerIds,
         filter: featuresFilter
@@ -42,7 +49,7 @@ const MapPost = (props) => {
       return getUniqueMapFeatures(features);
     }
 
-    const features = getVisibleFeatures(['creations','annotationsHandles','events']);
+    const features = getVisibleFeatures(['creations','annotations','events','partners']);
 
     setSidebarFeatures(features);
   }
@@ -63,15 +70,15 @@ const MapPost = (props) => {
   useEffect(()=>{
     if (!mapHasInit) return;
 
-    populateVisibleFeatures();
-    mapboxMap.on('moveend',populateVisibleFeatures);
+    updateSidebarFeatures();
+    mapboxMap.on('moveend',updateSidebarFeatures);
 
   },[mapHasInit])
 
   //update sidebar features when filters are updated
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    setTimeout(populateVisibleFeatures,250); //wait map finishes refreshing before update (TOUFIX TOUCHECK use 'idle' event instead?)
+    setTimeout(updateSidebarFeatures,250); //wait map finishes refreshing before update (TOUFIX TOUCHECK use 'idle' event instead?)
   },[featuresFilter,layersDisabled])
 
   useEffect(()=>{

@@ -108,7 +108,7 @@ export const getHumanDistance = meters => {
 
 export function getFormatText(slug){
 
-  let text = slug;
+  let text;
 
   switch(slug){
     case 'gallery':
@@ -126,8 +126,11 @@ export function getFormatText(slug){
     case 'audio':
       text='audio';
     break;
+    case 'standard':
+      //nothing
+    break;
     default:
-      text = 'texte';
+      text = slug;
     break;
   }
 

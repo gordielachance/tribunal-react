@@ -33,11 +33,11 @@ export function MapProvider({children}){
   const [featuresFilter,setFeaturesFilter] = useState();
 
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
-	const [layersDisabled,setLayersDisabled] = useState();
+	const [layersDisabled,setLayersDisabled] = useState([]);
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
-		const sourceCollection = mapData?.sources.annotationsHandles.data.features || [];
+		const sourceCollection = mapData?.sources.annotations.data.features || [];
     const handleFeatures = sourceCollection.filter(feature => feature.properties.id === feature_id);
 		return handleFeatures;
 	}
@@ -46,7 +46,7 @@ export function MapProvider({children}){
 		if (!handleFeature){
 			throw "Missing 'handleFeature' parameter.";
 		}
-		const sourceCollection = mapData?.sources.annotations?.data.features;
+		const sourceCollection = mapData?.sources.annotationPolygons?.data.features;
 		const polygonId = handleFeature.properties.id;
 		return sourceCollection.find(feature => feature.properties.id === polygonId);
 	}
@@ -146,7 +146,7 @@ export function MapProvider({children}){
   const toggleHoverTag = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByTag(allFeatures,slug);
@@ -168,7 +168,7 @@ export function MapProvider({children}){
 	const toggleHoverFormat = (slug,bool) => {
 
 		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotations?.data.features || [];
+	  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
 	  const allFeatures = creationFeatures.concat(annotationFeatures);
 
     const matches = filterFeaturesByFormat(allFeatures,slug);
@@ -184,24 +184,27 @@ export function MapProvider({children}){
 		let newDisabled = [...(layersDisabled || [])];
     const index = newDisabled.indexOf(layerId);
 
+		//default bool
 		if (bool === undefined){
-			bool = (index === -1);
+			bool = (index !== -1);
 		}
 
-		if (bool) {
+		DEBUG && console.log("TOGGLE MAP LAYER",layerId,bool);
+
+		if (!bool) {
 			newDisabled.push(layerId);
+			if (layerId === 'annotations'){
+				newDisabled = newDisabled.concat(annotationsLayerIds);//also exclude raster layers
+				newDisabled = newDisabled.concat(['annotationsFill','annotationsStroke']);
+			}
+
     }else{
       newDisabled.splice(index, 1);
-    }
-
-		//include or exclude raster layers
-		if (layerId === 'annotationsHandles'){
-			if (bool){
-				newDisabled = newDisabled.concat(annotationsLayerIds);
-			}else{
-				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));
+			if (layerId === 'annotations'){
+				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));//also include raster layers
+				newDisabled = newDisabled.filter(x => !['annotationsFill','annotationsStroke'].includes(x));
 			}
-		}
+    }
 
 		setLayersDisabled(newDisabled);
 	}
@@ -238,7 +241,7 @@ export function MapProvider({children}){
 
 						//TOUFIX URGENT ONLY VISIBLE FEATURES
 						const creationFeatures = mapData?.sources.creations?.data.features || [];
-					  const handlesFeatures = mapData?.sources.annotations?.data.features || [];
+					  const handlesFeatures = mapData?.sources.annotationPolygons?.data.features || [];
 					  const allPoints = creationFeatures.concat(handlesFeatures);
 
 						//get this feature within the new array
@@ -384,20 +387,20 @@ export function MapProvider({children}){
 				return {
 		      data:{
 		        type:'FeatureCollection',
-		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotations.data.features)
+		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotationPolygons.data.features)
 		      },
 		      promoteId:'id',
 		      type:'geojson'
 		    }
 			}
-			newMapData.sources.annotationsHandles = buildAnnotationHandlesSource(newMapData.sources.annotations.data.features);
+			newMapData.sources.annotations = buildAnnotationHandlesSource(newMapData.sources.annotationPolygons.data.features);
 		}
 
 		/*
 		if (newMapDatasources.annotations ){
 
-			const allPolygons = newMapData.sources.annotations.data.features || [];
-			const allHandles = newMapDatasources.annotations.data.features || [];
+			const allPolygons = newMapData.sources.annotationPolygons.data.features || [];
+			const allHandles = newMapDatasources.annotationPolygons.data.features || [];
 
 			//remove polygons that does not have handles
 
@@ -416,7 +419,7 @@ export function MapProvider({children}){
 				return polygons;
 			}
 
-			newMapData.sources.annotations.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
+			newMapData.sources.annotationPolygons.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
 
 			//remove handles that does not have polygons
 			const filterHandlesWithPolygons = (handles,polygons) => {
@@ -434,7 +437,7 @@ export function MapProvider({children}){
 				return handles;
 			}
 
-			newMapDatasources.annotations.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
+			newMapDatasources.annotationPolygons.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
 
 
 		}
@@ -457,22 +460,26 @@ export function MapProvider({children}){
 
 		})
 
-		if (newMapData.sources.annotationsHandles ){
+		if (newMapData.sources.annotations ){
 
 			const copyPolygonProperties = handles => {
 				return handles.map(handle => {
 					const targetId = handle.properties.id;
 					const polygonId = targetId;
-					const polygon = newMapData.sources.annotations.data.features.find(feature => (feature.properties.id === polygonId));
-					handle.properties = {
-						...polygon.properties,
-						...handle.properties
+					const polygon = newMapData.sources.annotationPolygons.data.features.find(feature => (feature.properties.id === polygonId));
+
+					if (polygon){
+						handle.properties = {
+							...polygon.properties,
+							...handle.properties
+						}
 					}
+
 					return handle;
 				})
 			}
 
-				newMapData.sources.annotationsHandles.data.features = copyPolygonProperties(newMapData.sources.annotationsHandles.data.features);
+				newMapData.sources.annotations.data.features = copyPolygonProperties(newMapData.sources.annotations.data.features);
 		}
 
 		DEBUG && console.log("***MAP DATA***",newMapData);
@@ -485,6 +492,22 @@ export function MapProvider({children}){
   useEffect(()=>{
 		if (!mapHasInit) return;
 		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
+  },[mapHasInit])
+
+	//detect hidden layers
+  useEffect(()=>{
+		if (!mapHasInit) return;
+
+		const hiddenLayers = mapboxMap.getStyle().layers.filter(layer => {
+	    return (layer.layout?.visibility === 'none')
+	  })
+
+		const hiddenIds = hiddenLayers.map(layer => {
+	    return layer.id;
+	  })
+
+		setLayersDisabled(hiddenIds);
+
   },[mapHasInit])
 
 	//build features tags filter
@@ -558,12 +581,13 @@ export function MapProvider({children}){
   //set global marker filters
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
+    DEBUG && console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
 
-    mapboxMap.setFilter("creations",featuresFilter);
-    mapboxMap.setFilter("annotationsHandles",featuresFilter);
-		mapboxMap.setFilter("annotationsFill",featuresFilter);
-		mapboxMap.setFilter("annotationsStroke",featuresFilter);
+		const layers = ['creations','annotations','annotationsFill','annotationsStroke','events','partners'];
+
+		layers.forEach(layerId=>{
+      mapboxMap.setFilter(layerId,featuresFilter);
+    })
 
   },[featuresFilter])
 
@@ -582,8 +606,8 @@ export function MapProvider({children}){
   },[layersDisabled])
 
 	useEffect(()=>{
+
 		if (!mapHasInit) return;
-		DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 
 		//hide old
 		if (prevActiveFeature.current){
@@ -592,6 +616,7 @@ export function MapProvider({children}){
 
 		//show new
 		if (activeFeature){
+			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
 			setMapFeatureState(activeFeature,'active',true);
 		}
 

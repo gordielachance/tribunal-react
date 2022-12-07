@@ -1,21 +1,20 @@
-import { Icon } from 'semantic-ui-react';
 import { Link,useLocation } from 'react-router-dom';
-import {isHorizontalTransition,getMenuAxisItems,getFirstLevelPath} from "../Layout";
+import {isHorizontalTransition,getMenuIndex,getMenuAxisItems} from "../Layout";
 import classNames from "classnames";
 import {ImageArrow} from "../Constants";
 import './PageMenu.scss';
 
 const PageMenu = props => {
+
   const location = useLocation();
   const currentPath = location.pathname;
-  const firstLevelPath = getFirstLevelPath(currentPath);
-
+  const allMenuItems = getMenuAxisItems('/');
   const axisMenuItems = getMenuAxisItems(currentPath);
-  const axisMenuPaths = axisMenuItems.map(item=>item.path);
-  const currentMenuIndex = axisMenuPaths.indexOf(firstLevelPath);
+  const currentMenuIndex = getMenuIndex(currentPath);
 
   const getIconClasses = (item) => {
-    const index = axisMenuItems.indexOf(item);
+
+    const index = allMenuItems.indexOf(item);
     const isCurrent = (index === currentMenuIndex);
     let horizontal = isHorizontalTransition(item.path,currentPath);
     const next = isCurrent ? undefined : (index > currentMenuIndex);
@@ -41,11 +40,13 @@ const PageMenu = props => {
   return(
     <ul id={props.id} className="pageMenu">
     {
-      axisMenuItems.map((item,k) => {
 
-        const isCurrentMenu = (k === currentMenuIndex);
+      axisMenuItems.map((item) => {
+
+        const index = allMenuItems.indexOf(item);
+        const isCurrentMenu = (index === currentMenuIndex);
         const isHorizontalMenu = isHorizontalTransition(item.path,currentPath)
-        const isNextMenu = isCurrentMenu ? undefined : (k > currentMenuIndex);
+        const isNextMenu = isCurrentMenu ? undefined : (index > currentMenuIndex);
         const iconClasses = getIconClasses(item);
 
         const icon = iconClasses ? <img className={iconClasses} src={ImageArrow}/> : undefined;
@@ -53,7 +54,7 @@ const PageMenu = props => {
         return(
           <li
           data-path={item.path}
-          key={k}
+          key={index}
           className={classNames({
             active:   isCurrentMenu,
             previous: !isNextMenu,

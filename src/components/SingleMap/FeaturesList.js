@@ -1,7 +1,7 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
-import {DEBUG,getFeatureUrl} from "../../Constants";
+import {DEBUG,getMapUrl,getFeatureUrl,getUniqueFeatureId} from "../../Constants";
 import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
 import { useMap } from './MapContext';
 import { CreationCard } from "./CreationCard";
@@ -48,6 +48,13 @@ const FeaturesList = props => {
       break;
       default://date
       break;
+    }
+
+    //keep active as first item
+    if (activeFeature){
+      newFeatures.sort((a,b)=>{
+        return (getUniqueFeatureId(a) === getUniqueFeatureId(activeFeature)) ? -1 : (getUniqueFeatureId(b) === getUniqueFeatureId(activeFeature)) ? 1 : 0;
+      });
     }
 
     return newFeatures;
@@ -126,14 +133,19 @@ const FeaturesList = props => {
   }
 
   const handleClick = feature => {
-    switch(feature.source){
-      case 'creations':
-        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id,'full'));
-      break;
-      default:
-        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
-    }
 
+    if ( activeFeature && (getUniqueFeatureId(feature) === getUniqueFeatureId(activeFeature)) ){//unset active
+      const url = getMapUrl(mapPostId,mapPostSlug);
+      navigate(url);
+    }else{//set active
+      switch(feature.source){
+        case 'creations':
+          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id) + '/full');
+        break;
+        default:
+          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
+      }
+    }
   }
 
   const toggleHoverFeature = (feature,bool) => {
