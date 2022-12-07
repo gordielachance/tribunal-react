@@ -33,7 +33,7 @@ export function MapProvider({children}){
   const [featuresFilter,setFeaturesFilter] = useState();
 
   const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
-	const [layersDisabled,setLayersDisabled] = useState();
+	const [layersDisabled,setLayersDisabled] = useState([]);
   const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
@@ -492,6 +492,22 @@ export function MapProvider({children}){
   useEffect(()=>{
 		if (!mapHasInit) return;
 		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
+  },[mapHasInit])
+
+	//detect hidden layers
+  useEffect(()=>{
+		if (!mapHasInit) return;
+
+		const hiddenLayers = mapboxMap.getStyle().layers.filter(layer => {
+	    return (layer.layout?.visibility === 'none')
+	  })
+
+		const hiddenIds = hiddenLayers.map(layer => {
+	    return layer.id;
+	  })
+
+		setLayersDisabled(hiddenIds);
+
   },[mapHasInit])
 
 	//build features tags filter
