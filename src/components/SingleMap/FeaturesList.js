@@ -50,6 +50,17 @@ const FeaturesList = props => {
       break;
     }
 
+    //keep active as first item
+    if (activeFeature){
+      const uniqueFeatureId = feature => {
+        return `${feature.properties.source}-${feature.properties.id}`;
+      }
+      newFeatures.sort((a,b)=>{
+
+        return (uniqueFeatureId(a) === uniqueFeatureId(activeFeature)) ? -1 : (uniqueFeatureId(b) === uniqueFeatureId(activeFeature)) ? 1 : 0;
+      });
+    }
+
     return newFeatures;
 
   }
