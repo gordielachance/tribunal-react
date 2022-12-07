@@ -1,7 +1,7 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
-import {DEBUG,getFeatureUrl} from "../../Constants";
+import {DEBUG,getFeatureUrl,getUniqueFeatureId} from "../../Constants";
 import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
 import { useMap } from './MapContext';
 import { CreationCard } from "./CreationCard";
@@ -52,12 +52,8 @@ const FeaturesList = props => {
 
     //keep active as first item
     if (activeFeature){
-      const uniqueFeatureId = feature => {
-        return `${feature.properties.source}-${feature.properties.id}`;
-      }
       newFeatures.sort((a,b)=>{
-
-        return (uniqueFeatureId(a) === uniqueFeatureId(activeFeature)) ? -1 : (uniqueFeatureId(b) === uniqueFeatureId(activeFeature)) ? 1 : 0;
+        return (getUniqueFeatureId(a) === getUniqueFeatureId(activeFeature)) ? -1 : (getUniqueFeatureId(b) === getUniqueFeatureId(activeFeature)) ? 1 : 0;
       });
     }
 
@@ -137,6 +133,7 @@ const FeaturesList = props => {
   }
 
   const handleClick = feature => {
+
     switch(feature.source){
       case 'creations':
         navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id) + '/full');

@@ -31,6 +31,10 @@ export const getMapUrl = (id,slug) => {
   return `/cartes/${id}/${slug}`;
 }
 
+export const getUniqueFeatureId = feature => {
+  return `${feature.properties.source}-${feature.properties.id}`;
+}
+
 export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId) => {
   const mapUrl = getMapUrl(mapId,mapSlug);
   let url = mapUrl + `/${sourceId}/${featureId}`;
