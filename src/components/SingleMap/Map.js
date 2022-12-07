@@ -446,11 +446,7 @@ const Map = (props) => {
 
   return (
     <div id="map-container">
-      {
-        activeFeature &&
-        <FeaturePopup
-        feature={activeFeature}/>
-      }
+      <FeaturePopup/>
       <div
       id="map"
       ref={mapContainerRef}
