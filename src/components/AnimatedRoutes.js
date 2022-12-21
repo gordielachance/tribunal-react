@@ -1,23 +1,14 @@
+//https://tech.lalilo.com/dynamic-transitions-with-react-router-and-react-transition-group
+import React from "react";
 import { Routes } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import React, { useRef,useState,useEffect } from "react";
-import {menuItems,isHorizontalTransition,getMenuAxisItems} from "../Layout";
-
-const dynamicChildFactory = classNames => child => React.cloneElement(child, { classNames });
+import {isHorizontalTransition,getMenuAxisItems} from "../Layout";
 
 export const AnimatedRoutes = props => {
 
-  const location = props.location;
-
-  const previousPagePath = useRef();
-  const [transitionClass,setTransitionClass] = useState();
-  const [updateTransition,setUpdateTransition] = useState(0);
-  const [hasEnterTransition,setHasEnterTransition] = useState(true);
-  const [hasExitTransition,setHasExitTransition] = useState(true);
-
-  const newPath = location.pathname;
-
   const getTransitionClass = (oldPath,newPath) => {
+
+    let className = undefined;
 
     //returns an object with the transition data
     const getTransitionData = (oldPath,newPath) => {
@@ -56,61 +47,56 @@ export const AnimatedRoutes = props => {
         steps:      Math.abs(steps),
       }
     }
-
     const transition = getTransitionData(oldPath,newPath);
 
-    if (!transition) return;
-
-    if (transition.horizontal){
-      if (transition.backwards){
-        return 'slideLeft';
+    if (transition){
+      if (transition.horizontal){
+        if (transition.backwards){
+          className = 'slideLeft';
+        }else{
+          className = 'slideRight';
+        }
       }else{
-        return 'slideRight';
-      }
-    }else{
-      if (transition.backwards){
-        return 'slideUp';
-      }else{
-        return 'slideDown';
+        if (transition.backwards){
+          className = 'slideUp';
+        }else{
+          className = 'slideDown';
+        }
       }
     }
+
+    console.log("****TRANSITION CLASS FOR",props.oldPath+' --> '+newPath,className);
+
+    return className;
 
   }
 
-  useEffect(()=>{
-    if (!previousPagePath.current) return;
-
-    let transClass = getTransitionClass(previousPagePath.current,newPath);
-
-    transClass = 'slideRight';
-
-    if (previousPagePath.current === '/credits'){
-      transClass = undefined;
+  /*
+  <TransitionGroup
+    id="layout-transition-group"
+    childFactory={child =>
+      React.cloneElement(child, {
+        classNames: getTransitionClass(props.oldPath,props.path),
+        timeout: 500
+      })
     }
-
-    if (transClass){
-      console.log("!!!TRANSITION CLASS FOR",previousPagePath.current+' --> '+newPath,transitionClass);
-      setUpdateTransition(updateTransition+1);
-    }
-
-    setTransitionClass(transClass);
-
-  },[previousPagePath.current])
-
-  //store last visited page for further use
-  previousPagePath.current = location.pathname;
+  >
+  */
 
   return(
-    <TransitionGroup key={updateTransition} enter={hasEnterTransition} exit={hasExitTransition}>
-      <CSSTransition
-      classNames={transitionClass}
-      key={newPath}
-      timeout={500}>
-        <Routes location={newPath}>{props.children}</Routes>
+    <TransitionGroup
+      childFactory={child =>
+        React.cloneElement(child, {
+          classNames: getTransitionClass(props.oldPath,props.path),
+          timeout: 500
+        })
+      }
+    >
+      <CSSTransition key={props.path} classNames="slideUp" timeout={500}>
+        <Routes location={props.path}>{props.children}</Routes>
       </CSSTransition>
     </TransitionGroup>
   )
 }
-
 
 export default AnimatedRoutes

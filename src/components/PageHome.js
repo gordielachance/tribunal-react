@@ -41,29 +41,31 @@ export const PageHome = (props) => {
 
 
   return (
-    <Dimmer.Dimmable as="div" dimmed={loading}>
-      <Dimmer active={loading} inverted>
-        <Loader />
-      </Dimmer>
-      <div id="homePage" className="page">
+    <div class="page-container">
+      <Dimmer.Dimmable as="div" dimmed={loading}>
+        <Dimmer active={loading} inverted>
+          <Loader />
+        </Dimmer>
+        <div id="homePage" className="page">
 
-        <div id="homeLogo">
-          <img src={ImageLogo}/>
-        </div>
-        <div id="homeContent">
-          <div id="homeText">
-          {
-            homePost?.content.rendered &&
-            <div
-              dangerouslySetInnerHTML={{__html: homePost.content.rendered}}
-            />
-          }
+          <div id="homeLogo">
+            <img src={ImageLogo}/>
           </div>
-          <PageMenu id="homeMenu"/>
+          <div id="homeContent">
+            <div id="homeText">
+            {
+              homePost?.content.rendered &&
+              <div
+                dangerouslySetInnerHTML={{__html: homePost.content.rendered}}
+              />
+            }
+            </div>
+            <PageMenu id="homeMenu"/>
+          </div>
         </div>
-      </div>
-      <BGHome/>
-    </Dimmer.Dimmable>
+        <BGHome/>
+      </Dimmer.Dimmable>
+    </div>
   )
 
 }

@@ -39,10 +39,10 @@ const PageAgenda = (props) => {
   }, [agendaPosts]);
 
   return(
-    <>
+    <div class="page-container">
       <PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>
       <BGAgenda/>
-    </>
+    </div>
   )
 }
 

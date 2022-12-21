@@ -1,3 +1,4 @@
+import React, { useRef,useState,useEffect } from "react";
 import { Routes,Route,useLocation,matchRoutes } from 'react-router-dom';
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
@@ -113,10 +114,17 @@ export const getMenuAxisItems = location => {
 
 const Layout = props => {
 
-  const location = useLocation();
   const {verticalScreen,mobileScreen} = useApp();
 
   const singleMapPage = <PageSingleMap />;
+  const location = useLocation();
+  const previousPagePath = useRef();
+
+  useEffect(()=>{
+    //store last visited page for further use
+    previousPagePath.current = location.pathname;
+    console.log("****UPDATED OLD LOCATION",previousPagePath.current);
+  },[location.pathname])
 
   return (
     <div
@@ -126,7 +134,7 @@ const Layout = props => {
       mobile: mobileScreen
     })}
     >
-     <Routes location={location}>
+     <AnimatedRoutes path={location.pathname} oldPath={previousPagePath.current}>
         <Route path="/" element={<PageHome/>} />
         <Route path="/agenda">
           <Route index element={<PageAgenda/>} />
@@ -144,7 +152,7 @@ const Layout = props => {
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={singleMapPage} />
         </Route>
         <Route path='*' element={<Page404/>} />
-      </Routes>
+      </AnimatedRoutes>
     </div>
   );
 }

@@ -40,10 +40,10 @@ const PageCreations = (props) => {
   }, [creationPosts]);
 
   return(
-    <>
+    <div class="page-container">
       <PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>
       <BGCreations/>
-    </>
+    </div>
   )
 }
 
