@@ -134,7 +134,12 @@ const Layout = props => {
       mobile: mobileScreen
     })}
     >
-     <AnimatedRoutes path={location.pathname} oldPath={previousPagePath.current}>
+      {
+        /* ANIMATED ROUTES
+        <AnimatedRoutes path={location.pathname} oldPath={previousPagePath.current}>
+        */
+      }
+     <Routes location={location}>
         <Route path="/" element={<PageHome/>} />
         <Route path="/agenda">
           <Route index element={<PageAgenda/>} />
@@ -152,7 +157,7 @@ const Layout = props => {
           <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={singleMapPage} />
         </Route>
         <Route path='*' element={<Page404/>} />
-      </AnimatedRoutes>
+      </Routes>
     </div>
   );
 }
