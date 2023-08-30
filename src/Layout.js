@@ -6,7 +6,7 @@ import './Layout.scss';
 import PageHome from "./components/PageHome";
 import PageMaps from "./components/PageMaps";
 import PageCreations from "./components/PageCreations";
-import PageAgenda from "./components/PageAgenda";
+import PageEvents from "./components/PageEvents";
 import PageCredits from "./components/PageCredits";
 import PagePosts from "./components/PagePosts";
 import PageSingleMap from "./components/PageSingleMap";
@@ -27,7 +27,7 @@ export const axisPaths = {
   ],
   vertical:[
     {
-      path:'/agenda/*'
+      path:'/evenements/*'
     },
     {
       path:'/creations/*'
@@ -54,8 +54,8 @@ export const menuItems = [
     name:'Carte'
   },
   {
-    path:'/agenda',
-    name:'Agenda'
+    path:'/evenements',
+    name:'Événements'
   },
   {
     path:'/creations',
@@ -141,9 +141,9 @@ const Layout = props => {
       }
      <Routes location={location}>
         <Route path="/" element={<PageHome/>} />
-        <Route path="/agenda">
-          <Route index element={<PageAgenda/>} />
-          <Route path=":urlPostId" element={<PageAgenda/>} />
+        <Route path="/evenements">
+          <Route index element={<PageEvents/>} />
+          <Route path=":urlPostId" element={<PageEvents/>} />
         </Route>
         <Route path="/creations">
           <Route index element={<PageCreations/>} />

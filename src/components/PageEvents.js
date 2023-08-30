@@ -5,7 +5,7 @@ import {DEBUG} from "../Constants";
 import PagePosts from "./PagePosts";
 import {BGAgenda} from "./PageBackgrounds";
 
-const PageAgenda = (props) => {
+const PageEvents = (props) => {
 
   const {agendaPosts,setAgendaPosts} = useApp();
   const [loading,setLoading] = useState();
@@ -39,10 +39,10 @@ const PageAgenda = (props) => {
 
   return(
     <div className="page-container">
-      <PagePosts id="agendaPage" title="Agenda" posts={agendaPosts}/>
+      <PagePosts id="agendaPage" title="Événements" posts={agendaPosts}/>
       <BGAgenda/>
     </div>
   )
 }
 
-export default PageAgenda
+export default PageEvents
