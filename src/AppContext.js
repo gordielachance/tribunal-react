@@ -34,8 +34,7 @@ export function AppProvider({children}){
 		let isSubscribed = true;
 
 		const fetchData = async () => {
-	    DEBUG && console.info("GETTING TAGS...");
-	    const data = await DatabaseAPI.getTags();
+	    const data = await DatabaseAPI.getItems('tags',10000);
 			if (isSubscribed) {
 				DEBUG && console.info("...TAGS LOADED",data);
 	      setTags(data);

@@ -22,7 +22,7 @@ const PageMaps = (props) => {
 
   		const fetchData = async () => {
   	    DEBUG && console.info("GETTING MAPS POSTS...");
-  	    const data = await DatabaseAPI.getMaps();
+  	    const data = await DatabaseAPI.getItems('maps');
   			if (isSubscribed) {
   				DEBUG && console.info("...MAPS POSTS LOADED",data);
           setLoading(false);

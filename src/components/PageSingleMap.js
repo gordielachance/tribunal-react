@@ -20,7 +20,7 @@ const PageSingleMap = (props) => {
     let isSubscribed = true;
 
     const fetchData = async () => {
-	    const data = await DatabaseAPI.getMapPost(mapPostId);
+	    const data = await DatabaseAPI.getSingleItem('maps',mapPostId);
 			if (isSubscribed) {
         DEBUG && console.log("GOT MAP POST",mapPostId,JSON.parse(JSON.stringify(data || [])))
         setPost(data);

@@ -24,7 +24,7 @@ const PageCredits = (props) => {
 
   		const fetchData = async () => {
   	    DEBUG && console.info("GETTING CREDITS PAGE...");
-  	    const data = await DatabaseAPI.getPage(WP_POST_ID_CONTACT);
+  	    const data = await DatabaseAPI.getSingleItem('pages',WP_POST_ID_CONTACT);
   			if (isSubscribed) {
   				DEBUG && console.info("...CREDITS PAGE LOADED",data);
           setLoading(false);

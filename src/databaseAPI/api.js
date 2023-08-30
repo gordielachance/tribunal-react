@@ -4,73 +4,59 @@ import {databaseAPI} from "./connect";
 
 export default class DatabaseAPI extends React.Component {
 
-  static async getTags(){
+  static async getPaginatedItems(type,page,perPage){
+
+    console.info(`GET '${type}' ITEMS, PAGE: ${page}, PER_PAGE: ${perPage}`);
+
     const config = {
-     method: 'get',
-     url: `/wp/v2/tags`,
-     params:{
-       per_page:10000
-     }
+      method: 'get',
+      url: `/wp/v2/${type}`,
+      params: {
+        page: page ?? 1,
+        per_page: perPage ?? 10,
+      },
     }
     return databaseAPI.request(config)
-    .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING TAGS",error))
   }
 
-  static async getMaps(){
+  static async getItems(type,perPage) {
+    let page = 1;
+    let posts = [];
+    perPage = perPage ?? 10;
 
-    const config = {
-     method: 'get',
-     url: `/wp/v2/maps`,
+    console.info(`GET '${type}' ITEMS, PER_PAGE: ${perPage}`);
+
+    while (true) {
+      try {
+        const request = await DatabaseAPI.getPaginatedItems(type,page,perPage);
+        const pageItems = request.data;
+
+        if (pageItems.length === 0) {
+          // No more posts to fetch
+          break;
+        }
+
+        posts = posts.concat(pageItems);
+        page++;
+      } catch (error) {
+        console.error(`ERROR GETTING '${type}' ITEMS`, type, error);
+        break; // Exit the loop on error
+      }
     }
-    return databaseAPI.request(config)
-    .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING MAPS",error))
+
+    return posts;
   }
 
-  static async getCreations(){
+  static async getSingleItem(type,id){
 
     const config = {
      method: 'get',
-     url: `/wp/v2/creations`,
-    }
-    return databaseAPI.request(config)
-    .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING CREATIONS",error))
-  }
-
-  static async getEvents(){
-
-    const config = {
-     method: 'get',
-     url: `/wp/v2/agenda`,
-    }
-    return databaseAPI.request(config)
-    .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING EVENTS",error))
-  }
-
-  static async getMapPost(post_id){
-
-    const config = {
-     method: 'get',
-     url: `wp/v2/maps/${post_id}`,
+     url: `wp/v2/${type}/${id}`,
     }
 
     return databaseAPI.request(config)
     .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING MAP",post_id,error))
+    .catch(error=>console.error(`ERROR GETTING '${type}' ITEM`,id,error))
   }
-
-  static async getPage(post_id){
-    const config = {
-     method: 'get',
-     url: `/wp/v2/pages/${post_id}`,
-    }
-    return databaseAPI.request(config)
-    .then(resp => resp.data)
-    .catch(error=>console.error("ERROR GETTING SINGLE PAGE",post_id,error))
-  }
-
 
 }

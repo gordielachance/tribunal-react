@@ -22,8 +22,7 @@ const PageCreations = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    DEBUG && console.info("GETTING CREATIONS POSTS...");
-  	    const data = await DatabaseAPI.getCreations();
+  	    const data = await DatabaseAPI.getItems('creations');
   			if (isSubscribed) {
   				DEBUG && console.info("...CREATIONS POSTS LOADED",data);
           setLoading(false);

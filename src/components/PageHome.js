@@ -23,7 +23,7 @@ export const PageHome = (props) => {
 
       const fetchData = async () => {
   	    DEBUG && console.info("GETTING HOME PAGE...");
-  	    const data = await DatabaseAPI.getPage(WP_POST_ID_HOME);
+  	    const data = await DatabaseAPI.getSingleItem('pages',WP_POST_ID_HOME);
   			if (isSubscribed) {
   				DEBUG && console.info("...HOME PAGE LOADED",data);
           setLoading(false);

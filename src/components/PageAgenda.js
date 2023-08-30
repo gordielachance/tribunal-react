@@ -21,8 +21,7 @@ const PageAgenda = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    DEBUG && console.info("GETTING EVENTS POSTS...");
-  	    const data = await DatabaseAPI.getEvents();
+  	    const data = await DatabaseAPI.getItems('agenda');
   			if (isSubscribed) {
   				DEBUG && console.info("...EVENTS POSTS LOADED",data);
           setLoading(false);
