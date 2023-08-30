@@ -37,7 +37,7 @@ const PageSingleMap = (props) => {
   },[])
 
   return(
-    <div class="page-container">
+    <div className="page-container">
       <div id="singleMapPage" className="page">
         <MapProvider>
           <MapPost

@@ -41,7 +41,7 @@ export const PageHome = (props) => {
 
 
   return (
-    <div class="page-container">
+    <div className="page-container">
       <Dimmer.Dimmable as="div" dimmed={loading}>
         <Dimmer active={loading} inverted>
           <Loader />

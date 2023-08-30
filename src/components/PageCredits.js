@@ -41,7 +41,7 @@ const PageCredits = (props) => {
   }, [creditsPost]);
 
   return(
-    <div class="page-container">
+    <div className="page-container">
       <div id="creditsPage" className="page">
         <div className="page-header">
           <h1>Crédits</h1>

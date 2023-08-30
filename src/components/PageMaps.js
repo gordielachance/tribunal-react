@@ -39,7 +39,7 @@ const PageMaps = (props) => {
   }, [mapPosts]);
 
   return(
-    <div class="page-container">
+    <div className="page-container">
       <PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>
       <BGMaps/>
     </div>
