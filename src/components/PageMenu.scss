@@ -12,7 +12,7 @@ ul.pageMenu{
     display:inline-block;
     padding:0 .5em;
     &.active{
-      display:none!important;
+      text-decoration:underline;
     }
     &:not(:hover){
       opacity:.8
@@ -30,16 +30,20 @@ ul.pageMenu{
     li{
       flex:1;
       display:block;
-      &[data-path="/cartes"] a{
+      padding: 0.25em 0;
+      &[data-url="/"]{
+        display:none;
+      }
+      &[data-url="/cartes"] a{
         color:$colorA;
       }
-      &[data-path="/evenements"] a{
+      &[data-url="/agenda"] a{
         color:$colorB;
       }
-      &[data-path="/creations"] a{
+      &[data-url="/creations"] a{
         color:$colorC;
       }
-      &[data-path="/credits"] a{
+      &[data-url="/credits"] a{
         color:$colorD;
       }
     }

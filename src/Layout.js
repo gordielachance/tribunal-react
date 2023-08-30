@@ -1,6 +1,5 @@
 import React, { useRef,useState,useEffect } from "react";
 import { Routes,Route,useLocation,matchRoutes } from 'react-router-dom';
-import AnimatedRoutes from "./components/AnimatedRoutes";
 import './Layout.scss';
 
 import PageHome from "./components/PageHome";
@@ -16,100 +15,53 @@ import {DEBUG} from "./Constants";
 import classNames from "classnames";
 import { useApp } from './AppContext';
 
-export const axisPaths = {
-  root:{
-    path:'/'
-  },
-  horizontal:[
-    {
-      path:'/cartes/*'
-    }
-  ],
-  vertical:[
-    {
-      path:'/evenements/*'
-    },
-    {
-      path:'/creations/*'
-    },
-    {
-      path:'/credits/*'
-    }
-  ]
-}
-
 export const menuItems = [
   {
+    url:'/',
     path:'/',
-    name:'menu'
+    name:'Accueil'
   },
   /*
   {
-    path:'/cartes',
+    url:'/cartes',
     name:'Cartes'
   },
   */
   {
-    path:'/cartes/944/carte-principale',
+    url:'/cartes/944/carte-principale',
+    path:'/cartes/*',
     name:'Carte'
   },
   {
-    path:'/evenements',
+    url:'/agenda',
+    path:'/agenda/*',
     name:'Événements'
   },
   {
-    path:'/creations',
+    url:'/creations',
+    path:'/creations/*',
     name:'Créations'
   },
   {
-    path:'/credits',
+    url:'/credits',
+    path:'/credits/*',
     name:'Crédits'
   }
 ]
 
 export const getMenuIndex = location => {
 
-  const routes = [axisPaths.root].concat(axisPaths.horizontal).concat(axisPaths.vertical);
+  const routes = menuItems.map(item=>{
+    return {path:item.path};
+  });
+
   const routesMatch = matchRoutes(routes, location);
   const match = routesMatch ? routesMatch[0] : undefined;
+
   if (!match) return;
-  const index = routes.indexOf(match.route);
+  const index = routes.findIndex(item=>item.path === match.route.path);
+
   return index;
-}
-
-//Select the axis depending of the page path
-export const isHorizontalPage = location => {
-  const routes = axisPaths.horizontal;
-  const routesMatch = matchRoutes(routes, location);
-  return routesMatch ? true : false;
-}
-
-export const isHorizontalTransition = (path,currentPath) => {
-  return (path === '/') ? isHorizontalPage(currentPath) : isHorizontalPage(path);
-}
-
-export const getMenuAxisItems = location => {
-
-  if (location === '/'){
-    return menuItems;
-  }else{
-    const horizontalItems = menuItems.filter(item => {
-      return ( isHorizontalPage(item.path) && (item.path !== '/') )
-    });
-    const verticalItems = menuItems.filter(item => {
-      return ( !isHorizontalPage(item.path) && (item.path !== '/') )
-    });
-
-    let items = isHorizontalPage(location) ? horizontalItems : verticalItems;
-
-    //add root
-    return [
-      menuItems[0],
-      ...items
-    ]
-
-  }
-
 }
 
 const Layout = props => {
@@ -134,14 +86,9 @@ const Layout = props => {
       mobile: mobileScreen
     })}
     >
-      {
-        /* ANIMATED ROUTES
-        <AnimatedRoutes path={location.pathname} oldPath={previousPagePath.current}>
-        */
-      }
      <Routes location={location}>
         <Route path="/" element={<PageHome/>} />
-        <Route path="/evenements">
+        <Route path="/agenda">
           <Route index element={<PageEvents/>} />
           <Route path=":urlPostId" element={<PageEvents/>} />
         </Route>

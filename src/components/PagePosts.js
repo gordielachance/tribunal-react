@@ -56,7 +56,7 @@ const PagePosts = (props) => {
                         <h3 className="post-title">
                           <Link to={post.guid.react}>{post.title.react}</Link>
                         </h3>
-                        <div>
+                        <div className="post-excerpt">
                           {post.excerpt.react}
                         </div>
                       </div>

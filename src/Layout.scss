@@ -104,11 +104,15 @@ h2,h3,h4,h5,h6{
   }
   .page-content{
     &.posts-list{
+      width:100%;
       li{
+        width: 100%;
         display:flex;
         .post-thumbnail{
-          width:100px;
-          height:100px;
+          img{
+            width:100px;
+            height:100px;
+          }
           aspect-ratio: 1 / 1;
           margin-right:2em;
           flex-shrink:0;
@@ -127,6 +131,7 @@ h2,h3,h4,h5,h6{
         }
       }
     }
+
   }
 
   &#singleMapPage{
