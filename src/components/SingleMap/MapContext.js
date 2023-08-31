@@ -583,7 +583,7 @@ export function MapProvider({children}){
     if (mapboxMap === undefined) return;
     DEBUG && console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
 
-		const layers = ['creations','annotations','annotationsFill','annotationsStroke','events','partners'];
+		const layers = ['features'];
 
 		layers.forEach(layerId=>{
       mapboxMap.setFilter(layerId,featuresFilter);

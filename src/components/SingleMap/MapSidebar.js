@@ -10,7 +10,6 @@ import {TdpLogoLink} from "./MapPost";
 import PageMenu from "../PageMenu";
 import './MapSidebar.scss';
 
-import DatabaseAPI from "../../databaseAPI/api";
 import {DEBUG} from "../../Constants";
 
 
@@ -23,8 +22,6 @@ const MapSidebar = (props) => {
   const [section,setSection] = useState('index');
 
   const [loading,setLoading] = useState(true);
-
-  const [features,setFeatures] = useState();
 
   const {
     mapboxMap,
@@ -44,11 +41,6 @@ const MapSidebar = (props) => {
     if (!props.features) return;
     setLoading(false);
   },[props.features]);
-
-  useEffect(()=>{
-    if (features === undefined) return;
-    DEBUG && console.info("...MAPS FEATURES LOADED",features);
-  },[features]);
 
   //offset map to match sidebar
   useEffect(()=>{

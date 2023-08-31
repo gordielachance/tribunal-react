@@ -60,7 +60,7 @@ const Map = (props) => {
       let hoveredFeature = undefined;
 
       //Update cursors IN
-      map.on('mousemove',['creations','annotations','events','partners'], e => {
+      map.on('mousemove',['features'], e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
 
@@ -73,7 +73,7 @@ const Map = (props) => {
       });
 
       //Update cursors OUT
-      map.on('mouseleave',['creations','annotations','events','partners'], e => {
+      map.on('mouseleave',['features'], e => {
         map.getCanvas().style.cursor = '';
         //Toggle 'hover'
         if(hoveredFeature){
@@ -82,7 +82,7 @@ const Map = (props) => {
       });
 
       //open (add) popup when clicking marker
-      map.on('click',['creations','annotations','events','partners'], e => {
+      map.on('click',['features'], e => {
         if (e.features.length === 0) return;
         const feature = e.features[0];
         navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
@@ -90,6 +90,8 @@ const Map = (props) => {
 
     }
 
+    /*
+    TOUFIX NO MORE USED ?
     const initMapPolygonsListeners = () => {
 
       // When the user moves their mouse over a polygon, show its limits
@@ -131,8 +133,9 @@ const Map = (props) => {
 
       });
     }
-
     initMapPolygonsListeners();
+    */
+
     initMapFeaturesListeners();
 
   }

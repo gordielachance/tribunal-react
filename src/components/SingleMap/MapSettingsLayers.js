@@ -49,7 +49,8 @@ const MapSettingsLayers = (props) => {
     toggleMapLayer,
   } = useMap();
 
-  const allowedLayers = ['creations','annotations','events','partners'];
+  //TOUFIX URGENT WHAT IS IT FOR ?
+  const allowedLayers = ['features'];
   const initialLayers = mapData?.layers ?
     Object.keys(mapData.layers).map(function(key, index) {
       return key;
