@@ -7,7 +7,7 @@ import {BGMaps} from "./PageBackgrounds";
 
 const PageMaps = (props) => {
 
-  const {mapItems,setmapItems} = useApp();
+  const {mapPosts,setMapPosts} = useApp();
   const [loading,setLoading] = useState();
 
   //load events on init
@@ -15,7 +15,7 @@ const PageMaps = (props) => {
 
     let isSubscribed;
 
-    if (mapItems === undefined){
+    if (mapPosts === undefined){
 
       isSubscribed = true;
       setLoading(true);
@@ -26,7 +26,7 @@ const PageMaps = (props) => {
   			if (isSubscribed) {
   				DEBUG && console.info("...MAPS POSTS LOADED",data);
           setLoading(false);
-  	      setmapItems(data);
+  	      setMapPosts(data);
   	    }
   		}
 
@@ -36,11 +36,11 @@ const PageMaps = (props) => {
 		//clean up fn
 		return () => isSubscribed = false;
 
-  }, [mapItems]);
+  }, [mapPosts]);
 
   return(
     <div className="page-container">
-      <PagePosts id="mapListPage" title="Cartes" items={mapItems}/>
+      <PagePosts id="mapListPage" title="Cartes" posts={mapPosts}/>
       <BGMaps/>
     </div>
   )

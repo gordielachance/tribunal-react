@@ -10,6 +10,8 @@ export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local'
 export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_CONTACT = 20;
+export const WP_TAG_ID_EVENT = 83;
+export const WP_TAG_ID_CREATION = 88;
 
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 

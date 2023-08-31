@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from "react";
 import { useApp } from './../AppContext';
 import DatabaseAPI from "../databaseAPI/api";
-import {DEBUG} from "../Constants";
+import {DEBUG,WP_TAG_ID_CREATION} from "../Constants";
 import PagePosts from "./PagePosts";
 import {BGCreations} from "./PageBackgrounds";
 
@@ -22,7 +22,7 @@ const PageCreations = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    const data = await DatabaseAPI.getItems('creations');
+  	    const data = await DatabaseAPI.getItems('features',{tags:WP_TAG_ID_CREATION,frontend:true});
   			if (isSubscribed) {
   				DEBUG && console.info("...CREATIONS POSTS LOADED",data);
           setLoading(false);
