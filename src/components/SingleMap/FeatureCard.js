@@ -57,6 +57,7 @@ const FeatureTags = (props) => {
   const {tags} = useApp();
 
   return (
+
     <>
     {
       (featureTags || formatText) &&
@@ -68,14 +69,14 @@ const FeatureTags = (props) => {
           </li>
         }
         {
-            featureTags.map((tag,k) => {
+          featureTags.map((tag,k) => {
 
-              return(
-                <li key={k}>
-                  <TagLabel highlightTags={props.highlightTags} slug={tag.slug} label={tag.name} description={tag.description}/>
-                </li>
-              )
-            })
+            return(
+              <li key={k}>
+                <TagLabel highlightTags={props.highlightTags} slug={tag.slug} label={tag.name} description={tag.description}/>
+              </li>
+            )
+          })
         }
         </ul>
     }
@@ -91,7 +92,7 @@ export const FeatureCard = props => {
   const description=  feature?.properties?.excerpt;
   const format = feature?.properties?.format;
   const color = feature?.properties?.color;
-  const tags = feature?.properties?.tags;
+  const tags = maybeDecodeJson(feature?.properties?.tags); //TOUFIX TOUCHECK that's weird, this needs JSON.parse or is interpreted as a string.
 
   return(
     <div
@@ -107,16 +108,11 @@ export const FeatureCard = props => {
           </span>
           {title}
         </p>
-        {
-          //TOUFIX URGENT
-          /*
-          <FeatureTags
-          tags={tags}
-          format={format}
-          highlightTags={props.highlightTags}
-          />
-          */
-        }
+        <FeatureTags
+        tags={tags}
+        format={format}
+        highlightTags={props.highlightTags}
+        />
 
       </div>
       {
