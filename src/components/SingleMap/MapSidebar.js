@@ -77,18 +77,7 @@ const MapSidebar = (props) => {
               <h3>{props.title}</h3>
 
               <Menu id="map-menu" pointing secondary>
-
-                  <Menu.Item
-                    id="map-menu-settings"
-                    name='Légende'
-                    active={section === 'settings'}
-                    onClick={e=>setSection('settings')}
-                  >
-                    <Icon name="setting"/>
-                    Légende
-                  </Menu.Item>
-
-                  <Menu.Item
+                <Menu.Item
                     id="map-menu-index"
                     name='Index'
                     active={section === 'index'}
@@ -97,7 +86,15 @@ const MapSidebar = (props) => {
                   <Icon name="circle"/>
                   Index
                 </Menu.Item>
-
+                <Menu.Item
+                  id="map-menu-settings"
+                  name='Filtres'
+                  active={section === 'settings'}
+                  onClick={e=>setSection('settings')}
+                >
+                  <Icon name="setting"/>
+                  Filtres
+                </Menu.Item>
               </Menu>
             </div>
             <div id="map-sections">
