@@ -1,10 +1,10 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
-import {DEBUG,getMapUrl,getFeatureUrl,getUniqueFeatureId} from "../../Constants";
+import {DEBUG,getMapUrl,getFeatureUrl} from "../../Constants";
 import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
 import { useMap } from './MapContext';
-import { CreationCard } from "./CreationCard";
+import { FeatureCard } from "./FeatureCard";
 
 const FeaturesList = props => {
 
@@ -39,6 +39,7 @@ const FeaturesList = props => {
     }
 
     //sort
+
     switch (sortMarkerBy){
       case 'distance':
         //sort by distance
@@ -127,7 +128,7 @@ const FeaturesList = props => {
 
   const handleClick = feature => {
 
-    if ( activeFeature && (getUniqueFeatureId(feature) === getUniqueFeatureId(activeFeature)) ){//unset active
+    if ( activeFeature && (feature.properties.id === activeFeature.properties.id) ){//unset active
       const url = getMapUrl(mapPostId,mapPostSlug);
       navigate(url);
     }else{//set active
@@ -170,7 +171,7 @@ const FeaturesList = props => {
             })}
             >
             <p className='sorted-value'>{sortValue}</p>
-            <CreationCard feature={feature}/>
+            <FeatureCard feature={feature}/>
             </li>
             /*
 

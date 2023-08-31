@@ -68,15 +68,11 @@ const FeatureTags = (props) => {
           </li>
         }
         {
-            featureTags.map((slug,k) => {
-
-              const tag = (tags || []).find(term => term.slug === slug);
-              const name = tag?.name || slug;
-              const desc = tag?.description;
+            featureTags.map((tag,k) => {
 
               return(
                 <li key={k}>
-                  <TagLabel highlightTags={props.highlightTags} slug={slug} label={name} description={desc}/>
+                  <TagLabel highlightTags={props.highlightTags} slug={tag.slug} label={tag.name} description={tag.description}/>
                 </li>
               )
             })
@@ -87,14 +83,15 @@ const FeatureTags = (props) => {
   )
 }
 
-export const CreationCard = props => {
+export const FeatureCard = props => {
 
   const feature = props.feature;
+
   const title = feature?.properties.title;
   const description=  feature?.properties.excerpt;
   const format = feature?.properties.format;
-  const tags = maybeDecodeJson(feature?.properties.tag_slugs);
-  const post_type = feature?.properties.post_type;
+  const tags = feature?.properties.tags;
+  const post_type = 'tdp_creation';//TOUFIX URGENT
 
   return(
     <div
@@ -112,11 +109,17 @@ export const CreationCard = props => {
           </span>
           {title}
         </p>
-        <FeatureTags
-        tags={tags}
-        format={format}
-        highlightTags={props.highlightTags}
-        />
+        {
+          //TOUFIX URGENT
+          /*
+          <FeatureTags
+          tags={tags}
+          format={format}
+          highlightTags={props.highlightTags}
+          />
+          */
+        }
+
       </div>
       {
         description &&

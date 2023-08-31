@@ -185,25 +185,29 @@ export function getUniqueMapFeatures(features){
   return uniqueFeatures;
 }
 
-export const getFeaturesTags = features => {
-  let arr = [];
+export const getFeatureCollectionTags = collection => {
+  const features = collection.data.features || [];
+  let collectionTags = [];
 
   (features || []).forEach(feature => {
-    const tags = feature.properties.tag_slugs || [];
-    arr = arr.concat(tags);
+    const featureTags = feature.properties.tags || [];
+    collectionTags = collectionTags.concat(featureTags);
   });
 
-  return [...new Set(arr)];
+  const uniqueTags = collectionTags.reduce((acc, current) => {
+    const existingItem = acc.find(item => item.slug === current.slug);
+    if (!existingItem) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+
+  return uniqueTags;
 }
 
 //checks if a source contains features
 export const isFeaturesSource = source => {
   return (source.data?.type === 'FeatureCollection');
-}
-
-export const getIdsForTag = (tag,features) => {
-  features = (features || []).filter(feature => (feature.properties.tag_slugs || []).includes(tag));
-  return features.map(feature=>feature.properties.id);
 }
 
 export const getFeaturesFormats = features => {

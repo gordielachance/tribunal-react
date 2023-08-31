@@ -2,7 +2,7 @@ import React, { useEffect,useState }  from "react";
 import { Icon,Popup } from 'semantic-ui-react';
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
-import {getFeaturesTags,getIdsForTag} from "./MapFunctions";
+import {getFeatureCollectionTags} from "./MapFunctions";
 
 const SingleListTag = props => {
   const tagNameEl = <span>{props.wpTag.name}</span>;
@@ -43,10 +43,6 @@ const MapSettingsTags = props => {
     toggleHoverTag
   } = useMap();
 
-  const creationFeatures = mapData?.sources.creations?.data.features || [];
-  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
-  const allFeatures = creationFeatures.concat(annotationFeatures);
-
   const handleClick = slug => {
 
     const newDisabled = [...markerTagsDisabled];
@@ -72,19 +68,18 @@ const MapSettingsTags = props => {
       <h5>Tags</h5>
       <ul id="tags-list" className="features-selection">
         {
-          getFeaturesTags(allFeatures).map(function(slug,k) {
-            const wpTag = tags.find(term=>term.slug===slug);
+          getFeatureCollectionTags(mapData?.sources.features).map(function(term,k) {
 
             return(
               <li
-              key={slug}
-              className={!isDisabled(slug) ? 'active' : ''}
+              key={term.slug}
+              className={!isDisabled(term.slug) ? 'active' : ''}
               >
                 <SingleListTag
-                wpTag={wpTag}
-                onClick={e=>handleClick(slug)}
-                onEnter={e=>toggleHoverTag(slug,true)}
-                onLeave={e=>toggleHoverTag(slug,false)}
+                wpTag={term}
+                onClick={e=>handleClick(term.slug)}
+                onEnter={e=>toggleHoverTag(term.slug,true)}
+                onLeave={e=>toggleHoverTag(term.slug,false)}
                 />
               </li>
             )

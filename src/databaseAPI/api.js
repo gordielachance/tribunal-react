@@ -4,54 +4,79 @@ import {databaseAPI} from "./connect";
 
 export default class DatabaseAPI extends React.Component {
 
-  static async getPaginatedItems(type,page,perPage){
+  static async getPaginatedItems(type, params = {}) {
+    const defaultParams = { page: 1, per_page: 10 };
+    const mergedParams = { ...defaultParams, ...params };
 
-    console.info(`GET '${type}' ITEMS, PAGE: ${page}, PER_PAGE: ${perPage}`);
+    console.info(`GET '${type}' ITEMS,`,mergedParams);
 
     const config = {
       method: 'get',
       url: `/wp/v2/${type}`,
-      params: {
-        page: page ?? 1,
-        per_page: perPage ?? 10,
-      },
+      params: mergedParams,
     }
     return databaseAPI.request(config)
   }
 
-  static async getItems(type,perPage) {
-    let page = 1;
-    let posts = [];
-    perPage = perPage ?? 10;
+  static async getItems(type, params = {}) {
+    const defaultParams = { page: 1, per_page: 10 };
+    const mergedParams = { ...defaultParams, ...params };
 
-    console.info(`GET '${type}' ITEMS, PER_PAGE: ${perPage}`);
+    let items = [];
+
+    console.info(`GET '${type}' ITEMS`,mergedParams);
 
     while (true) {
       try {
-        const request = await DatabaseAPI.getPaginatedItems(type,page,perPage);
+        const request = await DatabaseAPI.getPaginatedItems(type,mergedParams);
         const pageItems = request.data;
 
         if (pageItems.length === 0) {
-          // No more posts to fetch
+          // No more items to fetch
           break;
         }
 
-        posts = posts.concat(pageItems);
-        page++;
+        items = items.concat(pageItems);
+        mergedParams.page++;
       } catch (error) {
-        console.error(`ERROR GETTING '${type}' ITEMS`, type, error);
+        console.error(`ERROR GETTING '${type}' ITEMS`, type,mergedParams,error);
         break; // Exit the loop on error
       }
     }
 
-    return posts;
+    //merge paginated feature into a single collection
+    if (type === 'features' && params.geojson){
+
+      const mergePaginatedCollections = pages => {
+          const features = [];
+
+          for (const collection of pages) {
+              features.push(...collection.features);
+          }
+
+          return {
+              type: 'FeatureCollection',
+              features: features
+          };
+      }
+
+      items = mergePaginatedCollections(items);
+    }
+
+    return items;
   }
 
-  static async getSingleItem(type,id){
+  static async getSingleItem(type,id,params){
+
+    const defaultParams = {};
+    const mergedParams = { ...defaultParams, ...params };
+
+    console.info(`GET '${type}' ITEM #${id}`,mergedParams);
 
     const config = {
      method: 'get',
      url: `wp/v2/${type}/${id}`,
+     params: mergedParams,
     }
 
     return databaseAPI.request(config)

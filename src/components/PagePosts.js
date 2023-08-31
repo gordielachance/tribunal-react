@@ -54,10 +54,10 @@ const PagePosts = (props) => {
                       </div>
                       <div className="post-details">
                         <h3 className="post-title">
-                          <Link to={post.guid.react}>{post.title.react}</Link>
+                          <Link to={post.guid.rendered}>{post.title.rendered}</Link>
                         </h3>
                         <div className="post-excerpt">
-                          {post.excerpt.react}
+                          {post.excerpt.rendered}
                         </div>
                       </div>
                     </li>

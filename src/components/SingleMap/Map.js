@@ -244,7 +244,7 @@ const Map = (props) => {
             //init mapbox annotation images
             const getSingleRasterDatas = (feature) => {
 
-              const postId = feature.properties.post_id;
+              const postId = feature.properties.id;
               const imageUrl = feature.properties.image_url;
               const imageBbox = feature.properties.image_bbox;
 

@@ -68,28 +68,8 @@
 
 .feature-card{
 
-  &[data-source="creations"]{
-    .feature-icon{
-      color: $creationsColor;
-    }
-  }
-
-  &[data-source="annotations"]{
-    .feature-icon{
-      color: $annotationsColor;
-    }
-  }
-
-  &[data-source="events"]{
-    .feature-icon{
-      color: $eventsColor;
-    }
-  }
-
-  &[data-source="partners"]{
-    .feature-icon{
-      color: $partnersColor;
-    }
+  .feature-icon {
+    color: var(--point-color,$featureColor);
   }
 
   .feature-header{

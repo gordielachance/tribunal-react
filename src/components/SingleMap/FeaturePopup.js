@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import { Button } from 'semantic-ui-react';
 
-import { CreationCard } from "./CreationCard";
+import { FeatureCard } from "./FeatureCard";
 import { useMap } from './MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
@@ -56,7 +56,7 @@ const FeaturePopup = props => {
       <div style={{ display: "none" }}>
         <div ref={popupRef}>
           <div className="feature-popup">
-            <CreationCard
+            <FeatureCard
             feature={feature}
             highlightTags={true}
             />

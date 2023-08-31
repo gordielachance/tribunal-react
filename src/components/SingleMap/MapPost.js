@@ -49,7 +49,9 @@ const MapPost = (props) => {
       return getUniqueMapFeatures(features);
     }
 
-    const features = getVisibleFeatures(['creations','annotations','events','partners']);
+    //TOUFIX URGENT OLD const features = getVisibleFeatures(['creations','annotations','events','partners']);
+
+    const features = mapboxMap.queryRenderedFeatures();
 
     setSidebarFeatures(features);
   }
@@ -65,6 +67,7 @@ const MapPost = (props) => {
       setLoading(false);
     }
   },[mapHasInit]);
+
 
   //update sidebar features when map initialize or is moved
   useEffect(()=>{
@@ -86,7 +89,7 @@ const MapPost = (props) => {
     let postId = undefined;
 
     if ( (urlFeatureAction==='full') && activeFeature){
-      postId = activeFeature?.properties.post_id;
+      postId = activeFeature?.properties.id;
     }
     setModalPostId(postId);
 
@@ -102,6 +105,7 @@ const MapPost = (props) => {
 
       <MapSidebar
       title={props.title}
+      id={props.id}
       features={sidebarFeatures}
       />
       {

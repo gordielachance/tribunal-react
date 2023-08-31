@@ -5,7 +5,7 @@ const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 const FORCE_REMOTE_DB = false;
 export const DEBUG = IS_LOCAL;
 
-export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldesprejuges.local' : 'https://datas.tribunaldesprejuges.org';
+export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://datas.tribunaldesprejuges.org';
 
 export const WP_FORMATS = ['aside','gallery','link','image','quote','status','video','audio','chat'];
 export const WP_POST_ID_HOME = 948;
@@ -31,9 +31,6 @@ export const getMapUrl = (id,slug) => {
   return `/cartes/${id}/${slug}`;
 }
 
-export const getUniqueFeatureId = feature => {
-  return `${feature.properties.source}-${feature.properties.id}`;
-}
 
 export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId) => {
   const mapUrl = getMapUrl(mapId,mapSlug);

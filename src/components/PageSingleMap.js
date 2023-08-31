@@ -12,18 +12,18 @@ const PageSingleMap = (props) => {
   const { mapPostId } = useParams();
 
   const [loading,setLoading] = useState(true);
-  const [post,setPost] = useState();
+  const [item,setItem] = useState();
 
-  //load map post on init
+  //load map on init
   useEffect(()=>{
 
     let isSubscribed = true;
 
     const fetchData = async () => {
-	    const data = await DatabaseAPI.getSingleItem('maps',mapPostId);
+	    const data = await DatabaseAPI.getSingleItem('maps',mapPostId,{mapbox:true});
 			if (isSubscribed) {
-        DEBUG && console.log("GOT MAP POST",mapPostId,JSON.parse(JSON.stringify(data || [])))
-        setPost(data);
+        DEBUG && console.log("GOT MAP ITEM",mapPostId,JSON.parse(JSON.stringify(data || [])))
+        setItem(data);
         setLoading(false);
 	    }
 		}
@@ -41,8 +41,10 @@ const PageSingleMap = (props) => {
       <div id="singleMapPage" className="page">
         <MapProvider>
           <MapPost
-          title={post?.title.react}
-          mapData={post?.map}
+          mapData={item}
+          id={item?.id}
+          title={item?.name}
+          description={item?.description}
           />
         </MapProvider>
       </div>
