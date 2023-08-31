@@ -87,24 +87,22 @@ export const FeatureCard = props => {
 
   const feature = props.feature;
 
-  const title = feature?.properties.title;
-  const description=  feature?.properties.excerpt;
-  const format = feature?.properties.format;
-  const tags = feature?.properties.tags;
-  const post_type = 'tdp_creation';//TOUFIX URGENT
+  const title = feature?.properties?.title;
+  const description=  feature?.properties?.excerpt;
+  const format = feature?.properties?.format;
+  const color = feature?.properties?.color;
+  const tags = feature?.properties?.tags;
 
   return(
     <div
     className={classNames({
-      'feature-card':  true,
-      creation:   (post_type==='tdp_creation'),
-      annotation:   (post_type==='tdp_annotation')
+      'feature-card':  true
     })}
     data-source={feature.source}
     >
       <div className="feature-header">
         <p className="feature-title">
-          <span className="feature-icon">
+          <span className="feature-icon" style={{'--point-color': color}}>
             <Icon name="circle"/>
           </span>
           {title}
