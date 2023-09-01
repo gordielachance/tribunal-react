@@ -43,7 +43,7 @@ const TagLabel = props => {
 
 const FeatureTags = (props) => {
 
-  const {tags,getTagsFromSlugs,categories,getCategoriesFromSlugs} = useApp();
+  const {getTagsFromSlugs,categories,getCategoriesFromSlugs} = useMap();
 
   const featureTags = getTagsFromSlugs(props.tags);
   const featureCategories = getCategoriesFromSlugs(props.categories);

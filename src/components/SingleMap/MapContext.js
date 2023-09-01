@@ -1,9 +1,7 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {
-	DEBUG
-} from "../../Constants";
+import {DEBUG,maybeDecodeJson} from "../../Constants";
 import * as turf from "@turf/turf";
 
 import {
@@ -654,37 +652,109 @@ export function MapProvider({children}){
 
 		*/
 
+		const mapTags = () => {
+			const terms = mapData.terms || [];
+			const tags = terms.filter(term=>term.taxonomy === 'post_tag');
+			return tags;
+		}
+
+		const mapCategories = () => {
+			const terms = mapData.terms || [];
+			const categories = terms.filter(term=>term.taxonomy === 'category');
+			return categories;
+		}
+
+		const getCategoriesFromSlugs = slugs => {
+			slugs = maybeDecodeJson(slugs);
+			slugs = [...new Set(slugs||[])];
+			return slugs.map(slug=>{
+				return mapCategories().find(item => item.slug === slug);
+			})
+		}
+
+		const getTagsFromSlugs = slugs => {
+
+			slugs = maybeDecodeJson(slugs);
+			slugs = [...new Set(slugs||[])];
+			return slugs.map(slug=>{
+				return mapTags().find(item => item.slug === slug);
+			})
+		}
+
+		const getFeaturesTags = features => {
+		  let slugs = [];
+
+		  (features || []).forEach(feature => {
+				const terms = maybeDecodeJson(feature.properties.tags) || [];
+		    slugs = slugs.concat(terms);
+		  });
+
+			slugs = [...new Set(slugs)];
+		  return getTagsFromSlugs(slugs);
+		}
+
+		const getFeaturesCategories = features => {
+		  let slugs = [];
+
+		  (features || []).forEach(feature => {
+				const terms = maybeDecodeJson(feature.properties.categories) || [];
+		    slugs = slugs.concat(terms);
+		  });
+
+			slugs = [...new Set(slugs)];
+		  return getCategoriesFromSlugs(slugs);
+		}
+
+		const getFeaturesFormats = features => {
+			let slugs = [];
+
+		  (features || []).forEach(feature => {
+		    slugs = slugs.concat(feature.properties.format);
+		  });
+
+			slugs = [...new Set(slugs)];
+			return slugs;
+
+		}
+
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
-  const value = {
-		mapContainerRef:mapContainerRef,
-		mapData:mapData,
-		setRawMapData:setRawMapData,
-		mapboxMap:mapboxMap,
-		setMapboxMap:setMapboxMap,
-		mapHasInit:mapHasInit,
-		setMapHasInit:setMapHasInit,
-		getAnnotationPolygonByHandle:getAnnotationPolygonByHandle,
-		activeFeature:activeFeature,
-		setActiveFeature:setActiveFeature,
-		sortMarkerBy:sortMarkerBy,
-		setSortMarkerBy:setSortMarkerBy,
-		markerTagsDisabled:markerTagsDisabled,
-		setMarkerTagsDisabled:setMarkerTagsDisabled,
-		markerFormatsDisabled:markerFormatsDisabled,
-		setMarkerFormatsDisabled:setMarkerFormatsDisabled,
-		setMapFeatureState:setMapFeatureState,
-		getHandlesByAnnotationPolygonId:getHandlesByAnnotationPolygonId,
-		filterFeaturesByTag:filterFeaturesByTag,
-		filterFeaturesByFormat:filterFeaturesByFormat,
-		toggleHoverTag:toggleHoverTag,
-		toggleHoverFormat:toggleHoverFormat,
-		zoomOnFeatures:zoomOnFeatures,
-		featuresFilter:featuresFilter,
-		layersDisabled:layersDisabled,
-		toggleMapLayer:toggleMapLayer,
-		annotationsLayerIds:annotationsLayerIds,
-		setAnnotationsLayerIds:setAnnotationsLayerIds
+	const value = {
+	  mapContainerRef,
+	  mapData,
+	  setRawMapData,
+	  mapboxMap,
+	  setMapboxMap,
+	  mapHasInit,
+	  setMapHasInit,
+	  getAnnotationPolygonByHandle,
+	  activeFeature,
+	  setActiveFeature,
+	  sortMarkerBy,
+	  setSortMarkerBy,
+	  markerTagsDisabled,
+	  setMarkerTagsDisabled,
+	  markerFormatsDisabled,
+	  setMarkerFormatsDisabled,
+	  setMapFeatureState,
+	  getHandlesByAnnotationPolygonId,
+	  filterFeaturesByTag,
+	  filterFeaturesByFormat,
+	  toggleHoverTag,
+	  toggleHoverFormat,
+	  zoomOnFeatures,
+	  featuresFilter,
+	  layersDisabled,
+	  toggleMapLayer,
+	  annotationsLayerIds,
+	  setAnnotationsLayerIds,
+		mapTags,
+		mapCategories,
+		getCategoriesFromSlugs,
+		getTagsFromSlugs,
+		getFeaturesTags,
+		getFeaturesCategories,
+		getFeaturesFormats
 	};
 
   return (

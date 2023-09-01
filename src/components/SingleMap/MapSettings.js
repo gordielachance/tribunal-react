@@ -1,12 +1,14 @@
 import React  from "react";
 import MapSettingsTerms from "./mapSettingsTerms";
 import MapSettingsFormats from "./MapSettingsFormats";
+import MapSettingsAreas from "./MapSettingsAreas";
 import MapSettingsSort from "./MapSettingsSort";
 import { useApp } from '../../AppContext';
+import { useMap } from './MapContext';
 
 const MapSettings = (props) => {
 
-  const {getFeaturesTags,getFeaturesCategories,getFeaturesFormats} = useApp();
+  const {getFeaturesTags,getFeaturesCategories,getFeaturesFormats} = useMap();
 
   const mapCategories = getFeaturesCategories(props.features);
   const renderedCategories = getFeaturesCategories(props.renderedFeatures);
@@ -47,6 +49,10 @@ const MapSettings = (props) => {
         <MapSettingsFormats
         items={mapFormats}
         renderedItems={renderedFormats}
+        />
+      }
+      {
+        <MapSettingsAreas
         />
       }
     </div>

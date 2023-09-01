@@ -2,7 +2,7 @@
 
 import React, { useState,useEffect,createContext } from 'react';
 import DatabaseAPI from "./databaseAPI/api";
-import {DEBUG,maybeDecodeJson} from "./Constants";
+import {DEBUG} from "./Constants";
 import useWindowDimensions from './components/ScreenSize';
 
 const AppContext = createContext();
@@ -13,66 +13,11 @@ export function AppProvider({children}){
   const [verticalScreen,setVerticalScreen] = useState();
   const [mobileScreen,setMobileScreen] = useState();
 
-	const [tags,setTags] = useState();
-	const [categories,setCategories] = useState();
-	const [hasInit,setHasInit] = useState(false);
 	const [homePost,setHomePost] = useState();
 	const [creditsPost,setCreditsPost] = useState();
   const [mapPosts,setMapPosts] = useState();
 	const [creationPosts,setCreationPosts] = useState();
 	const [agendaPosts,setAgendaPosts] = useState();
-
-	const getCategoriesFromSlugs = slugs => {
-		slugs = maybeDecodeJson(slugs);
-		slugs = [...new Set(slugs||[])];
-		return slugs.map(slug=>{
-			return (categories || []).find(item => item.slug === slug);
-		})
-	}
-
-	const getTagsFromSlugs = slugs => {
-		slugs = maybeDecodeJson(slugs);
-		slugs = [...new Set(slugs||[])];
-		return slugs.map(slug=>{
-			return (tags || []).find(item => item.slug === slug);
-		})
-	}
-
-	const getFeaturesTags = features => {
-	  let slugs = [];
-
-	  (features || []).forEach(feature => {
-			const terms = maybeDecodeJson(feature.properties.tags) || [];
-	    slugs = slugs.concat(terms);
-	  });
-
-		slugs = [...new Set(slugs)];
-	  return getTagsFromSlugs(slugs);
-	}
-
-	const getFeaturesCategories = features => {
-	  let slugs = [];
-
-	  (features || []).forEach(feature => {
-			const terms = maybeDecodeJson(feature.properties.categories) || [];
-	    slugs = slugs.concat(terms);
-	  });
-
-		slugs = [...new Set(slugs)];
-	  return getCategoriesFromSlugs(slugs);
-	}
-
-	const getFeaturesFormats = features => {
-		let slugs = [];
-
-	  (features || []).forEach(feature => {
-	    slugs = slugs.concat(feature.properties.format);
-	  });
-
-		slugs = [...new Set(slugs)];
-		return slugs;
-
-	}
 
 	//check is vertical
   useEffect(()=>{
@@ -82,56 +27,10 @@ export function AppProvider({children}){
     setMobileScreen(isMobile);
   },[screenSize]);
 
-	//initialize data
-	useEffect(() => {
-	  // Define an asynchronous function to fetch data
-
-		let isSubscribed = true;
-
-	  async function fetchData() {
-	    try {
-	      const tags = await DatabaseAPI.getItems('tags');
-				setTags(tags.data);
-
-	      const categories = await DatabaseAPI.getItems('categories');
-				setCategories(categories.data);
-
-	      // Once the data is loaded, set the 'hasInit' state to true
-	      setHasInit(true);
-
-	    } catch (error) {
-	      // Handle any errors that occur during data fetching
-	      console.error('Error fetching data:', error);
-	    }
-	  }
-
-		if (isSubscribed) {
-	  	fetchData();
-		}
-
-		//clean up fn
-		return () => isSubscribed = false;
-
-	}, []);
-
-	useEffect(() => {
-		if (!hasInit) return;
-		console.info('***APP DATA READY***');
-		console.log(tags);
-		console.log(categories);
-	}, [hasInit]);
-
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
   const value = {
-    tags,
-		getTagsFromSlugs,
-		getFeaturesTags,
-		categories,
-		getCategoriesFromSlugs,
-		getFeaturesCategories,
-		getFeaturesFormats,
 		homePost,
 		setHomePost,
 		creditsPost,
