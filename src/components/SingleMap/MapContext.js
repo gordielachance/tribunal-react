@@ -84,57 +84,6 @@ export function MapProvider({children}){
 			{ source: sourceKey, id: featureId },
 			{ [key]: value }
 		);
-
-		switch(sourceKey){
-			case 'annotations':
-
-				const polygonSideEffects = (feature,key,value) => {
-					const polygonId = feature.properties.id;
-					const handles = getHandlesByAnnotationPolygonId(polygonId);
-
-					//for hovered annotations, toggle handles too.
-					if(key === 'hover'){
-						handles.forEach(handle => {
-							mapboxMap.setFeatureState(
-								{ source: 'annotations', id: handle.properties.id },
-								{ 'side-hover': value }
-							);
-						})
-					}
-
-					if (key === 'active'){
-						const firstHandle = handles[0];
-
-						console.log("FIRST HANDLE YO",firstHandle);
-
-						mapboxMap.setFeatureState(
-							{ source: 'annotations', id: firstHandle.properties.id },
-							{ [key]: value }
-						);
-					}
-
-				}
-
-				polygonSideEffects(feature,key,value);
-
-			break;
-			case 'annotations':
-
-				const handleSideEffects = (feature,key,value) => {
-					const polygon = getAnnotationPolygonByHandle(feature);
-
-					mapboxMap.setFeatureState(
-						{ source: 'annotations', id: polygon.properties.id },
-						{ [key]: value }
-					);
-				}
-
-				handleSideEffects(feature,key,value);
-
-			break;
-		}
-
-
 	}
 
 	const filterFeaturesByTermId = (features,termId) => {
@@ -220,8 +169,25 @@ export function MapProvider({children}){
 		})
 	}
 
-	const toggleHoverArea = (feature,bool) =>{
-		console.log("HOVER AREA",bool,feature);
+	const toggleIsolateArea = (feature,bool) =>{
+		const areaId = feature.properties.id;
+		if(areaId===undefined) return;
+
+		//hover area
+		setMapFeatureState(feature,'hover',bool);
+
+		//area isolation filter
+		const buildFilter = feature => {
+			return ['within', feature];
+	  }
+
+		if (bool){
+			const filter = buildFilter(feature);
+			setIsolationFilter(filter);
+		}else{
+			setIsolationFilter();
+		}
+
 	}
 
 	const toggleMapLayer = (layerId,bool) => {
@@ -851,7 +817,7 @@ export function MapProvider({children}){
 	  filterFeaturesByFormat,
 	  toggleIsolateTermId,
 	  toggleIsolateFormat,
-		toggleHoverArea,
+		toggleIsolateArea,
 	  zoomOnFeatures,
 	  featuresFilter,
 	  layersDisabled,

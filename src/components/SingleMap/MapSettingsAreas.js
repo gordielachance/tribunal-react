@@ -6,7 +6,8 @@ import { useMap } from './MapContext';
 const MapSettingsAreas = props => {
 
   const {
-    mapAreaCollection
+    mapAreaCollection,
+    toggleIsolateArea
   } = useMap();
 
   const isDisabled = area => {
@@ -22,6 +23,8 @@ const MapSettingsAreas = props => {
             <li
             key={k}
             className={!isDisabled(feature) ? 'active' : ''}
+            onMouseEnter={e=>toggleIsolateArea(feature,true)}
+            onMouseLeave={e=>toggleIsolateArea(feature,false)}
             >
               <span><Icon name="check"/></span>
               {feature.properties.mun_name_fr}
