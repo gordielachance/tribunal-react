@@ -14,6 +14,8 @@ export function AppProvider({children}){
   const [mobileScreen,setMobileScreen] = useState();
 
 	const [tags,setTags] = useState();
+	const [categories,setCategories] = useState();
+	const [hasInit,setHasInit] = useState(false);
 	const [homePost,setHomePost] = useState();
 	const [creditsPost,setCreditsPost] = useState();
   const [mapPosts,setMapPosts] = useState();
@@ -28,25 +30,44 @@ export function AppProvider({children}){
     setMobileScreen(isMobile);
   },[screenSize]);
 
-	//load tags on init
+	//initialize data
 	useEffect(() => {
+	  // Define an asynchronous function to fetch data
 
 		let isSubscribed = true;
 
-		const fetchData = async () => {
-	    const data = await DatabaseAPI.getItems('tags',{per_page:10000});
-			if (isSubscribed) {
-				DEBUG && console.info("...TAGS LOADED",data);
-	      setTags(data);
-	    }
-		}
+	  async function fetchData() {
+	    try {
+	      const tags = await DatabaseAPI.getItems('tags');
+				setTags(tags.data);
 
-	  fetchData();
+	      const categories = await DatabaseAPI.getItems('categories');
+				setCategories(categories.data);
+
+	      // Once the data is loaded, set the 'hasInit' state to true
+	      setHasInit(true);
+				
+	    } catch (error) {
+	      // Handle any errors that occur during data fetching
+	      console.error('Error fetching data:', error);
+	    }
+	  }
+
+		if (isSubscribed) {
+	  	fetchData();
+		}
 
 		//clean up fn
 		return () => isSubscribed = false;
 
-  }, []);
+	}, []);
+
+	useEffect(() => {
+		if (!hasInit) return;
+		console.info('***APP DATA READY***');
+		console.log(tags);
+		console.log(categories);
+	}, [hasInit]);
 
 
 	// NOTE: you *might* need to memoize this value
