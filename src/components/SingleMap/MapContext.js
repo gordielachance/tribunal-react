@@ -1,7 +1,7 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {DEBUG,maybeDecodeJson} from "../../Constants";
+import {DEBUG,WP_FORMATS,maybeDecodeJson} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import * as turf from "@turf/turf";
 
@@ -238,6 +238,14 @@ export function MapProvider({children}){
 		}
 
   }
+
+	const selectAllFormats = () => {
+		setDisabledFormats();
+	}
+
+	const selectNoFormats = () => {
+		setDisabledFormats(WP_FORMATS);
+	}
 
 	const filterFeaturesByFormat = (features,slug) => {
 		return (features || []).filter(feature=>{
@@ -792,14 +800,14 @@ export function MapProvider({children}){
 
 		const mapTags = () => {
 			const terms = mapData.terms || [];
-			const tags = terms.filter(term=>term.taxonomy === 'post_tag');
-			return tags;
+			const items = terms.filter(term=>term.taxonomy === 'post_tag');
+			return items;
 		}
 
 		const mapCategories = () => {
 			const terms = mapData.terms || [];
-			const categories = terms.filter(term=>term.taxonomy === 'category');
-			return categories;
+			const items = terms.filter(term=>term.taxonomy === 'category');
+			return items;
 		}
 
 		const getCategoriesFromSlugs = slugs => {
@@ -895,22 +903,24 @@ export function MapProvider({children}){
 	  setActiveFeature,
 	  sortMarkerBy,
 	  setSortMarkerBy,
-	  disabledTermIds,
-	  setDisabledTermIds,
-		disabledAreaIds,
-	  setDisabledAreaIds,
-	  disabledFormats,
-	  setDisabledFormats,
 		setIsolationFilter,
 	  setMapFeatureState,
 	  getHandlesByAnnotationPolygonId,
 	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
+		disabledTermIds,
+	  setDisabledTermIds,
 		toggleTermId,
 		selectAllTerms,
 		selectNoTerms,
 		selectSoloTermId,
 	  toggleIsolateTermId,
+		disabledFormats,
+	  setDisabledFormats,
+		selectAllFormats,
+		selectNoFormats,
+		disabledAreaIds,
+	  setDisabledAreaIds,
 	  toggleIsolateFormat,
 		toggleIsolateArea,
 	  zoomOnFeatures,

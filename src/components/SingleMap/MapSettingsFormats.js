@@ -16,7 +16,7 @@ const MapSettingsFormats = props => {
 
   const handleClick = (e,slug) => {
 
-    const newDisabled = [...disabledFormats];
+    const newDisabled = [...disabledFormats || []];
     const index = newDisabled.indexOf(slug);
 
     if (index > -1) {//exists in array
@@ -30,7 +30,7 @@ const MapSettingsFormats = props => {
   }
 
   const isDisabled = slug => {
-    return disabledFormats.includes(slug);
+    return (disabledFormats || []).includes(slug);
   }
 
   return(
