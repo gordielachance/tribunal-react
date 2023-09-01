@@ -136,21 +136,24 @@ export function MapProvider({children}){
 
 	}
 
-	const filterFeaturesByTag = (features,slug) => {
+	const filterFeaturesByTermId = (features,termId) => {
+
+		const term = getMapTermById(termId);
+		if (!term) return false;
+
+		const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
+		if (!propertyName) return false;
+
 		return (features || []).filter(feature=>{
-			const tags = feature.properties.tag_slugs || [];
-			return tags.includes(slug);
+			const slugs = feature.properties[propertyName] || [];
+			return slugs.includes(term.slug);
 		})
 	}
 
 	//hover features  matching this tag
-  const toggleHoverTag = (slug,bool) => {
+  const toggleHoverTermId = (id,bool) => {
 
-		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
-	  const allFeatures = creationFeatures.concat(annotationFeatures);
-
-    const matches = filterFeaturesByTag(allFeatures,slug);
+    const matches = filterFeaturesByTermId(mapFeatureCollection(),id);
 
     matches.forEach(feature=>{
       setMapFeatureState(feature,'hover',bool);
@@ -168,11 +171,7 @@ export function MapProvider({children}){
 	//hover features matching this format
 	const toggleHoverFormat = (slug,bool) => {
 
-		const creationFeatures = mapData?.sources.creations?.data.features || [];
-	  const annotationFeatures = mapData?.sources.annotationPolygons?.data.features || [];
-	  const allFeatures = creationFeatures.concat(annotationFeatures);
-
-    const matches = filterFeaturesByFormat(allFeatures,slug);
+    const matches = filterFeaturesByFormat(mapFeatureCollection(),slug);
 
     matches.forEach(feature=>{
       setMapFeatureState(feature,'hover',bool);
@@ -511,32 +510,38 @@ export function MapProvider({children}){
 
   },[mapHasInit])
 
+	const getFeaturePropertyNameForTaxonomy = taxonomy => {
+		switch(taxonomy){
+			case 'post_tag':
+				return 'tags';
+			break;
+			case 'category':
+				return 'categories';
+			break;
+		}
+	}
+
+	const getMapTermById = id => {
+		return (mapData.terms || []).find(item => id === item.term_id);
+	}
+
 	//build features term filter
   useEffect(()=>{
 
 		const disabledTerms = (disabledTermIds || []).map(matchId=>{
-			return (mapData.terms || []).find(item => matchId === item.term_id);
+			return getMapTermById(matchId);
 		});
 
     const buildFilter = terms => {
 
       if ( (terms || []).length === 0) return;
 
-			const tagTerms = terms.filter(term=>term.taxonomy==='post_tag');
-			const categoryTerms = terms.filter(term=>term.taxonomy==='category');
-
-      //tags
-      const tagFilters = tagTerms.map(term=>{
-				return ['in',term.slug,['get', 'tags']];
-			})
-
-			//categories
-			const categoryFilters = categoryTerms.map(term=>{
-				return ['in',term.slug,['get', 'categories']];
-			})
-
-			//all
-			const termFilters = tagFilters.concat(categoryFilters);
+			const termFilters = (terms || []).map(term=>{
+				const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
+				if (propertyName){
+					return ['in',term.slug,['get', propertyName]];
+				}
+		 	})
 
       return ['any'].concat(termFilters);
 
@@ -796,9 +801,9 @@ export function MapProvider({children}){
 	  setDisabledFormats,
 	  setMapFeatureState,
 	  getHandlesByAnnotationPolygonId,
-	  filterFeaturesByTag,
+	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
-	  toggleHoverTag,
+	  toggleHoverTermId,
 	  toggleHoverFormat,
 	  zoomOnFeatures,
 	  featuresFilter,

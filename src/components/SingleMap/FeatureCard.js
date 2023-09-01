@@ -5,18 +5,18 @@ import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import {getFormatIcon,getFormatText} from "./MapFunctions";
 
-const TagLabel = props => {
+const TermLabel = props => {
 
   const {
-    toggleHoverTag
+    toggleHoverTermId
   } = useMap();
 
   const handleHover = e => {
-    toggleHoverTag(props.slug,true);
+    toggleHoverTermId(props.id,true);
   }
 
   const handleOut = e => {
-    toggleHoverTag(props.slug,false);
+    toggleHoverTermId(props.id,false);
   }
 
   const tagNameEl = <span>{props.label}</span>;
@@ -63,7 +63,7 @@ const FeatureTags = (props) => {
 
             return(
               <li key={k} className="feature-category">
-                <TagLabel slug={term.slug} label={term.name} description={term.description}/>
+                <TermLabel id={term.term_id} label={term.name} description={term.description}/>
               </li>
             )
           })
@@ -71,7 +71,7 @@ const FeatureTags = (props) => {
         {
           formatText &&
           <li className="feature-format">
-            <TagLabel label={formatText} icon={formatIcon}/>
+            <TermLabel label={formatText} icon={formatIcon}/>
           </li>
         }
         {
@@ -79,7 +79,7 @@ const FeatureTags = (props) => {
 
             return(
               <li key={k} className="feature-tag">
-                <TagLabel slug={term.slug} label={term.name} description={term.description}/>
+                <TermLabel id={term.term_id} label={term.name} description={term.description}/>
               </li>
             )
           })
