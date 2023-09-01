@@ -155,7 +155,7 @@ export function MapProvider({children}){
 
     const matches = filterFeaturesByTermId(mapFeatureCollection(),id);
 
-    matches.forEach(feature=>{
+    (matches || []).forEach(feature=>{
       setMapFeatureState(feature,'hover',bool);
     })
 
