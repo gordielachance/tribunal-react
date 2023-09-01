@@ -1,34 +1,7 @@
 import React, { useEffect,useState }  from "react";
 import { Icon,Popup } from 'semantic-ui-react';
 import { useMap } from './MapContext';
-
-const SingleTerm = props => {
-  const tagNameEl = <span>{props.term.name}</span>;
-  const [showDescription,setShowDescription] = useState(true);
-  return(
-    <>
-      <div className="singleTagHeader">
-        <Icon name="check" onClick={props.onClick}/>
-      {
-        <span
-        onClick={props.onClick}
-        onMouseEnter={props.onEnter}
-        onMouseLeave={props.onLeave}
-        >{tagNameEl}
-        </span>
-      }
-      {
-        (props.term.description && !showDescription) &&
-        <span className="tagDescriptionHandle" onClick={(e)=>setShowDescription(!showDescription)}><Icon name="info circle"/></span>
-      }
-      </div>
-      {
-        showDescription &&
-        <div className="singleTagDescription">{props.term.description}</div>
-      }
-    </>
-  )
-}
+import FilterItem from './FilterItem';
 
 const MapSettingsTerms = props => {
 
@@ -60,17 +33,17 @@ const MapSettingsTerms = props => {
         (props.items||[]).map(function(term,k) {
 
           return(
-            <li
-            key={term.slug}
-            className={!isDisabled(term) ? 'active' : ''}
-            >
-              <SingleTerm
-              term={term}
-              onClick={e=>handleClick(e,term)}
-              onEnter={e=>toggleIsolateTermId(term.term_id,true)}
-              onLeave={e=>toggleIsolateTermId(term.term_id,false)}
-              />
-            </li>
+            <FilterItem
+            key={k}
+            label={term.name}
+            description={term.description}
+            disabled={isDisabled(term)}
+            onClick={e=>handleClick(e,term)}
+            onMouseEnter={e=>toggleIsolateTermId(term.term_id,true)}
+            onMouseLeave={e=>toggleIsolateTermId(term.term_id,false)}
+            //renderedCount={renderedFeatureCount}
+            //totalCount={allFeatureCount}
+            />
           )
         })
       }

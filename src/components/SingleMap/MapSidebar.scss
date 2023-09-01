@@ -131,25 +131,6 @@
 
   }
 
-  ul{
-    columns: auto 200px;
-    li{
-      break-inside: avoid;
-      padding: 0.25em 0;
-      @extend .clickable;
-    }
-    &#terms-list{
-      .singleTagDescription{
-        font-size:.8em;
-        line-height:1em;
-        padding:.5em 0;
-      }
-      .tagDescriptionHandle{
-        margin-left:.25em;
-        opacity:.5;
-      }
-    }
-  }
 }
 
 
@@ -177,17 +158,12 @@ ul#features-list,
   }
 }
 
-ul.map-filter-terms{
-  .singleTagDescription{
-    opacity:.5;
-  }
-}
-
 .filters-section{
   .content{
     margin-left:.5em;
   }
   li{
+    line-height:2em;
     .icon.check{
       opacity:.25;
     }
@@ -195,6 +171,12 @@ ul.map-filter-terms{
       .icon.check{
         opacity:1;
       }
+    }
+    .filter-item-title{
+      @extend .clickable;
+    }
+    .filter-item-description{
+      opacity:.5;
     }
   }
 

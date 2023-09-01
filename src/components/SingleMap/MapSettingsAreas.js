@@ -1,7 +1,7 @@
 import { Icon } from 'semantic-ui-react';
-import {getFormatIcon,getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
+import {getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
 import { useMap } from './MapContext';
-
+import FilterItem from './FilterItem';
 
 const MapSettingsAreas = props => {
 
@@ -36,18 +36,17 @@ const MapSettingsAreas = props => {
     <ul className="map-filter-areas">
       {
         mapAreaCollection().map(function(feature,k) {
-
           return(
-            <li
+            <FilterItem
             key={k}
+            label={feature.properties.mun_name_fr}
+            disabled={isDisabled(feature)}
             onClick={e=>{handleClick(e,feature)}}
-            className={!isDisabled(feature) ? 'active' : ''}
             onMouseEnter={e=>toggleIsolateArea(feature,true)}
             onMouseLeave={e=>toggleIsolateArea(feature,false)}
-            >
-              <span><Icon name="check"/></span>
-              {feature.properties.mun_name_fr}
-            </li>
+            //renderedCount={renderedFeatureCount}
+            //totalCount={allFeatureCount}
+            />
           )
         })
       }

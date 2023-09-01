@@ -1,6 +1,7 @@
 import { Icon,Label } from 'semantic-ui-react';
-import {getFormatIcon,getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
+import {getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
 import { useMap } from './MapContext';
+import FilterItem from './FilterItem';
 
 const MapSettingsFormats = props => {
 
@@ -35,30 +36,22 @@ const MapSettingsFormats = props => {
   return(
     <ul className="map-filter-formats">
       {
-        (props.items||[]).map(function(slug) {
+        (props.items||[]).map(function(slug,k) {
           const allFeatureCount = getIdsForFormat(slug,mapFeatureCollection()).length;
           const renderedFeatureCount = getIdsForFormat(slug,mapRenderedFeatures).length;
-
-          const formatIcon = getFormatIcon(slug);
           const formatText = getFormatText(slug);
 
           return(
-            <li
-            key={slug}
-            className={!isDisabled(slug) ? 'active' : ''}
+            <FilterItem
+            key={k}
+            label={formatText}
+            disabled={isDisabled(slug)}
             onClick={e=>{handleClick(e,slug)}}
             onMouseEnter={e=>toggleIsolateFormat(slug,true)}
             onMouseLeave={e=>toggleIsolateFormat(slug,false)}
-            >
-              <span><Icon name="check"/></span>
-              <span>
-              {formatIcon &&
-                <Icon name={formatIcon}/>
-              }
-              {formatText}
-              </span>
-              <Label className="count">{renderedFeatureCount}/{allFeatureCount}</Label>
-            </li>
+            renderedCount={renderedFeatureCount}
+            totalCount={allFeatureCount}
+            />
           )
         })
       }
