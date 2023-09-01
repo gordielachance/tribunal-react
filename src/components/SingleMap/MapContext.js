@@ -33,7 +33,7 @@ export function MapProvider({children}){
 	const [formatsFilter,setFormatsFilter] = useState();
   const [featuresFilter,setFeaturesFilter] = useState();
 
-  const [disabledTerms,setDisabledTerms] = useState([]);
+  const [disabledTermIds,setDisabledTermIds] = useState([]);
 	const [layersDisabled,setLayersDisabled] = useState([]);
   const [disabledFormats,setDisabledFormats] = useState([]);
 
@@ -514,17 +514,31 @@ export function MapProvider({children}){
 	//build features term filter
   useEffect(()=>{
 
-		console.info("DISABLED TERMS",disabledTerms);
+		const disabledTerms = (disabledTermIds || []).map(matchId=>{
+			return (mapData.terms || []).find(item => matchId === item.term_id);
+		});
 
     const buildFilter = terms => {
 
-      //no tags set
       if ( (terms || []).length === 0) return;
 
-      //expression for each tag
-      const tagFilters = terms.map(tag=>['in',terms,['get', 'tag_slugs']]) //URGENT TOU FIX
+			const tagTerms = terms.filter(term=>term.taxonomy==='post_tag');
+			const categoryTerms = terms.filter(term=>term.taxonomy==='category');
 
-      return ['any'].concat(tagFilters);
+      //tags
+      const tagFilters = tagTerms.map(term=>{
+				return ['in',term.slug,['get', 'tags']];
+			})
+
+			//categories
+			const categoryFilters = categoryTerms.map(term=>{
+				return ['in',term.slug,['get', 'categories']];
+			})
+
+			//all
+			const termFilters = tagFilters.concat(categoryFilters);
+
+      return ['any'].concat(termFilters);
 
     }
 
@@ -534,8 +548,10 @@ export function MapProvider({children}){
       filter = ['!',filter];
     }
 
+		DEBUG && console.info("SET TERMS FILTERS",filter);
+
     setTermsFilter(filter);
-  },[disabledTerms])
+  },[disabledTermIds])
 
   //build features formats filter
   useEffect(()=>{
@@ -774,8 +790,8 @@ export function MapProvider({children}){
 	  setActiveFeature,
 	  sortMarkerBy,
 	  setSortMarkerBy,
-	  disabledTerms,
-	  setDisabledTerms,
+	  disabledTermIds,
+	  setDisabledTermIds,
 	  disabledFormats,
 	  setDisabledFormats,
 	  setMapFeatureState,

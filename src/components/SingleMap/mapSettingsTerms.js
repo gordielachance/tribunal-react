@@ -37,29 +37,29 @@ const MapSettingsTerms = props => {
 
   const {
     mapData,
-    disabledTerms,
-    setDisabledTerms,
+    disabledTermIds,
+    setDisabledTermIds,
     toggleHoverTag
   } = useMap();
 
-  const handleClick = slug => {
+  const handleClick = term => {
 
-    const newDisabled = [...disabledTerms];
-    const index = newDisabled.indexOf(slug);
+    const newDisabled = [...disabledTermIds];
+    const index = newDisabled.indexOf(term.term_id);
 
     if (index > -1) {//exists in array
       newDisabled.splice(index, 1);
     }else{
-      newDisabled.push(slug);
+      newDisabled.push(term.term_id);
     }
 
-    setDisabledTerms(newDisabled);
+    setDisabledTermIds(newDisabled);
 
   }
 
 
-  const isDisabled = slug => {
-    return disabledTerms.includes(slug);
+  const isDisabled = term => {
+    return disabledTermIds.includes(term.term_id);
   }
 
   return(
@@ -72,11 +72,11 @@ const MapSettingsTerms = props => {
             return(
               <li
               key={term.slug}
-              className={!isDisabled(term.slug) ? 'active' : ''}
+              className={!isDisabled(term) ? 'active' : ''}
               >
                 <SingleTerm
                 term={term}
-                onClick={e=>handleClick(term.slug)}
+                onClick={e=>handleClick(term)}
                 onEnter={e=>toggleHoverTag(term.slug,true)}
                 onLeave={e=>toggleHoverTag(term.slug,false)}
                 />

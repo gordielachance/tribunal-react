@@ -113,7 +113,7 @@ const MapSidebar = (props) => {
               {
                 (section === 'index') &&
                 <FeaturesList
-                disabledTags={props.disabledTerms}
+                disabledTags={props.disabledTermIds}
                 sortBy={props.sortMarkerBy}
                 />
               }
