@@ -32,6 +32,7 @@ export function MapProvider({children}){
 	const [termsFilter,setTermsFilter] = useState();
 	const [formatsFilter,setFormatsFilter] = useState();
   const [featuresFilter,setFeaturesFilter] = useState();
+	const [isolationFilter,setIsolationFilter] = useState();
 
   const [disabledTermIds,setDisabledTermIds] = useState([]);
 	const [layersDisabled,setLayersDisabled] = useState([]);
@@ -150,24 +151,17 @@ export function MapProvider({children}){
 		})
 	}
 
+	/*
 	//hover features  matching this tag
-  const toggleHoverTermId = (id,bool) => {
+	const toggleHoverTermId = (termId,bool) => {
 
-    const matches = filterFeaturesByTermId(mapFeatureCollection(),id);
+    const matches = filterFeaturesByTermId(mapFeatureCollection(),termId);
 
     (matches || []).forEach(feature=>{
       setMapFeatureState(feature,'hover',bool);
     })
 
   }
-
-	const filterFeaturesByFormat = (features,slug) => {
-		return (features || []).filter(feature=>{
-			const format = feature.properties?.format;
-			return format === slug;
-		})
-	}
-
 	//hover features matching this format
 	const toggleHoverFormat = (slug,bool) => {
 
@@ -178,6 +172,57 @@ export function MapProvider({children}){
     })
 
   }
+	*/
+
+  const toggleIsolateTermId = (termId,bool) => {
+
+		const buildFilter = term => {
+
+			if (!term) return;
+
+			const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
+			if (!propertyName) return;
+
+			return ['in',term.slug,['get', propertyName]];
+
+	  }
+
+		if (bool){
+			const term = getMapTermById(termId);
+			const filter = buildFilter(term);
+			if (!term) return false;
+			setIsolationFilter(filter);
+		}else{
+			setIsolationFilter();
+		}
+
+  }
+
+	const toggleIsolateFormat = (slug,bool) => {
+
+		const buildFilter = slug => {
+			return ['in', ['get', 'format'], ['literal', slug]];
+	  }
+
+		if (bool){
+			const filter = buildFilter(slug);
+			setIsolationFilter(filter);
+		}else{
+			setIsolationFilter();
+		}
+
+  }
+
+	const filterFeaturesByFormat = (features,slug) => {
+		return (features || []).filter(feature=>{
+			const format = feature.properties?.format;
+			return format === slug;
+		})
+	}
+
+	const toggleHoverArea = (feature,bool) =>{
+		console.log("HOVER AREA",bool,feature);
+	}
 
 	const toggleMapLayer = (layerId,bool) => {
 
@@ -587,7 +632,8 @@ export function MapProvider({children}){
 
     const filters = [
       termsFilter,
-      formatsFilter
+      formatsFilter,
+			isolationFilter
     ]
 
     const buildFilter = filters => {
@@ -604,7 +650,7 @@ export function MapProvider({children}){
     const filter = buildFilter(filters);
     setFeaturesFilter(filter);
 
-  },[termsFilter,formatsFilter])
+  },[termsFilter,formatsFilter,isolationFilter])
 
   //set global marker filters
   useEffect(()=>{
@@ -803,8 +849,9 @@ export function MapProvider({children}){
 	  getHandlesByAnnotationPolygonId,
 	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
-	  toggleHoverTermId,
-	  toggleHoverFormat,
+	  toggleIsolateTermId,
+	  toggleIsolateFormat,
+		toggleHoverArea,
 	  zoomOnFeatures,
 	  featuresFilter,
 	  layersDisabled,

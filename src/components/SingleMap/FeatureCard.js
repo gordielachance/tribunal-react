@@ -8,15 +8,15 @@ import {getFormatIcon,getFormatText} from "./MapFunctions";
 const TermLabel = props => {
 
   const {
-    toggleHoverTermId
+    toggleIsolateTermId
   } = useMap();
 
   const handleHover = e => {
-    toggleHoverTermId(props.id,true);
+    toggleIsolateTermId(props.id,true);
   }
 
   const handleOut = e => {
-    toggleHoverTermId(props.id,false);
+    toggleIsolateTermId(props.id,false);
   }
 
   const tagNameEl = <span>{props.label}</span>;

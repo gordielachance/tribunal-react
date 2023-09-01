@@ -39,7 +39,7 @@ const MapSettingsTerms = props => {
     mapData,
     disabledTermIds,
     setDisabledTermIds,
-    toggleHoverTermId
+    toggleIsolateTermId
   } = useMap();
 
   const handleClick = term => {
@@ -75,8 +75,8 @@ const MapSettingsTerms = props => {
               <SingleTerm
               term={term}
               onClick={e=>handleClick(term)}
-              onEnter={e=>toggleHoverTermId(term.term_id,true)}
-              onLeave={e=>toggleHoverTermId(term.term_id,false)}
+              onEnter={e=>toggleIsolateTermId(term.term_id,true)}
+              onLeave={e=>toggleIsolateTermId(term.term_id,false)}
               />
             </li>
           )

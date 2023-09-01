@@ -8,7 +8,7 @@ const MapSettingsFormats = props => {
     mapData,
     disabledFormats,
     setDisabledFormats,
-    toggleHoverFormat,
+    toggleIsolateFormat,
     mapRenderedFeatures,
     mapFeatureCollection
   } = useMap();
@@ -47,8 +47,8 @@ const MapSettingsFormats = props => {
             key={slug}
             className={!isDisabled(slug) ? 'active' : ''}
             onClick={e=>{handleClick(slug)}}
-            onMouseEnter={e=>toggleHoverFormat(slug,true)}
-            onMouseLeave={e=>toggleHoverFormat(slug,false)}
+            onMouseEnter={e=>toggleIsolateFormat(slug,true)}
+            onMouseLeave={e=>toggleIsolateFormat(slug,false)}
             >
               <span><Icon name="check"/></span>
               <span>
