@@ -179,13 +179,18 @@ export function MapProvider({children}){
 		const term = getMapTermById(termId);
 		if (!term) return false;
 
-		let otherTerms = (mapData.terms || []).filter(item=>item.term_id !== term.term_id);
-
 		//restrict to this taxonomy
-		otherTerms = otherTerms.filter(item=>item.taxonomy === term.taxonomy);
+		let excludeTerms = (mapData.terms || []).filter(item=>item.taxonomy === term.taxonomy);
 
-		const otherIds = otherTerms.map(item=>item.term_id);
-		setDisabledTermIds(otherIds);
+		const excludeIds = excludeTerms.map(item=>item.term_id);
+
+		let newDisabledIds = (disabledTermIds || []).filter(item=>item.taxonomy !== term.taxonomy);//keep other taxonomies
+		newDisabledIds = newDisabledIds.concat(excludeIds);//add current taxonomy
+		newDisabledIds = newDisabledIds.filter(item=>item !== term.term_id);//exculde current
+
+		newDisabledIds = [...new Set(newDisabledIds)];
+
+		setDisabledTermIds(newDisabledIds);
 	}
 
 	const toggleTermId = termId => {
