@@ -224,6 +224,21 @@ export function MapProvider({children}){
 		}
   }
 
+	const selectAllAreas = () => {
+		setDisabledAreaIds();
+	}
+
+	const selectNoAreas = () => {
+		let targetFeatures = mapAreaCollection();
+
+		const targetIds = targetFeatures.map(item=>item.properties.id);
+
+		let newDisabledIds = disabledTermIds.concat(targetIds);
+		newDisabledIds = [...new Set(newDisabledIds)];
+
+		setDisabledAreaIds(newDisabledIds);
+	}
+
 	const toggleIsolateFormat = (slug,bool) => {
 
 		const buildFilter = slug => {
@@ -921,6 +936,8 @@ export function MapProvider({children}){
 		selectNoFormats,
 		disabledAreaIds,
 	  setDisabledAreaIds,
+		selectAllAreas,
+		selectNoAreas,
 	  toggleIsolateFormat,
 		toggleIsolateArea,
 	  zoomOnFeatures,

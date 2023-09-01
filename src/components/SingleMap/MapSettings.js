@@ -46,7 +46,9 @@ const MapSettings = (props) => {
     selectAllTerms,
     selectNoTerms,
     selectAllFormats,
-    selectNoFormats
+    selectNoFormats,
+    selectAllAreas,
+    selectNoAreas
   } = useMap();
 
   const mapCategories = getFeaturesCategories(mapFeatureCollection());
@@ -135,6 +137,8 @@ const MapSettings = (props) => {
         label="Zones"
         index="areas"
         onClick={e=>handleSectionClick('areas')}
+        onClickAll={e=>selectAllAreas()}
+        onClickNone={e=>selectNoAreas()}
         active={activeSlugs.includes('areas')}
       >
         <MapSettingsAreas/>

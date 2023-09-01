@@ -14,7 +14,7 @@ const MapSettingsAreas = props => {
 
   const handleClick = (e,feature) => {
     const featureId = feature.properties.id;
-    const newDisabled = [...disabledAreaIds];
+    const newDisabled = [...disabledAreaIds || []];
     const index = newDisabled.indexOf(featureId);
 
     if (index > -1) {//exists in array
@@ -29,7 +29,7 @@ const MapSettingsAreas = props => {
 
 
   const isDisabled = feature => {
-    return disabledAreaIds.includes(feature.properties.id);
+    return (disabledAreaIds || []).includes(feature.properties.id);
   }
 
   return(
