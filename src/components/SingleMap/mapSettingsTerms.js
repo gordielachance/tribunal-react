@@ -10,13 +10,13 @@ const MapSettingsTerms = props => {
     disabledTermIds,
     toggleIsolateTermId,
     toggleTermId,
-    soloTermId
+    selectSoloTermId
   } = useMap();
 
   const handleClick = (e,term) => {
     if (e.shiftKey) {
       //solo
-      soloTermId(term.term_id)
+      selectSoloTermId(term.term_id)
     }else{
       toggleTermId(term.term_id)
     }
@@ -24,7 +24,7 @@ const MapSettingsTerms = props => {
 
 
   const isDisabled = term => {
-    return disabledTermIds.includes(term.term_id);
+    return (disabledTermIds || []).includes(term.term_id);
   }
 
   return(

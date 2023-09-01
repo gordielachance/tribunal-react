@@ -159,6 +159,25 @@ ul#features-list,
 }
 
 .filters-section{
+  .title{
+    display:flex;
+    .filters-section-shortcuts{
+      padding:0;
+      margin:0;
+      margin-left:auto;
+      color: grey;
+      font-size:0.8em;
+      li{
+        display:inline;
+        padding:.1em;
+      }
+    }
+    &:not(.active){
+      .filters-section-shortcuts{
+        display:none;
+      }
+    }
+  }
   .content{
     margin-left:.5em;
   }
@@ -172,7 +191,7 @@ ul#features-list,
         opacity:1;
       }
     }
-    .filter-item-title{
+    .filter-item-header{
       @extend .clickable;
     }
     .filter-item-description{

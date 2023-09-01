@@ -9,9 +9,9 @@ const FilterItem = props => {
     onMouseLeave={props.onMouseLeave}
     >
 
-      <div className="filter-item-title">
+      <div className="filter-item-header">
         <span className="filter-item-icon"><Icon name="check"/></span>
-        <span>
+        <span className="filter-item-label">
         {props.label}
         </span>
         {

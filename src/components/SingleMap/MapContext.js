@@ -145,19 +145,44 @@ export function MapProvider({children}){
 	  return sourceCollection.find(feature => feature.properties.id === areaId);
 	}
 
-	const soloTermId = termId => {
+	const selectAllTerms = taxonomy => {
+		let targetTerms = (mapData.terms || []);
+
+		//restrict to this taxonomy
+		targetTerms = targetTerms.filter(item=>item.taxonomy === taxonomy);
+
+		const targetIds = targetTerms.map(item=>item.term_id);
+
+		const newDisabledIds = disabledTermIds.filter(id => !targetIds.includes(id));
+
+		setDisabledTermIds(newDisabledIds);
+
+	}
+
+	const selectNoTerms = taxonomy => {
+		let targetTerms = (mapData.terms || []);
+
+		//restrict to this taxonomy
+		targetTerms = targetTerms.filter(item=>item.taxonomy === taxonomy);
+
+		const targetIds = targetTerms.map(item=>item.term_id);
+
+		let newDisabledIds = disabledTermIds.concat(targetIds);
+		newDisabledIds = [...new Set(newDisabledIds)];
+
+		setDisabledTermIds(newDisabledIds);
+
+	}
+
+	const selectSoloTermId = termId => {
 
 		const term = getMapTermById(termId);
 		if (!term) return false;
 
 		let otherTerms = (mapData.terms || []).filter(item=>item.term_id !== term.term_id);
 
-		console.log("OTHER TERMS",[...otherTerms])
-
 		//restrict to this taxonomy
 		otherTerms = otherTerms.filter(item=>item.taxonomy === term.taxonomy);
-
-		console.log("OTHER TAX TERMS",[...otherTerms])
 
 		const otherIds = otherTerms.map(item=>item.term_id);
 		setDisabledTermIds(otherIds);
@@ -882,7 +907,9 @@ export function MapProvider({children}){
 	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
 		toggleTermId,
-		soloTermId,
+		selectAllTerms,
+		selectNoTerms,
+		selectSoloTermId,
 	  toggleIsolateTermId,
 	  toggleIsolateFormat,
 		toggleIsolateArea,

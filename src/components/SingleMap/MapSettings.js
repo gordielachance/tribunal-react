@@ -13,10 +13,16 @@ const FilterSection = props => {
       <Accordion.Title
         active={props.active}
         index={0}
-        onClick={props.onClick}
+
       >
-        <Icon name='dropdown' />
-        {props.label}
+        <Icon name='dropdown' onClick={props.onClick}/>
+        <span onClick={props.onClick}>
+          {props.label}
+        </span>
+        <ul className="filters-section-shortcuts">
+          <li onClick={props.onClickAll}>All</li>
+          <li onClick={props.onClickNone}>None</li>
+        </ul>
       </Accordion.Title>
       <Accordion.Content active={props.active}>
         {props.children}
@@ -27,7 +33,7 @@ const FilterSection = props => {
 
 const MapSettings = (props) => {
 
-  const {mapFeatureCollection,mapRenderedFeatures,getFeaturesTags,getFeaturesCategories,getFeaturesFormats} = useMap();
+  const {mapFeatureCollection,mapRenderedFeatures,getFeaturesTags,getFeaturesCategories,getFeaturesFormats,selectAllTerms,selectNoTerms} = useMap();
 
   const mapCategories = getFeaturesCategories(mapFeatureCollection());
   const renderedCategories = getFeaturesCategories(mapRenderedFeatures);
@@ -63,6 +69,8 @@ const MapSettings = (props) => {
         label="Catégories"
         index="categories"
         onClick={e=>handleSectionClick('categories')}
+        onClickAll={e=>selectAllTerms('category')}
+        onClickNone={e=>selectNoTerms('category')}
         active={activeSlugs.includes('categories')}
       >
         <MapSettingsTerms
@@ -96,6 +104,8 @@ const MapSettings = (props) => {
         label="Tags"
         index="tags"
         onClick={e=>handleSectionClick('tags')}
+        onClickAll={e=>selectAllTerms('post_tag')}
+        onClickNone={e=>selectNoTerms('post_tag')}
         active={activeSlugs.includes('tags')}
       >
         <MapSettingsTerms
