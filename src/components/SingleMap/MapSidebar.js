@@ -25,7 +25,8 @@ const MapSidebar = (props) => {
 
   const {
     mapboxMap,
-    mapHasInit
+    mapHasInit,
+    mapRenderedFeatures,
   } = useMap();
 
   //open sidebar on init ?
@@ -38,9 +39,9 @@ const MapSidebar = (props) => {
   //load features on init
   //on sidebar features first init
   useEffect(()=>{
-    if (!props.renderedFeatures) return;
+    if (!mapRenderedFeatures) return;
     setLoading(false);
-  },[props.renderedFeatures]);
+  },[mapRenderedFeatures]);
 
   //offset map to match sidebar
   useEffect(()=>{
@@ -103,19 +104,16 @@ const MapSidebar = (props) => {
               {
                 (section === 'settings') &&
                 <MapSettings
-                features={props.features}
-                renderedFeatures={props.renderedFeatures}
                 sortBy={props.sortMarkerBy}
                 onSortBy={props.onSortBy}
-                disabledFormats={props.markerFormatsDisabled}
+                disabledFormats={props.disabledFormats}
                 onDisableFormats={props.onDisableFormats}
                 />
               }
               {
                 (section === 'index') &&
                 <FeaturesList
-                features={props.renderedFeatures}
-                disabledTags={props.markerTagsDisabled}
+                disabledTags={props.disabledTerms}
                 sortBy={props.sortMarkerBy}
                 />
               }

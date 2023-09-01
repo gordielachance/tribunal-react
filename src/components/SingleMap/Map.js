@@ -416,32 +416,7 @@ const Map = (props) => {
 
     mapboxMap.once('idle',(e)=>{
 
-      const allPolygons = mapData.sources.annotationPolygons.data.features || [];
-
-      const visiblePolygons = mapboxMap.queryRenderedFeatures({
-        layers: ['annotationsFill'],
-        filter: featuresFilter
-      }) || [];
-
-      const visiblePolygonIds = getUniqueMapFeatures(visiblePolygons).map(feature=>feature.id);
-
-      const toggleAnnotationByLayerId = (layerId,bool) => {
-
-        if (!layerId) return;//continue
-
-        if (bool === undefined){
-          bool = !(mapboxMap.getLayoutProperty(layerId, 'visibility') !== 'none');
-        }
-
-        const visibilityValue = bool ? 'visible' : 'none';
-        mapboxMap.setLayoutProperty(layerId, 'visibility', visibilityValue);
-      }
-
-      allPolygons.forEach(feature => {
-        const layerId = feature.properties.image_layer;
-        const isVisible = visiblePolygonIds.includes(feature.properties.id);
-        toggleAnnotationByLayerId(layerId,isVisible);
-      });
+      console.log("MAP IDLE");
 
     })
 

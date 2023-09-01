@@ -111,6 +111,9 @@ export function getFormatText(slug){
   let text;
 
   switch(slug){
+    case false:
+      text='autre';
+    break;
     case 'gallery':
       text='gallerie';
     break;

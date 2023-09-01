@@ -1,4 +1,4 @@
-import { Icon } from 'semantic-ui-react';
+import { Icon,Label } from 'semantic-ui-react';
 import {getFormatIcon,getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
 import { useMap } from './MapContext';
 
@@ -6,17 +6,16 @@ const MapSettingsFormats = props => {
 
   const {
     mapData,
-    markerFormatsDisabled,
-    setMarkerFormatsDisabled,
-    toggleHoverFormat
+    disabledFormats,
+    setDisabledFormats,
+    toggleHoverFormat,
+    mapRenderedFeatures,
+    mapFeatureCollection
   } = useMap();
-
-  const creationFeatures = mapData?.sources.creations?.data.features || [];
-  const allFeatures = creationFeatures;
 
   const handleClick = slug => {
 
-    const newDisabled = [...markerFormatsDisabled];
+    const newDisabled = [...disabledFormats];
     const index = newDisabled.indexOf(slug);
 
     if (index > -1) {//exists in array
@@ -25,12 +24,12 @@ const MapSettingsFormats = props => {
       newDisabled.push(slug);
     }
 
-    setMarkerFormatsDisabled(newDisabled);
+    setDisabledFormats(newDisabled);
 
   }
 
   const isDisabled = slug => {
-    return markerFormatsDisabled.includes(slug);
+    return disabledFormats.includes(slug);
   }
 
   return(
@@ -39,7 +38,8 @@ const MapSettingsFormats = props => {
       <ul id="formats-list" className="features-selection">
         {
           (props.items||[]).map(function(slug) {
-            const count = getIdsForFormat(slug,allFeatures).length;
+            const allFeatureCount = getIdsForFormat(slug,mapFeatureCollection()).length;
+            const renderedFeatureCount = getIdsForFormat(slug,mapRenderedFeatures).length;
 
             const formatIcon = getFormatIcon(slug);
             const formatText = getFormatText(slug);
@@ -59,7 +59,7 @@ const MapSettingsFormats = props => {
                 }
                 {formatText}
                 </span>
-                <span className="count">{count}</span>
+                <Label className="count">{renderedFeatureCount}/{allFeatureCount}</Label>
               </li>
             )
           })

@@ -2,6 +2,7 @@
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
 import {DEBUG,maybeDecodeJson} from "../../Constants";
+import {getUniqueMapFeatures} from "./MapFunctions";
 import * as turf from "@turf/turf";
 
 import {
@@ -19,6 +20,8 @@ export function MapProvider({children}){
 	const [rawMapData,setRawMapData] = useState(); //map data before it is cleaned
 	const [mapData,setMapData] = useState();
 
+	const [mapRenderedFeatures,setMapRenderedFeatures] = useState();
+
 	const [annotationsLayerIds,setAnnotationsLayerIds] = useState();
 
 	const [activeFeature,setActiveFeature] = useState();
@@ -26,13 +29,13 @@ export function MapProvider({children}){
 
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
 
-	const [tagsFilter,setTagsFilter] = useState();
+	const [termsFilter,setTermsFilter] = useState();
 	const [formatsFilter,setFormatsFilter] = useState();
   const [featuresFilter,setFeaturesFilter] = useState();
 
-  const [markerTagsDisabled,setMarkerTagsDisabled] = useState([]);
+  const [disabledTerms,setDisabledTerms] = useState([]);
 	const [layersDisabled,setLayersDisabled] = useState([]);
-  const [markerFormatsDisabled,setMarkerFormatsDisabled] = useState([]);
+  const [disabledFormats,setDisabledFormats] = useState([]);
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
 		const sourceCollection = mapData?.sources.annotations.data.features || [];
@@ -508,31 +511,37 @@ export function MapProvider({children}){
 
   },[mapHasInit])
 
-	//build features tags filter
+	//build features term filter
   useEffect(()=>{
-    const buildFilter = tags => {
+
+		console.info("DISABLED TERMS",disabledTerms);
+
+    const buildFilter = terms => {
 
       //no tags set
-      if ( (tags || []).length === 0) return;
+      if ( (terms || []).length === 0) return;
 
       //expression for each tag
-      const tagFilters = tags.map(tag=>['in',tag,['get', 'tag_slugs']]) //URGENT TOU FIX
+      const tagFilters = terms.map(tag=>['in',terms,['get', 'tag_slugs']]) //URGENT TOU FIX
 
       return ['any'].concat(tagFilters);
 
     }
 
-    let filter = buildFilter(markerTagsDisabled);
+    let filter = buildFilter(disabledTerms);
 
     if (filter){//exclude all
       filter = ['!',filter];
     }
 
-    setTagsFilter(filter);
-  },[markerTagsDisabled])
+    setTermsFilter(filter);
+  },[disabledTerms])
 
   //build features formats filter
   useEffect(()=>{
+
+		console.info("DISABLED FORMATS",disabledFormats);
+
     const buildFilter = formats => {
 
       //no formats set
@@ -542,21 +551,21 @@ export function MapProvider({children}){
 
     }
 
-    let filter = buildFilter(markerFormatsDisabled);
+    let filter = buildFilter(disabledFormats);
 
     if (filter){//exclude all
       filter = ['!',filter];
     }
 
     setFormatsFilter(filter);
-  },[markerFormatsDisabled])
+  },[disabledFormats])
 
 
 	//set global features filters
   useEffect(()=>{
 
     const filters = [
-      tagsFilter,
+      termsFilter,
       formatsFilter
     ]
 
@@ -574,12 +583,12 @@ export function MapProvider({children}){
     const filter = buildFilter(filters);
     setFeaturesFilter(filter);
 
-  },[tagsFilter,formatsFilter])
+  },[termsFilter,formatsFilter])
 
   //set global marker filters
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    DEBUG && console.log("RUN GLOBAL FILTER",featuresFilter,mapboxMap);
+    DEBUG && console.log("RUN FEATURES FILTER",featuresFilter);
 
 		const layers = ['features'];
 
@@ -652,6 +661,14 @@ export function MapProvider({children}){
 
 		*/
 
+		const mapFeatureCollection = () => {
+			return mapData.sources?.features.data.features || [];
+		}
+
+		const mapAreaCollection = () => {
+			return mapData.sources?.areas.data.features || [];
+		}
+
 		const mapTags = () => {
 			const terms = mapData.terms || [];
 			const tags = terms.filter(term=>term.taxonomy === 'post_tag');
@@ -717,6 +734,31 @@ export function MapProvider({children}){
 
 		}
 
+		const updateSidebarFeatures = e => {
+	    //get visible features on map for use in the sidebar
+
+	    const getVisibleFeatures = (layerIds) => {
+
+	      //ensure layer exists or query will fail
+	      if (mapboxMap === undefined) return;
+	      layerIds = layerIds.filter(layerId => {
+	        return ( mapboxMap.getLayer(layerId) )
+	      })
+
+	      let features = mapboxMap.queryRenderedFeatures({
+	        layers: layerIds,
+	        filter: featuresFilter
+	      }) || [];
+	      return getUniqueMapFeatures(features);
+	    }
+
+	    //TOUFIX URGENT OLD const features = getVisibleFeatures(['creations','annotations','events','partners']);
+
+	    const features = mapboxMap.queryRenderedFeatures();
+
+	    setMapRenderedFeatures(features);
+	  }
+
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
 	const value = {
@@ -732,10 +774,10 @@ export function MapProvider({children}){
 	  setActiveFeature,
 	  sortMarkerBy,
 	  setSortMarkerBy,
-	  markerTagsDisabled,
-	  setMarkerTagsDisabled,
-	  markerFormatsDisabled,
-	  setMarkerFormatsDisabled,
+	  disabledTerms,
+	  setDisabledTerms,
+	  disabledFormats,
+	  setDisabledFormats,
 	  setMapFeatureState,
 	  getHandlesByAnnotationPolygonId,
 	  filterFeaturesByTag,
@@ -748,8 +790,12 @@ export function MapProvider({children}){
 	  toggleMapLayer,
 	  annotationsLayerIds,
 	  setAnnotationsLayerIds,
+		mapFeatureCollection,
+		mapRenderedFeatures,
+		updateSidebarFeatures,
 		mapTags,
 		mapCategories,
+		mapAreaCollection,
 		getCategoriesFromSlugs,
 		getTagsFromSlugs,
 		getFeaturesTags,

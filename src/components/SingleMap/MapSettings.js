@@ -8,16 +8,16 @@ import { useMap } from './MapContext';
 
 const MapSettings = (props) => {
 
-  const {getFeaturesTags,getFeaturesCategories,getFeaturesFormats} = useMap();
+  const {mapFeatureCollection,mapRenderedFeatures,getFeaturesTags,getFeaturesCategories,getFeaturesFormats} = useMap();
 
-  const mapCategories = getFeaturesCategories(props.features);
-  const renderedCategories = getFeaturesCategories(props.renderedFeatures);
+  const mapCategories = getFeaturesCategories(mapFeatureCollection());
+  const renderedCategories = getFeaturesCategories(mapRenderedFeatures);
 
-  const mapTags = getFeaturesTags(props.features);
-  const renderedTags = getFeaturesTags(props.renderedFeatures);
+  const mapTags = getFeaturesTags(mapFeatureCollection());
+  const renderedTags = getFeaturesTags(mapRenderedFeatures);
 
-  const mapFormats = getFeaturesFormats(props.features);
-  const renderedFormats = getFeaturesFormats(props.renderedFeatures);
+  const mapFormats = getFeaturesFormats(mapFeatureCollection());
+  const renderedFormats = getFeaturesFormats(mapRenderedFeatures);
 
   console.log("MAP FORMATS",mapFormats);
 

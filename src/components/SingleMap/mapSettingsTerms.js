@@ -37,14 +37,14 @@ const MapSettingsTerms = props => {
 
   const {
     mapData,
-    markerTagsDisabled,
-    setMarkerTagsDisabled,
+    disabledTerms,
+    setDisabledTerms,
     toggleHoverTag
   } = useMap();
 
   const handleClick = slug => {
 
-    const newDisabled = [...markerTagsDisabled];
+    const newDisabled = [...disabledTerms];
     const index = newDisabled.indexOf(slug);
 
     if (index > -1) {//exists in array
@@ -53,13 +53,13 @@ const MapSettingsTerms = props => {
       newDisabled.push(slug);
     }
 
-    setMarkerTagsDisabled(newDisabled);
+    setDisabledTerms(newDisabled);
 
   }
 
 
   const isDisabled = slug => {
-    return markerTagsDisabled.includes(slug);
+    return disabledTerms.includes(slug);
   }
 
   return(

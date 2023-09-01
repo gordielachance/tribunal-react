@@ -5,7 +5,6 @@ import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
 
 
 import './Map.scss';
-import {getUniqueMapFeatures} from "./MapFunctions";
 import WpPostModal from "../WpPostModal";
 import MapSidebar from "./MapSidebar";
 import MapLegend from "./MapLegend";
@@ -26,35 +25,10 @@ export const TdpLogoLink = props => {
 const MapPost = (props) => {
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled} = useMap();
+  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled,updateSidebarFeatures} = useMap();
   const [loading,setLoading] = useState(true);
-	const [renderedFeatures,setRenderedFeatures] = useState();
+
   const [modalPostId,setModalPostId] = useState();
-
-  const updateSidebarFeatures = e => {
-    //get visible features on map for use in the sidebar
-
-    const getVisibleFeatures = (layerIds) => {
-
-      //ensure layer exists or query will fail
-      if (mapboxMap === undefined) return;
-      layerIds = layerIds.filter(layerId => {
-        return ( mapboxMap.getLayer(layerId) )
-      })
-
-      let features = mapboxMap.queryRenderedFeatures({
-        layers: layerIds,
-        filter: featuresFilter
-      }) || [];
-      return getUniqueMapFeatures(features);
-    }
-
-    //TOUFIX URGENT OLD const features = getVisibleFeatures(['creations','annotations','events','partners']);
-
-    const features = mapboxMap.queryRenderedFeatures();
-
-    setRenderedFeatures(features);
-  }
 
   //initialize map data
   useEffect(()=>{
@@ -67,7 +41,6 @@ const MapPost = (props) => {
       setLoading(false);
     }
   },[mapHasInit]);
-
 
   //update sidebar features when map initialize or is moved
   useEffect(()=>{
@@ -106,8 +79,6 @@ const MapPost = (props) => {
       <MapSidebar
       title={props.title}
       id={props.id}
-      features={props.mapData?.sources.features.data.features}
-      renderedFeatures={renderedFeatures}
       />
       {
         ( modalPostId !== undefined ) &&
@@ -117,9 +88,7 @@ const MapPost = (props) => {
         />
       }
       <TdpLogoLink/>
-      <MapLegend
-      renderedFeatures={renderedFeatures}
-      />
+      <MapLegend/>
       <Map/>
     </div>
   );

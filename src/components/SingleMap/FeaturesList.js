@@ -11,6 +11,7 @@ const FeaturesList = props => {
   const {
     mapboxMap,
     mapHasInit,
+    mapRenderedFeatures,
     sortMarkerBy,
     setMapFeatureState,
     zoomOnFeatures,
@@ -56,10 +57,10 @@ const FeaturesList = props => {
   }
 
   useEffect(()=>{
-    if (props.features === undefined) return;
-    const data = prepareFeatures(props.features);
+    if (mapRenderedFeatures === undefined) return;
+    const data = prepareFeatures(mapRenderedFeatures);
     setFeatures(data);
-  },[props.features,mapCenter,sortMarkerBy])
+  },[mapRenderedFeatures,mapCenter,sortMarkerBy])
 
 
   useEffect(()=>{
