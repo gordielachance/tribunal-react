@@ -151,10 +151,7 @@ const FeaturesList = props => {
     <>
     {
       (features || []).length ?
-      <ul
-      id="features-list"
-      className="map-section features-selection"
-      >
+      <ul id="features-list">
 
         {
           features.map((feature,k) => {

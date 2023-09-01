@@ -63,29 +63,26 @@ const MapSettingsTerms = props => {
   }
 
   return(
-    <div id="map-settings-terms">
-      <h5>{props.label}</h5>
-      <ul id="terms-list" className="features-selection">
-        {
-          (props.items||[]).map(function(term,k) {
+    <ul className="map-filter-terms">
+      {
+        (props.items||[]).map(function(term,k) {
 
-            return(
-              <li
-              key={term.slug}
-              className={!isDisabled(term) ? 'active' : ''}
-              >
-                <SingleTerm
-                term={term}
-                onClick={e=>handleClick(term)}
-                onEnter={e=>toggleHoverTermId(term.term_id,true)}
-                onLeave={e=>toggleHoverTermId(term.term_id,false)}
-                />
-              </li>
-            )
-          })
-        }
-      </ul>
-    </div>
+          return(
+            <li
+            key={term.slug}
+            className={!isDisabled(term) ? 'active' : ''}
+            >
+              <SingleTerm
+              term={term}
+              onClick={e=>handleClick(term)}
+              onEnter={e=>toggleHoverTermId(term.term_id,true)}
+              onLeave={e=>toggleHoverTermId(term.term_id,false)}
+              />
+            </li>
+          )
+        })
+      }
+    </ul>
   )
 }
 

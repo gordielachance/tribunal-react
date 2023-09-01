@@ -33,39 +33,36 @@ const MapSettingsFormats = props => {
   }
 
   return(
-    <div id="map-settings-formats">
-      <h5>Discipline</h5>
-      <ul id="formats-list" className="features-selection">
-        {
-          (props.items||[]).map(function(slug) {
-            const allFeatureCount = getIdsForFormat(slug,mapFeatureCollection()).length;
-            const renderedFeatureCount = getIdsForFormat(slug,mapRenderedFeatures).length;
+    <ul className="map-filter-formats">
+      {
+        (props.items||[]).map(function(slug) {
+          const allFeatureCount = getIdsForFormat(slug,mapFeatureCollection()).length;
+          const renderedFeatureCount = getIdsForFormat(slug,mapRenderedFeatures).length;
 
-            const formatIcon = getFormatIcon(slug);
-            const formatText = getFormatText(slug);
+          const formatIcon = getFormatIcon(slug);
+          const formatText = getFormatText(slug);
 
-            return(
-              <li
-              key={slug}
-              className={!isDisabled(slug) ? 'active' : ''}
-              onClick={e=>{handleClick(slug)}}
-              onMouseEnter={e=>toggleHoverFormat(slug,true)}
-              onMouseLeave={e=>toggleHoverFormat(slug,false)}
-              >
-                <span><Icon name="check"/></span>
-                <span>
-                {formatIcon &&
-                  <Icon name={formatIcon}/>
-                }
-                {formatText}
-                </span>
-                <Label className="count">{renderedFeatureCount}/{allFeatureCount}</Label>
-              </li>
-            )
-          })
-        }
-      </ul>
-    </div>
+          return(
+            <li
+            key={slug}
+            className={!isDisabled(slug) ? 'active' : ''}
+            onClick={e=>{handleClick(slug)}}
+            onMouseEnter={e=>toggleHoverFormat(slug,true)}
+            onMouseLeave={e=>toggleHoverFormat(slug,false)}
+            >
+              <span><Icon name="check"/></span>
+              <span>
+              {formatIcon &&
+                <Icon name={formatIcon}/>
+              }
+              {formatText}
+              </span>
+              <Label className="count">{renderedFeatureCount}/{allFeatureCount}</Label>
+            </li>
+          )
+        })
+      }
+    </ul>
   )
 }
 

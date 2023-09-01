@@ -120,15 +120,6 @@
   }
 }
 
-ul.features-selection{
-  li{
-    opacity:.9;
-    &:hover{
-      opacity:1;
-    }
-  }
-}
-
 #map-settings{
   > * {
     margin: 0 1em;
@@ -139,6 +130,7 @@ ul.features-selection{
     }
 
   }
+
   ul{
     columns: auto 200px;
     li{
@@ -175,8 +167,26 @@ ul.features-selection{
   }
 }
 
-#map-settings-terms,
-#map-settings-formats{
+ul#features-list,
+.filters-section ul{
+  li{
+    opacity:.9;
+    &:hover{
+      opacity:1;
+    }
+  }
+}
+
+ul.map-filter-terms{
+  .singleTagDescription{
+    opacity:.5;
+  }
+}
+
+.filters-section{
+  .content{
+    margin-left:.5em;
+  }
   li{
     .icon.check{
       opacity:.25;

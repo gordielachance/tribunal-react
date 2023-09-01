@@ -9,24 +9,27 @@ const MapSettingsAreas = props => {
     mapAreaCollection
   } = useMap();
 
-  return(
-    <div id="map-settings-formats">
-      <h5>Areas</h5>
-      <ul id="terms-list" className="features-selection">
-        {
-          mapAreaCollection().map(function(feature,k) {
+  const isDisabled = area => {
+    return false;//TOUFIX
+  }
 
-            return(
-              <li
-              key={k}
-              >
-                {feature.properties.mun_name_fr}
-              </li>
-            )
-          })
-        }
-      </ul>
-    </div>
+  return(
+    <ul className="map-filter-areas">
+      {
+        mapAreaCollection().map(function(feature,k) {
+
+          return(
+            <li
+            key={k}
+            className={!isDisabled(feature) ? 'active' : ''}
+            >
+              <span><Icon name="check"/></span>
+              {feature.properties.mun_name_fr}
+            </li>
+          )
+        })
+      }
+    </ul>
   )
 }
 
