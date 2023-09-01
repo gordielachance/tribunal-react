@@ -49,18 +49,20 @@ const TagLabel = props => {
 
 const FeatureTags = (props) => {
 
-  const featureTags = (props.tags || []);
+  const {tags,getTagsFromSlugs,categories,getCategoriesFromSlugs} = useApp();
+
+  const featureTags = getTagsFromSlugs(props.tags);
+  const featureCategories = getCategoriesFromSlugs(props.categories);
+
   const featureFormat = props.format;
   const formatIcon = featureFormat ? getFormatIcon(featureFormat) : undefined;
   const formatText = featureFormat ? getFormatText(featureFormat) : undefined;
-
-  const {tags} = useApp();
 
   return (
 
     <>
     {
-      (featureTags || formatText) &&
+      (featureTags || formatText || featureCategories) &&
         <ul className="feature-tags feature-meta">
         {
           formatText &&
@@ -69,11 +71,21 @@ const FeatureTags = (props) => {
           </li>
         }
         {
-          featureTags.map((tag,k) => {
+          featureCategories.map((term,k) => {
 
             return(
               <li key={k}>
-                <TagLabel highlightTags={props.highlightTags} slug={tag.slug} label={tag.name} description={tag.description}/>
+                <TagLabel highlightTags={props.highlightTags} slug={term.slug} label={term.name} description={term.description}/>
+              </li>
+            )
+          })
+        }
+        {
+          featureTags.map((term,k) => {
+
+            return(
+              <li key={k}>
+                <TagLabel highlightTags={props.highlightTags} slug={term.slug} label={term.name} description={term.description}/>
               </li>
             )
           })
@@ -93,6 +105,8 @@ export const FeatureCard = props => {
   const format = feature?.properties?.format;
   const color = feature?.properties?.color;
   const tags = maybeDecodeJson(feature?.properties?.tags); //TOUFIX TOUCHECK that's weird, this needs JSON.parse or is interpreted as a string.
+  const categories = maybeDecodeJson(feature?.properties?.categories); //TOUFIX TOUCHECK that's weird, this needs JSON.parse or is interpreted as a string.
+
 
   return(
     <div
@@ -110,6 +124,7 @@ export const FeatureCard = props => {
         </p>
         <FeatureTags
         tags={tags}
+        categories={categories}
         format={format}
         highlightTags={props.highlightTags}
         />

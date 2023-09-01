@@ -22,6 +22,18 @@ export function AppProvider({children}){
 	const [creationPosts,setCreationPosts] = useState();
 	const [agendaPosts,setAgendaPosts] = useState();
 
+	const getTagsFromSlugs = slugs => {
+		return (slugs||[]).map(slug=>{
+			return (tags || []).find(item => item.slug === slug);
+		})
+	}
+
+	const getCategoriesFromSlugs = slugs => {
+		return (slugs||[]).map(slug=>{
+			return (categories || []).find(item => item.slug === slug);
+		})
+	}
+
 	//check is vertical
   useEffect(()=>{
     const isVertical = screenSize.height > screenSize.width;
@@ -46,7 +58,7 @@ export function AppProvider({children}){
 
 	      // Once the data is loaded, set the 'hasInit' state to true
 	      setHasInit(true);
-				
+
 	    } catch (error) {
 	      // Handle any errors that occur during data fetching
 	      console.error('Error fetching data:', error);
@@ -73,19 +85,22 @@ export function AppProvider({children}){
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
   const value = {
-    tags:tags,
-		homePost:homePost,
-		setHomePost:setHomePost,
-		creditsPost:creditsPost,
-		setCreditsPost:setCreditsPost,
-    mapPosts:mapPosts,
-		setMapPosts:setMapPosts,
-		creationPosts:creationPosts,
-		setCreationPosts:setCreationPosts,
-		agendaPosts:agendaPosts,
-		setAgendaPosts:setAgendaPosts,
-		mobileScreen:mobileScreen,
-		verticalScreen:verticalScreen
+    tags,
+		getTagsFromSlugs,
+		categories,
+		getCategoriesFromSlugs,
+		homePost,
+		setHomePost,
+		creditsPost,
+		setCreditsPost,
+    mapPosts,
+		setMapPosts,
+		creationPosts,
+		setCreationPosts,
+		agendaPosts,
+		setAgendaPosts,
+		mobileScreen,
+		verticalScreen
 	};
 
   return (
