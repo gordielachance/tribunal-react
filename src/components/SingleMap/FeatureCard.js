@@ -16,12 +16,10 @@ const TagLabel = props => {
   } = useMap();
 
   const handleHover = e => {
-    if (!props.highlightTags) return;
     toggleHoverTag(props.slug,true);
   }
 
   const handleOut = e => {
-    if (!props.highlightTags) return;
     toggleHoverTag(props.slug,false);
   }
 
@@ -32,7 +30,7 @@ const TagLabel = props => {
     <Label
     onMouseEnter={handleHover}
     onMouseLeave={handleOut}
-    className={props.highlightTags ? 'clickable' : ''}
+    className={props.className}
     >
       {props.icon &&
         <Icon name={props.icon}/>
@@ -63,29 +61,29 @@ const FeatureTags = (props) => {
     <>
     {
       (featureTags || formatText || featureCategories) &&
-        <ul className="feature-tags feature-meta">
-        {
-          formatText &&
-          <li>
-            <TagLabel highlightTags={props.highlightTags} label={formatText} icon={formatIcon}/>
-          </li>
-        }
+        <ul className="feature-terms feature-meta">
         {
           featureCategories.map((term,k) => {
 
             return(
-              <li key={k}>
-                <TagLabel highlightTags={props.highlightTags} slug={term.slug} label={term.name} description={term.description}/>
+              <li key={k} className="feature-category">
+                <TagLabel slug={term.slug} label={term.name} description={term.description}/>
               </li>
             )
           })
         }
         {
+          formatText &&
+          <li className="feature-format">
+            <TagLabel label={formatText} icon={formatIcon}/>
+          </li>
+        }
+        {
           featureTags.map((term,k) => {
 
             return(
-              <li key={k}>
-                <TagLabel highlightTags={props.highlightTags} slug={term.slug} label={term.name} description={term.description}/>
+              <li key={k} className="feature-tag">
+                <TagLabel slug={term.slug} label={term.name} description={term.description}/>
               </li>
             )
           })
@@ -126,7 +124,6 @@ export const FeatureCard = props => {
         tags={tags}
         categories={categories}
         format={format}
-        highlightTags={props.highlightTags}
         />
 
       </div>

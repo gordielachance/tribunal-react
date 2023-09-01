@@ -79,7 +79,7 @@
     }
     .feature-meta{
       color: grey;
-      &.feature-tags{
+      &.feature-terms{
         margin:0;
         padding:0;
         display: inline;
@@ -87,14 +87,20 @@
 
         li{
           display:inline-block;
+          @extend .clickable;
+
           &:not(:last-child){
             margin-right:.5em;
           }
           .label{
+            background:rgba(232,232,232,1);
             font-weight: normal;
             margin: 0.25em 0;
             font-size:.8em;
             padding: 0.4em 0.5em;
+          }
+          &.feature-tag .label{
+            background:rgba(232,232,232, 0.5);
           }
         }
       }

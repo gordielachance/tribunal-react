@@ -58,7 +58,6 @@ const FeaturePopup = props => {
           <div className="feature-popup">
             <FeatureCard
             feature={feature}
-            highlightTags={true}
             />
             {
               feature.properties.has_more &&
