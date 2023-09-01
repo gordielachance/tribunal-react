@@ -15,7 +15,10 @@ export default class DatabaseAPI extends React.Component {
       url: `/wp/v2/${type}`,
       params: mergedParams,
     }
-    return databaseAPI.request(config)
+    const response = await databaseAPI.request(config);
+
+    return response.data;
+
   }
 
 
