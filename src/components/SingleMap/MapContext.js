@@ -125,28 +125,78 @@ export function MapProvider({children}){
   }
 	*/
 
+	const getFeaturePropertyNameForTaxonomy = taxonomy => {
+		switch(taxonomy){
+			case 'post_tag':
+				return 'tags';
+			break;
+			case 'category':
+				return 'categories';
+			break;
+		}
+	}
+
+	const getMapTermById = id => {
+		return (mapData.terms || []).find(item => id === item.term_id);
+	}
+
+	const getMapAreaById = areaId => {
+		const sourceCollection = mapData?.sources.areas?.data.features || [];
+	  return sourceCollection.find(feature => feature.properties.id === areaId);
+	}
+
+	const soloTermId = termId => {
+
+		const term = getMapTermById(termId);
+		if (!term) return false;
+
+		let otherTerms = (mapData.terms || []).filter(item=>item.term_id !== term.term_id);
+
+		console.log("OTHER TERMS",[...otherTerms])
+
+		//restrict to this taxonomy
+		otherTerms = otherTerms.filter(item=>item.taxonomy === term.taxonomy);
+
+		console.log("OTHER TAX TERMS",[...otherTerms])
+
+		const otherIds = otherTerms.map(item=>item.term_id);
+		setDisabledTermIds(otherIds);
+	}
+
+	const toggleTermId = termId => {
+    const newDisabled = [...disabledTermIds];
+    const index = newDisabled.indexOf(termId);
+
+    if (index > -1) {//exists in array
+      newDisabled.splice(index, 1);
+    }else{
+      newDisabled.push(termId);
+    }
+
+    setDisabledTermIds(newDisabled);
+
+  }
+
   const toggleIsolateTermId = (termId,bool) => {
 
-		const buildFilter = term => {
+		const buildFilter = termId => {
 
-			if (!term) return;
+			const term = getMapTermById(termId);
+			if (!term) return false;
 
 			const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
 			if (!propertyName) return;
 
 			return ['in',term.slug,['get', propertyName]];
 
-	  }
+		}
 
 		if (bool){
-			const term = getMapTermById(termId);
-			const filter = buildFilter(term);
-			if (!term) return false;
+			const filter = buildFilter(termId);
 			setIsolationFilter(filter);
 		}else{
 			setIsolationFilter();
 		}
-
   }
 
 	const toggleIsolateFormat = (slug,bool) => {
@@ -523,26 +573,6 @@ export function MapProvider({children}){
 
   },[mapHasInit])
 
-	const getFeaturePropertyNameForTaxonomy = taxonomy => {
-		switch(taxonomy){
-			case 'post_tag':
-				return 'tags';
-			break;
-			case 'category':
-				return 'categories';
-			break;
-		}
-	}
-
-	const getMapTermById = id => {
-		return (mapData.terms || []).find(item => id === item.term_id);
-	}
-
-	const getMapAreaById = areaId => {
-		const sourceCollection = mapData?.sources.areas?.data.features || [];
-	  return sourceCollection.find(feature => feature.properties.id === areaId);
-	}
-
 	//build features term filter
   useEffect(()=>{
 
@@ -851,6 +881,8 @@ export function MapProvider({children}){
 	  getHandlesByAnnotationPolygonId,
 	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
+		toggleTermId,
+		soloTermId,
 	  toggleIsolateTermId,
 	  toggleIsolateFormat,
 		toggleIsolateArea,

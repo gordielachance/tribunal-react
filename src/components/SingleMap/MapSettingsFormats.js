@@ -13,7 +13,7 @@ const MapSettingsFormats = props => {
     mapFeatureCollection
   } = useMap();
 
-  const handleClick = slug => {
+  const handleClick = (e,slug) => {
 
     const newDisabled = [...disabledFormats];
     const index = newDisabled.indexOf(slug);
@@ -46,7 +46,7 @@ const MapSettingsFormats = props => {
             <li
             key={slug}
             className={!isDisabled(slug) ? 'active' : ''}
-            onClick={e=>{handleClick(slug)}}
+            onClick={e=>{handleClick(e,slug)}}
             onMouseEnter={e=>toggleIsolateFormat(slug,true)}
             onMouseLeave={e=>toggleIsolateFormat(slug,false)}
             >

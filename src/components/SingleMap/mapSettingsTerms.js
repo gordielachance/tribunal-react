@@ -1,6 +1,5 @@
 import React, { useEffect,useState }  from "react";
 import { Icon,Popup } from 'semantic-ui-react';
-import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 
 const SingleTerm = props => {
@@ -33,28 +32,21 @@ const SingleTerm = props => {
 
 const MapSettingsTerms = props => {
 
-  const {tags,getFeaturesTags} = useApp();
-
   const {
     mapData,
     disabledTermIds,
-    setDisabledTermIds,
-    toggleIsolateTermId
+    toggleIsolateTermId,
+    toggleTermId,
+    soloTermId
   } = useMap();
 
-  const handleClick = term => {
-
-    const newDisabled = [...disabledTermIds];
-    const index = newDisabled.indexOf(term.term_id);
-
-    if (index > -1) {//exists in array
-      newDisabled.splice(index, 1);
+  const handleClick = (e,term) => {
+    if (e.shiftKey) {
+      //solo
+      soloTermId(term.term_id)
     }else{
-      newDisabled.push(term.term_id);
+      toggleTermId(term.term_id)
     }
-
-    setDisabledTermIds(newDisabled);
-
   }
 
 
@@ -74,7 +66,7 @@ const MapSettingsTerms = props => {
             >
               <SingleTerm
               term={term}
-              onClick={e=>handleClick(term)}
+              onClick={e=>handleClick(e,term)}
               onEnter={e=>toggleIsolateTermId(term.term_id,true)}
               onLeave={e=>toggleIsolateTermId(term.term_id,false)}
               />

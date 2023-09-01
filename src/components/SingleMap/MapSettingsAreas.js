@@ -12,7 +12,7 @@ const MapSettingsAreas = props => {
     setDisabledAreaIds
   } = useMap();
 
-  const handleClick = feature => {
+  const handleClick = (e,feature) => {
     const featureId = feature.properties.id;
     const newDisabled = [...disabledAreaIds];
     const index = newDisabled.indexOf(featureId);
@@ -40,7 +40,7 @@ const MapSettingsAreas = props => {
           return(
             <li
             key={k}
-            onClick={e=>{handleClick(feature)}}
+            onClick={e=>{handleClick(e,feature)}}
             className={!isDisabled(feature) ? 'active' : ''}
             onMouseEnter={e=>toggleIsolateArea(feature,true)}
             onMouseLeave={e=>toggleIsolateArea(feature,false)}
