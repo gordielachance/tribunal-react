@@ -39,11 +39,21 @@ const MapSettings = (props) => {
   const renderedFormats = getFeaturesFormats(mapRenderedFeatures);
 
   const [activeIndex,setActiveIndex] = useState();
+  const [activeSlugs,setActiveSlugs] = useState([]);
 
-  const handleClick = (index) => {
-     const newIndex = activeIndex === index ? -1 : index
-     setActiveIndex(newIndex);
-   }
+  const handleSectionClick = slug => {
+    const index = activeSlugs.indexOf(slug);
+
+    const newSlugs = [...activeSlugs];
+
+    if (index > -1) {//exists in array
+      newSlugs.splice(index, 1);
+    }else{
+      newSlugs.push(slug);
+    }
+
+    setActiveSlugs(newSlugs);
+ }
 
   return (
     <Accordion id="map-settings" className="map-section">
@@ -51,9 +61,9 @@ const MapSettings = (props) => {
       (mapCategories !== undefined) &&
       <FilterSection
         label="Catégories"
-        index={0}
-        onClick={e=>handleClick(0)}
-        active={activeIndex===0}
+        index="categories"
+        onClick={e=>handleSectionClick('categories')}
+        active={activeSlugs.includes('categories')}
       >
         <MapSettingsTerms
         items={mapCategories}
@@ -70,9 +80,9 @@ const MapSettings = (props) => {
     {
       <FilterSection
         label="Disciplines"
-        index={1}
-        onClick={e=>handleClick(1)}
-        active={activeIndex===1}
+        index="disciplines"
+        onClick={e=>handleSectionClick('disciplines')}
+        active={activeSlugs.includes('disciplines')}
       >
         <MapSettingsFormats
         items={mapFormats}
@@ -84,9 +94,9 @@ const MapSettings = (props) => {
       (mapTags !== undefined) &&
       <FilterSection
         label="Tags"
-        index={2}
-        onClick={e=>handleClick(2)}
-        active={activeIndex===2}
+        index="tags"
+        onClick={e=>handleSectionClick('tags')}
+        active={activeSlugs.includes('tags')}
       >
         <MapSettingsTerms
         items={mapTags}
@@ -97,9 +107,9 @@ const MapSettings = (props) => {
     {
       <FilterSection
         label="Zones"
-        index={3}
-        onClick={e=>handleClick(3)}
-        active={activeIndex===3}
+        index="areas"
+        onClick={e=>handleSectionClick('areas')}
+        active={activeSlugs.includes('areas')}
       >
         <MapSettingsAreas/>
       </FilterSection>
