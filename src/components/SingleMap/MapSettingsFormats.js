@@ -35,10 +35,10 @@ const MapSettingsFormats = props => {
 
   return(
     <div id="map-settings-formats">
-      <h5>Créations</h5>
+      <h5>Discipline</h5>
       <ul id="formats-list" className="features-selection">
         {
-          getFeaturesFormats(allFeatures).map(function(slug) {
+          (props.items||[]).map(function(slug) {
             const count = getIdsForFormat(slug,allFeatures).length;
 
             const formatIcon = getFormatIcon(slug);

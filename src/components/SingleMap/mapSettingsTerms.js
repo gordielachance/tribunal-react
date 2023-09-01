@@ -2,10 +2,9 @@ import React, { useEffect,useState }  from "react";
 import { Icon,Popup } from 'semantic-ui-react';
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
-import {getFeatureCollectionTags} from "./MapFunctions";
 
-const SingleListTag = props => {
-  const tagNameEl = <span>{props.wpTag.name}</span>;
+const SingleTerm = props => {
+  const tagNameEl = <span>{props.term.name}</span>;
   const [showDescription,setShowDescription] = useState(true);
   return(
     <>
@@ -20,21 +19,21 @@ const SingleListTag = props => {
         </span>
       }
       {
-        (props.wpTag.description && !showDescription) &&
+        (props.term.description && !showDescription) &&
         <span className="tagDescriptionHandle" onClick={(e)=>setShowDescription(!showDescription)}><Icon name="info circle"/></span>
       }
       </div>
       {
         showDescription &&
-        <div className="singleTagDescription">{props.wpTag.description}</div>
+        <div className="singleTagDescription">{props.term.description}</div>
       }
     </>
   )
 }
 
-const MapSettingsTags = props => {
+const MapSettingsTerms = props => {
 
-  const {tags} = useApp();
+  const {tags,getFeaturesTags} = useApp();
 
   const {
     mapData,
@@ -64,19 +63,19 @@ const MapSettingsTags = props => {
   }
 
   return(
-    <div id="map-settings-tags">
-      <h5>Tags</h5>
-      <ul id="tags-list" className="features-selection">
+    <div id="map-settings-terms">
+      <h5>{props.label}</h5>
+      <ul id="terms-list" className="features-selection">
         {
-          getFeatureCollectionTags(mapData?.sources.features).map(function(term,k) {
+          (props.items||[]).map(function(term,k) {
 
             return(
               <li
               key={term.slug}
               className={!isDisabled(term.slug) ? 'active' : ''}
               >
-                <SingleListTag
-                wpTag={term}
+                <SingleTerm
+                term={term}
                 onClick={e=>handleClick(term.slug)}
                 onEnter={e=>toggleHoverTag(term.slug,true)}
                 onLeave={e=>toggleHoverTag(term.slug,false)}
@@ -90,4 +89,4 @@ const MapSettingsTags = props => {
   )
 }
 
-export default MapSettingsTags
+export default MapSettingsTerms

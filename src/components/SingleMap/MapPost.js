@@ -28,7 +28,7 @@ const MapPost = (props) => {
   const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
   const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled} = useMap();
   const [loading,setLoading] = useState(true);
-	const [sidebarFeatures,setSidebarFeatures] = useState();
+	const [renderedFeatures,setRenderedFeatures] = useState();
   const [modalPostId,setModalPostId] = useState();
 
   const updateSidebarFeatures = e => {
@@ -53,7 +53,7 @@ const MapPost = (props) => {
 
     const features = mapboxMap.queryRenderedFeatures();
 
-    setSidebarFeatures(features);
+    setRenderedFeatures(features);
   }
 
   //initialize map data
@@ -106,7 +106,8 @@ const MapPost = (props) => {
       <MapSidebar
       title={props.title}
       id={props.id}
-      features={sidebarFeatures}
+      features={props.mapData?.sources.features.data.features}
+      renderedFeatures={renderedFeatures}
       />
       {
         ( modalPostId !== undefined ) &&
@@ -116,7 +117,9 @@ const MapPost = (props) => {
         />
       }
       <TdpLogoLink/>
-      <MapLegend features={sidebarFeatures}/>
+      <MapLegend
+      renderedFeatures={renderedFeatures}
+      />
       <Map/>
     </div>
   );

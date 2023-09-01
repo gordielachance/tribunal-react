@@ -5,10 +5,6 @@ import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 import {getFormatIcon,getFormatText} from "./MapFunctions";
 
-function maybeDecodeJson(value){
-  return (typeof value === 'string') ? JSON.parse(value) : value;
-}
-
 const TagLabel = props => {
 
   const {
@@ -102,9 +98,6 @@ export const FeatureCard = props => {
   const description=  feature?.properties?.excerpt;
   const format = feature?.properties?.format;
   const color = feature?.properties?.color;
-  const tags = maybeDecodeJson(feature?.properties?.tags); //TOUFIX TOUCHECK that's weird, this needs JSON.parse or is interpreted as a string.
-  const categories = maybeDecodeJson(feature?.properties?.categories); //TOUFIX TOUCHECK that's weird, this needs JSON.parse or is interpreted as a string.
-
 
   return(
     <div
@@ -121,8 +114,8 @@ export const FeatureCard = props => {
           {title}
         </p>
         <FeatureTags
-        tags={tags}
-        categories={categories}
+        tags={feature?.properties?.tags}
+        categories={feature?.properties?.categories}
         format={format}
         />
 

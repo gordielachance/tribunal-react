@@ -2,7 +2,7 @@
 
 import React, { useState,useEffect,createContext } from 'react';
 import DatabaseAPI from "./databaseAPI/api";
-import {DEBUG} from "./Constants";
+import {DEBUG,maybeDecodeJson} from "./Constants";
 import useWindowDimensions from './components/ScreenSize';
 
 const AppContext = createContext();
@@ -22,16 +22,56 @@ export function AppProvider({children}){
 	const [creationPosts,setCreationPosts] = useState();
 	const [agendaPosts,setAgendaPosts] = useState();
 
+	const getCategoriesFromSlugs = slugs => {
+		slugs = maybeDecodeJson(slugs);
+		slugs = [...new Set(slugs||[])];
+		return slugs.map(slug=>{
+			return (categories || []).find(item => item.slug === slug);
+		})
+	}
+
 	const getTagsFromSlugs = slugs => {
-		return (slugs||[]).map(slug=>{
+		slugs = maybeDecodeJson(slugs);
+		slugs = [...new Set(slugs||[])];
+		return slugs.map(slug=>{
 			return (tags || []).find(item => item.slug === slug);
 		})
 	}
 
-	const getCategoriesFromSlugs = slugs => {
-		return (slugs||[]).map(slug=>{
-			return (categories || []).find(item => item.slug === slug);
-		})
+	const getFeaturesTags = features => {
+	  let slugs = [];
+
+	  (features || []).forEach(feature => {
+			const terms = maybeDecodeJson(feature.properties.tags) || [];
+	    slugs = slugs.concat(terms);
+	  });
+
+		slugs = [...new Set(slugs)];
+	  return getTagsFromSlugs(slugs);
+	}
+
+	const getFeaturesCategories = features => {
+	  let slugs = [];
+
+	  (features || []).forEach(feature => {
+			const terms = maybeDecodeJson(feature.properties.categories) || [];
+	    slugs = slugs.concat(terms);
+	  });
+
+		slugs = [...new Set(slugs)];
+	  return getCategoriesFromSlugs(slugs);
+	}
+
+	const getFeaturesFormats = features => {
+		let slugs = [];
+
+	  (features || []).forEach(feature => {
+	    slugs = slugs.concat(feature.properties.format);
+	  });
+
+		slugs = [...new Set(slugs)];
+		return slugs;
+
 	}
 
 	//check is vertical
@@ -87,8 +127,11 @@ export function AppProvider({children}){
   const value = {
     tags,
 		getTagsFromSlugs,
+		getFeaturesTags,
 		categories,
 		getCategoriesFromSlugs,
+		getFeaturesCategories,
+		getFeaturesFormats,
 		homePost,
 		setHomePost,
 		creditsPost,

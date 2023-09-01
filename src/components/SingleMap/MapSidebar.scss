@@ -146,7 +146,7 @@ ul.features-selection{
       padding: 0.25em 0;
       @extend .clickable;
     }
-    &#tags-list{
+    &#terms-list{
       .singleTagDescription{
         font-size:.8em;
         line-height:1em;
@@ -175,7 +175,7 @@ ul.features-selection{
   }
 }
 
-#map-settings-tags,
+#map-settings-terms,
 #map-settings-formats{
   li{
     .icon.check{

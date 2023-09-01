@@ -185,26 +185,6 @@ export function getUniqueMapFeatures(features){
   return uniqueFeatures;
 }
 
-export const getFeatureCollectionTags = collection => {
-  const features = collection.data.features || [];
-  let collectionTags = [];
-
-  (features || []).forEach(feature => {
-    const featureTags = feature.properties.tags || [];
-    collectionTags = collectionTags.concat(featureTags);
-  });
-
-  const uniqueTags = collectionTags.reduce((acc, current) => {
-    const existingItem = acc.find(item => item.slug === current.slug);
-    if (!existingItem) {
-      acc.push(current);
-    }
-    return acc;
-  }, []);
-
-  return uniqueTags;
-}
-
 //checks if a source contains features
 export const isFeaturesSource = source => {
   return (source.data?.type === 'FeatureCollection');

@@ -39,3 +39,9 @@ export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId) => {
   let url = mapUrl + `/${sourceId}/${featureId}`;
   return url;
 }
+
+//sometime we parse features from mapbox, sometimes from wordpress.
+//It seems that from mapbox, some properties are rendered as strings while it should be objects.
+export function maybeDecodeJson(value){
+  return (typeof value === 'string') ? JSON.parse(value) : value;
+}
