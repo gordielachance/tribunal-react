@@ -38,7 +38,7 @@ const MapSettings = (props) => {
   const mapFormats = getFeaturesFormats(mapFeatureCollection());
   const renderedFormats = getFeaturesFormats(mapRenderedFeatures);
 
-  const [activeIndex,setActiveIndex] = useState(0);
+  const [activeIndex,setActiveIndex] = useState();
 
   const handleClick = (index) => {
      const newIndex = activeIndex === index ? -1 : index
@@ -67,31 +67,30 @@ const MapSettings = (props) => {
       <MapSettingsSort/>
               */
     }
-
     {
-      (mapTags !== undefined) &&
       <FilterSection
-        label="Tags"
+        label="Disciplines"
         index={1}
         onClick={e=>handleClick(1)}
         active={activeIndex===1}
       >
-        <MapSettingsTerms
-        items={mapTags}
-        renderedItems={renderedTags}
+        <MapSettingsFormats
+        items={mapFormats}
+        renderedItems={renderedFormats}
         />
       </FilterSection>
     }
     {
+      (mapTags !== undefined) &&
       <FilterSection
-        label="Disciplines"
+        label="Tags"
         index={2}
         onClick={e=>handleClick(2)}
         active={activeIndex===2}
       >
-        <MapSettingsFormats
-        items={mapFormats}
-        renderedItems={renderedFormats}
+        <MapSettingsTerms
+        items={mapTags}
+        renderedItems={renderedTags}
         />
       </FilterSection>
     }

@@ -106,8 +106,6 @@ const MapSidebar = (props) => {
                 <MapSettings
                 sortBy={props.sortMarkerBy}
                 onSortBy={props.onSortBy}
-                disabledFormats={props.disabledFormats}
-                onDisableFormats={props.onDisableFormats}
                 />
               }
               {
