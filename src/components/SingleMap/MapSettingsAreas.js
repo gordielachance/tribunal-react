@@ -7,11 +7,29 @@ const MapSettingsAreas = props => {
 
   const {
     mapAreaCollection,
-    toggleIsolateArea
+    toggleIsolateArea,
+    disabledAreaIds,
+    setDisabledAreaIds
   } = useMap();
 
-  const isDisabled = area => {
-    return false;//TOUFIX
+  const handleClick = feature => {
+    const featureId = feature.properties.id;
+    const newDisabled = [...disabledAreaIds];
+    const index = newDisabled.indexOf(featureId);
+
+    if (index > -1) {//exists in array
+      newDisabled.splice(index, 1);
+    }else{
+      newDisabled.push(featureId);
+    }
+
+    setDisabledAreaIds(newDisabled);
+
+  }
+
+
+  const isDisabled = feature => {
+    return disabledAreaIds.includes(feature.properties.id);
   }
 
   return(
@@ -22,6 +40,7 @@ const MapSettingsAreas = props => {
           return(
             <li
             key={k}
+            onClick={e=>{handleClick(feature)}}
             className={!isDisabled(feature) ? 'active' : ''}
             onMouseEnter={e=>toggleIsolateArea(feature,true)}
             onMouseLeave={e=>toggleIsolateArea(feature,false)}

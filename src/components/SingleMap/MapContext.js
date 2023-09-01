@@ -31,10 +31,12 @@ export function MapProvider({children}){
 
 	const [termsFilter,setTermsFilter] = useState();
 	const [formatsFilter,setFormatsFilter] = useState();
+	const [areaFilter,setAreaFilter] = useState();
   const [featuresFilter,setFeaturesFilter] = useState();
 	const [isolationFilter,setIsolationFilter] = useState();
 
   const [disabledTermIds,setDisabledTermIds] = useState([]);
+	const [disabledAreaIds,setDisabledAreaIds] = useState([]);
 	const [layersDisabled,setLayersDisabled] = useState([]);
   const [disabledFormats,setDisabledFormats] = useState([]);
 
@@ -536,6 +538,11 @@ export function MapProvider({children}){
 		return (mapData.terms || []).find(item => id === item.term_id);
 	}
 
+	const getMapAreaById = areaId => {
+		const sourceCollection = mapData?.sources.areas?.data.features || [];
+	  return sourceCollection.find(feature => feature.properties.id === areaId);
+	}
+
 	//build features term filter
   useEffect(()=>{
 
@@ -569,6 +576,31 @@ export function MapProvider({children}){
     setTermsFilter(filter);
   },[disabledTermIds])
 
+	//build features term filter
+  useEffect(()=>{
+
+		const buildFilter = areaIds => {
+
+      if ( (areaIds || []).length === 0) return;
+
+			const areaFilters = (areaIds || []).map(areaId=>{
+				const feature = getMapAreaById(areaId);
+				return ['within', feature];
+		 	})
+
+      return ['any'].concat(areaFilters);
+
+    }
+
+    let filter = buildFilter(disabledAreaIds);
+
+    if (filter){//exclude all
+      filter = ['!',filter];
+    }
+
+    setAreaFilter(filter);
+  },[disabledAreaIds])
+
   //build features formats filter
   useEffect(()=>{
 
@@ -599,6 +631,7 @@ export function MapProvider({children}){
     const filters = [
       termsFilter,
       formatsFilter,
+			areaFilter,
 			isolationFilter
     ]
 
@@ -616,7 +649,7 @@ export function MapProvider({children}){
     const filter = buildFilter(filters);
     setFeaturesFilter(filter);
 
-  },[termsFilter,formatsFilter,isolationFilter])
+  },[termsFilter,formatsFilter,areaFilter,isolationFilter])
 
   //set global marker filters
   useEffect(()=>{
@@ -809,8 +842,11 @@ export function MapProvider({children}){
 	  setSortMarkerBy,
 	  disabledTermIds,
 	  setDisabledTermIds,
+		disabledAreaIds,
+	  setDisabledAreaIds,
 	  disabledFormats,
 	  setDisabledFormats,
+		setIsolationFilter,
 	  setMapFeatureState,
 	  getHandlesByAnnotationPolygonId,
 	  filterFeaturesByTermId,
