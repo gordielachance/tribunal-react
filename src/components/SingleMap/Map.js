@@ -28,8 +28,7 @@ const Map = (props) => {
     setMapHasInit,
     setMapFeatureState,
     featuresFilter,
-    getHandlesByAnnotationPolygonId,
-    setAnnotationsLayerIds
+    updateRenderedFeatures
   } = useMap();
 
   const initializeMap = data => {
@@ -81,7 +80,7 @@ const Map = (props) => {
         }
       });
 
-      //open (add) popup when clicking marker
+      //open (add) popup when clicking point
       map.on('click',['points'], e => {
         if (e.features.length === 0) return;
         const feature = e.features[0];
@@ -89,52 +88,6 @@ const Map = (props) => {
       });
 
     }
-
-    /*
-    TOUFIX NO MORE USED ?
-    const initMapPolygonsListeners = () => {
-
-      // When the user moves their mouse over a polygon, show its limits
-      //!!!NOT MOBILE FRIENDLY
-
-      let hoveredMapPolygon = undefined;
-
-      map.on('mousemove','annotationsFill', (e) => {
-        if (e.features.length > 0) {
-
-          // Use the first found feature.
-          hoveredMapPolygon = e.features[0];
-
-          //Set 'active' polygon
-          setMapFeatureState(hoveredMapPolygon,'hover',true);
-        }
-      });
-
-      //!!!NOT MOBILE FRIENDLY
-      map.on('click','annotationsFill',e=>{
-        if (e.features.length > 0) {
-          const polygon = e.features[0];
-          const handles = getHandlesByAnnotationPolygonId(polygon.id);
-          const firstHandle = handles[0];
-
-          navigate(getFeatureUrl(mapPostId,mapPostSlug,firstHandle.properties.source,firstHandle.properties.id));
-        }
-      });
-
-      // When the mouse leaves the polygon
-      //!!!NOT MOBILE FRIENDLY
-      map.on('mouseleave','annotationsFill', () => {
-
-        //Unset 'active' polygon
-        setMapFeatureState(hoveredMapPolygon,'hover',false);
-
-        //Unset popup
-        //setPopupDrawingFeatureId();
-
-      });
-    }
-    initMapPolygonsListeners();
-    */
 
     initMapFeaturesListeners();
 
@@ -189,135 +142,6 @@ const Map = (props) => {
       if(mapData !== undefined){
         mapboxMap.on('load', () => {
 
-          //add raster layers
-          const getRastersDatas = () => {
-            /*
-            set polygon minzoom properties
-            */
-
-            //get size of the polygon at the current zoom
-            const getPolygonSize = polygon => {
-              const bbox = turf.bbox(polygon);
-
-              const p1 = [bbox[0],bbox[3]];
-              const p2 = [bbox[2],bbox[1]];
-
-              const p1Pixels = mapboxMap.project(p1);
-              const p2Pixels = mapboxMap.project(p2);
-
-              const pixelWidth = (p2Pixels.x - p1Pixels.x);
-              const pixelHeight = (p2Pixels.y - p1Pixels.y);
-
-              const zoomLevel = mapboxMap.getZoom();
-
-              return {
-                x:pixelWidth,
-                y:pixelHeight,
-                zoomLevel:zoomLevel
-              }
-
-            }
-
-            const getPolygonSizeForZoomlevel = (polygon,zoomLevel) => {
-
-              const polygonSize = getPolygonSize(polygon);
-
-              const currentZoom = polygonSize.zoomLevel;
-              const zoomCorrection = Math.pow(2, currentZoom) / Math.pow(2, zoomLevel);
-              return {x:polygonSize.x/zoomCorrection,y:polygonSize.y/zoomCorrection,zoomLevel:zoomLevel};
-
-            }
-
-            //get the minimum zoom level for a polygon, based on a minimum size (in pixels) of the polygon's bounding box.
-            const getPolygonMinimumZoom = polygon => {
-              const minPixels = 15;
-              let targetZoom = undefined;
-              for (let zoomLevel = 0; zoomLevel < 23; zoomLevel++) {
-                const size = getPolygonSizeForZoomlevel(polygon,zoomLevel);
-                if ( (size.x > minPixels) || (size.y > minPixels) ){
-                  targetZoom = zoomLevel;
-                  break;
-                }
-
-              }
-              return targetZoom;
-            }
-
-
-            //init mapbox annotation images
-            const getSingleRasterDatas = (feature) => {
-
-              const postId = feature.properties.id;
-              const imageUrl = feature.properties.image_url;
-              const imageBbox = feature.properties.image_bbox;
-
-              //compute minimum zoom and store as a prop
-              const minzoom = getPolygonMinimumZoom(feature);
-              feature.properties.minzoom = minzoom;
-
-              const imagePolygon = turf.bboxPolygon(imageBbox);
-              let coordinates = imagePolygon.geometry.coordinates[0];
-              coordinates.pop();//remove last item of the polygon (the closing vertex)
-
-              const sourceId = "annotation-source-"+postId;
-              const layerId = "annotation-layer-"+postId;
-
-              return {
-                polygon_id:feature.properties.id,
-                source:{
-                  id:sourceId,
-                  type: 'image',
-                  url: imageUrl,
-                  coordinates: coordinates
-                },
-                layer:{
-                  id: layerId,
-                  source: sourceId,
-                  type: "raster",
-                  //"minzoom":minzoom
-                }
-              }
-
-            }
-
-            const polygonFeatures = (mapData.sources?.annotationPolygons?.data.features || []);
-
-            const sourceIds = [];
-
-            return polygonFeatures.map(feature => {
-              const datas = getSingleRasterDatas(feature);
-              feature.properties.image_layer = datas.layer.id;
-              return datas;
-            })
-
-            .filter(data => {  //Ignore duplicates
-
-              const sourceId = data.source.id;
-
-              if ( sourceIds.includes(sourceId) ){
-                DEBUG && console.log(`Source "${sourceId}" already exists.`);
-                return false;
-              }
-
-              sourceIds.push(data.source.id);
-              return true;
-
-            })
-
-
-
-          }
-          const rastersDatas = getRastersDatas();
-          const rastersLayers = rastersDatas.map(rasterData => rasterData.layer);
-          const rastersLayerIds = rastersLayers.map(rasterLayer => rasterLayer.id);
-          setAnnotationsLayerIds(rastersLayerIds); //keep a track of the whole set of layer Ids; we'll need this to toggle all the rasters.
-
-          //add raster sources to collection
-          rastersDatas.forEach(data => {
-            const sourceData = {...data.source};delete sourceData.id;//remove ID since to avoid bug
-            mapData.sources[data.source.id] = sourceData;
-          })
-
           //init mapbox sources
           for (var sourceId in mapData.sources) {
             const sourceData = mapData.sources[sourceId];
@@ -340,9 +164,6 @@ const Map = (props) => {
 
           //get basemap layer (we need to inject the rasters between the basemap and the other layers)
           const baseMapLayer = allLayers.find(layer => layer.id === 'basemap');
-
-          //add rasters at the beginning of the array
-          allLayers = [...rastersLayers,...allLayers];
 
           //move basemap at the very beginning of the array (should show BELOW the rasters)
           allLayers = allLayers.filter(item => item !== baseMapLayer);
@@ -398,29 +219,20 @@ const Map = (props) => {
         var features = mapboxMap.querySourceFeatures('markers');
         console.log("FEATURES YO",features);
       });
+
+      mapboxMap.on('idle', updateRenderedFeatures);
+
     }
 
     // Clean up on unmount
     return () => {
       if (mapboxMap){
+        mapboxMap.off('idle', updateRenderedFeatures);
         mapboxMap.remove();
       }
     }
 
   },[mapboxMap]);
-
-
-  //toggle annotation rasters (layers) based on filtered polygons.
-  useEffect(()=>{
-    if (mapboxMap === undefined) return;
-
-    mapboxMap.once('idle',(e)=>{
-
-      console.log("MAP IDLE");
-
-    })
-
-  },[featuresFilter])
 
   return (
     <div id="map-container">

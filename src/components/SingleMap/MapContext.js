@@ -37,6 +37,9 @@ export function MapProvider({children}){
 	const [layersDisabled,setLayersDisabled] = useState([]);
   const [disabledFormatIds,setDisabledFormatIds] = useState([]);
 
+  const [openFilterSlugs,setOpenFilterSlugs] = useState([]);
+
+
 	const getHandlesByAnnotationPolygonId = feature_id => {
 		const sourceCollection = mapData?.sources.annotations.data.features || [];
     const handleFeatures = sourceCollection.filter(feature => feature.properties.id === feature_id);
@@ -405,7 +408,7 @@ export function MapProvider({children}){
 				features = (features || []);
 				const noGeometryFeatures = features.filter(feature => !feature?.geometry);
 				if (noGeometryFeatures.length){
-					console.log("removing "+noGeometryFeatures.length+"/"+features.length+" source features that have no geometry",sourceKey,noGeometryFeatures);
+					DEBUG && console.error("removing "+noGeometryFeatures.length+"/"+features.length+" source features that have no geometry",sourceKey,noGeometryFeatures);
 					features = features.filter(x => !noGeometryFeatures.includes(x));
 				}
 				return features;
@@ -418,7 +421,7 @@ export function MapProvider({children}){
 				features = (features || []);
 				const noIDfeatures = features.filter(feature => (feature?.id !== undefined));
 				if (noIDfeatures.length){
-					console.log("removing "+noIDfeatures.length+"/"+features.length+" source features that have no IDs",sourceKey,noIDfeatures);
+					DEBUG && console.error("removing "+noIDfeatures.length+"/"+features.length+" source features that have no IDs",sourceKey,noIDfeatures);
 					features = features.filter(x => !noIDfeatures.includes(x));
 				}
 				return features;
@@ -426,85 +429,8 @@ export function MapProvider({children}){
 
 			newMapData.sources[sourceKey].data.features = filterFeaturesWithIDs(newMapData.sources[sourceKey].data.features);
 
-
 		})
 
-    if (newMapData.sources.annotations ){
-			//add polygon handles automatically
-			const buildAnnotationHandlesSource = polygonFeatures => {
-
-				const buildAnnotationHandlesFeatures = polygonFeatures => {
-					let collection = [];
-		      (polygonFeatures || []).forEach((polygonFeature,index) => {
-		        const handleFeature = turf.pointOnFeature(polygonFeature);
-
-						handleFeature.properties = {
-							id:polygonFeature.properties.id
-						}
-
-						collection.push(handleFeature);
-		      })
-					return collection;
-				}
-
-				return {
-		      data:{
-		        type:'FeatureCollection',
-		        features:buildAnnotationHandlesFeatures(newMapData.sources.annotationPolygons.data.features)
-		      },
-		      promoteId:'id',
-		      type:'geojson'
-		    }
-			}
-			newMapData.sources.annotations = buildAnnotationHandlesSource(newMapData.sources.annotationPolygons.data.features);
-		}
-
-		/*
-		if (newMapDatasources.annotations ){
-
-			const allPolygons = newMapData.sources.annotationPolygons.data.features || [];
-			const allHandles = newMapDatasources.annotationPolygons.data.features || [];
-
-			//remove polygons that does not have handles
-
-			const filterPolygonsWithHandles = (polygons,handles) => {
-
-				const polygonIds = polygons.map(feature => feature.properties.id);
-				const handleIds = handles.map(feature => feature.properties.id);
-				const noHandlePolygonIds = polygonIds.filter(x => !handleIds.includes(x));
-				const noHandlePolygons = polygons.filter(feature => noHandlePolygonIds.includes(feature.properties.id));
-
-				if (noHandlePolygons.length){
-					console.log("removing "+noHandlePolygons.length+"/"+polygons.length+" annotation polygon features that have no handles",noHandlePolygons);
-					polygons = polygons.filter(x => !noHandlePolygons.includes(x));
-				}
-
-				return polygons;
-			}
-
-			newMapData.sources.annotationPolygons.data.features = filterPolygonsWithHandles(allPolygons,allHandles);
-
-			//remove handles that does not have polygons
-			const filterHandlesWithPolygons = (handles,polygons) => {
-
-				const polygonIds = polygons.map(feature => feature.properties.id);
-				const handleIds = handles.map(feature => feature.properties.id);
-				const noPolygonHandleIds = handleIds.filter(x => !polygonIds.includes(x));
-				const noPolygonHandles = handles.filter(feature => noPolygonHandleIds.includes(feature.properties.id));
-
-				if (noPolygonHandles.length){
-					console.log("removing "+noPolygonHandles.length+"/"+handles.length+" annotation handle features that have no polygon",noPolygonHandles);
-					handles = handles.filter(x => !noPolygonHandles.includes(x));
-				}
-
-				return handles;
-			}
-
-			newMapDatasources.annotationPolygons.data.features = filterHandlesWithPolygons(allHandles,allPolygons);
-
-
-		}
-		*/
 
 		//append source Ids
 
@@ -523,38 +449,37 @@ export function MapProvider({children}){
 
 		})
 
-		if (newMapData.sources.annotations ){
-
-			const copyPolygonProperties = handles => {
-				return handles.map(handle => {
-					const targetId = handle.properties.id;
-					const polygonId = targetId;
-					const polygon = newMapData.sources.annotationPolygons.data.features.find(feature => (feature.properties.id === polygonId));
-
-					if (polygon){
-						handle.properties = {
-							...polygon.properties,
-							...handle.properties
-						}
-					}
-
-					return handle;
-				})
-			}
-
-				newMapData.sources.annotations.data.features = copyPolygonProperties(newMapData.sources.annotations.data.features);
-		}
-
 		DEBUG && console.log("***MAP DATA***",newMapData);
 
 		setMapData(newMapData);
 
 	},[rawMapData])
 
+	const mapFeatureCollection = () => {
+		return mapData?.sources?.points.data.features || [];
+	}
+
+	const mapAreaCollection = () => {
+		return mapData?.sources?.areas.data.features || [];
+	}
+
+	const mapTags = () => {
+		const terms = mapData?.terms || [];
+		const items = terms.filter(term=>term.taxonomy === 'post_tag');
+		return items;
+	}
+
+	const mapCategories = () => {
+		const terms = mapData?.terms || [];
+		const items = terms.filter(term=>term.taxonomy === 'category');
+		return items;
+	}
+
 	//INIT
   useEffect(()=>{
 		if (!mapHasInit) return;
 		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
+
   },[mapHasInit])
 
 	//detect hidden layers
@@ -583,13 +508,19 @@ export function MapProvider({children}){
   useEffect(()=>{
     if (mapboxMap === undefined) return;
 
+		mapboxMap.setFilter('points',featuresFilter);
+
+		/* TOUFIX / ISOLATION / BREAKS WITH FEATURES LIST
+
 		if (isolationFilter){
 			DEBUG && console.log("FEATURES ISOLATION FILTER",isolationFilter);
 			mapboxMap.setFilter('points',isolationFilter);
 		}else{
 			DEBUG && console.log("FEATURES GLOBAL FILTER",featuresFilter);
-			mapboxMap.setFilter('points',featuresFilter);
+
 		}
+		*/
+
 
 
   },[featuresFilter,isolationFilter])
@@ -657,26 +588,6 @@ export function MapProvider({children}){
 
 		*/
 
-		const mapFeatureCollection = () => {
-			return mapData.sources?.features.data.features || [];
-		}
-
-		const mapAreaCollection = () => {
-			return mapData.sources?.areas.data.features || [];
-		}
-
-		const mapTags = () => {
-			const terms = mapData.terms || [];
-			const items = terms.filter(term=>term.taxonomy === 'post_tag');
-			return items;
-		}
-
-		const mapCategories = () => {
-			const terms = mapData.terms || [];
-			const items = terms.filter(term=>term.taxonomy === 'category');
-			return items;
-		}
-
 		const getCategoriesFromSlugs = slugs => {
 			slugs = maybeDecodeJson(slugs);
 			slugs = [...new Set(slugs||[])];
@@ -730,30 +641,10 @@ export function MapProvider({children}){
 
 		}
 
-		const updateSidebarFeatures = e => {
-	    //get visible features on map for use in the sidebar
-
-	    const getVisibleFeatures = (layerIds) => {
-
-	      //ensure layer exists or query will fail
-	      if (mapboxMap === undefined) return;
-	      layerIds = layerIds.filter(layerId => {
-	        return ( mapboxMap.getLayer(layerId) )
-	      })
-
-	      let features = mapboxMap.queryRenderedFeatures({
-	        layers: layerIds,
-	        filter: featuresFilter
-	      }) || [];
-	      return getUniqueMapFeatures(features);
-	    }
-
-	    //TOUFIX URGENT OLD const features = getVisibleFeatures(['creations','annotations','events','partners']);
-
-	    const features = mapboxMap.queryRenderedFeatures();
-
-	    setMapRenderedFeatures(features);
-	  }
+		const updateRenderedFeatures = () => {
+			const newRenderedFeatures = mapboxMap.queryRenderedFeatures();
+			setMapRenderedFeatures(newRenderedFeatures);
+		};
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -799,7 +690,7 @@ export function MapProvider({children}){
 	  setAnnotationsLayerIds,
 		mapFeatureCollection,
 		mapRenderedFeatures,
-		updateSidebarFeatures,
+		updateRenderedFeatures,
 		mapTags,
 		mapCategories,
 		mapAreaCollection,
@@ -807,7 +698,9 @@ export function MapProvider({children}){
 		getTagsFromSlugs,
 		getFeaturesTags,
 		getFeaturesCategories,
-		getFeaturesFormats
+		getFeaturesFormats,
+		openFilterSlugs,
+		setOpenFilterSlugs
 	};
 
   return (

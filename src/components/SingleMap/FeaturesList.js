@@ -11,10 +11,10 @@ const FeaturesList = props => {
   const {
     mapboxMap,
     mapHasInit,
+    mapFeatureCollection,
     mapRenderedFeatures,
     sortMarkerBy,
     setMapFeatureState,
-    zoomOnFeatures,
     activeFeature,
     getAnnotationPolygonByHandle
   } = useMap();
@@ -26,7 +26,7 @@ const FeaturesList = props => {
   const [features,setFeatures] = useState();
   const scrollRefs = useRef([]);
 
-  const prepareFeatures = features => {
+  const sortFeatures = features => {
 
     //clone array; we don't want to alter the original data
     let newFeatures = JSON.parse(JSON.stringify(features || []));
@@ -40,7 +40,6 @@ const FeaturesList = props => {
     }
 
     //sort
-
     switch (sortMarkerBy){
       case 'distance':
         //sort by distance
@@ -57,9 +56,27 @@ const FeaturesList = props => {
   }
 
   useEffect(()=>{
+
     if (mapRenderedFeatures === undefined) return;
-    const data = prepareFeatures(mapRenderedFeatures);
-    setFeatures(data);
+
+    //get IDs of rendered points
+    const renderedPointIds = (mapRenderedFeatures || [])
+    .filter(feature => {
+      const isPoint = feature.properties.source === "points";
+      const postId = feature.properties.post_id;
+      return (isPoint && postId);
+    })
+    .map(feature => feature.properties.id);
+
+    //filter source data
+    let sourceFeatures = mapFeatureCollection()
+    .filter(feature => renderedPointIds.includes(feature.properties.id))
+
+    //sort
+    sourceFeatures = sortFeatures(sourceFeatures);
+
+    setFeatures(sourceFeatures);
+
   },[mapRenderedFeatures,mapCenter,sortMarkerBy])
 
 

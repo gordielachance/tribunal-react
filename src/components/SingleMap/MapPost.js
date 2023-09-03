@@ -25,7 +25,7 @@ export const TdpLogoLink = props => {
 const MapPost = (props) => {
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled,updateSidebarFeatures} = useMap();
+  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled,updateRenderedFeatures} = useMap();
   const [loading,setLoading] = useState(true);
 
   const [modalPostId,setModalPostId] = useState();
@@ -41,21 +41,6 @@ const MapPost = (props) => {
       setLoading(false);
     }
   },[mapHasInit]);
-
-  //update sidebar features when map initialize or is moved
-  useEffect(()=>{
-    if (!mapHasInit) return;
-
-    updateSidebarFeatures();
-    mapboxMap.on('moveend',updateSidebarFeatures);
-
-  },[mapHasInit])
-
-  //update sidebar features when filters are updated
-  useEffect(()=>{
-    if (mapboxMap === undefined) return;
-    setTimeout(updateSidebarFeatures,250); //wait map finishes refreshing before update (TOUFIX TOUCHECK use 'idle' event instead?)
-  },[featuresFilter,layersDisabled])
 
   useEffect(()=>{
 

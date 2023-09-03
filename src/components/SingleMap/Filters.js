@@ -48,7 +48,9 @@ const Filters = (props) => {
     selectAllFormats,
     selectNoFormats,
     selectAllAreas,
-    selectNoAreas
+    selectNoAreas,
+    openFilterSlugs,
+    setOpenFilterSlugs
   } = useMap();
 
   const categoryFeatures = getFeaturesCategories(mapFeatureCollection());
@@ -63,13 +65,10 @@ const Filters = (props) => {
   //const mapAreas = getFeaturesAreas(mapFeatureCollection());
   //const renderedAreas = getFeaturesAreas(mapRenderedFeatures);
 
-  const [activeIndex,setActiveIndex] = useState();
-  const [activeSlugs,setActiveSlugs] = useState([]);
-
   const handleSectionClick = slug => {
-    const index = activeSlugs.indexOf(slug);
+    const index = openFilterSlugs.indexOf(slug);
 
-    const newSlugs = [...activeSlugs];
+    const newSlugs = [...openFilterSlugs];
 
     if (index > -1) {//exists in array
       newSlugs.splice(index, 1);
@@ -77,7 +76,7 @@ const Filters = (props) => {
       newSlugs.push(slug);
     }
 
-    setActiveSlugs(newSlugs);
+    setOpenFilterSlugs(newSlugs);
  }
 
   return (
@@ -90,7 +89,7 @@ const Filters = (props) => {
         onClick={e=>handleSectionClick('categories')}
         onClickAll={e=>selectAllTerms('category')}
         onClickNone={e=>selectNoTerms('category')}
-        active={activeSlugs.includes('categories')}
+        active={openFilterSlugs.includes('categories')}
       >
         <FilterTerms
         items={categoryFeatures}
@@ -112,7 +111,7 @@ const Filters = (props) => {
         onClick={e=>handleSectionClick('disciplines')}
         onClickAll={e=>selectAllFormats()}
         onClickNone={e=>selectNoFormats()}
-        active={activeSlugs.includes('disciplines')}
+        active={openFilterSlugs.includes('disciplines')}
       >
         <FilterFormats
         items={formatFeatures}
@@ -128,7 +127,7 @@ const Filters = (props) => {
         onClick={e=>handleSectionClick('tags')}
         onClickAll={e=>selectAllTerms('post_tag')}
         onClickNone={e=>selectNoTerms('post_tag')}
-        active={activeSlugs.includes('tags')}
+        active={openFilterSlugs.includes('tags')}
       >
         <FilterTerms
         items={tagFeatures}
@@ -144,7 +143,7 @@ const Filters = (props) => {
         onClick={e=>handleSectionClick('areas')}
         onClickAll={e=>selectAllAreas()}
         onClickNone={e=>selectNoAreas()}
-        active={activeSlugs.includes('areas')}
+        active={openFilterSlugs.includes('areas')}
       >
         <FilterAreas/>
       </FilterSection>
