@@ -149,28 +149,8 @@ const Map = (props) => {
             mapboxMap.addSource(sourceId,sourceData);
           }
 
-
-          let allLayers = [];
-
-          //conform input data
-          for (var key in mapData.layers) {
-            //conform data for mapbox layers
-            const layerData = {
-              ...mapData.layers[key],
-              id:key
-            }
-            allLayers.push(layerData);
-          }
-
-          //get basemap layer (we need to inject the rasters between the basemap and the other layers)
-          const baseMapLayer = allLayers.find(layer => layer.id === 'basemap');
-
-          //move basemap at the very beginning of the array (should show BELOW the rasters)
-          allLayers = allLayers.filter(item => item !== baseMapLayer);
-          allLayers.unshift(baseMapLayer);
-
           //init mapbox layers
-          allLayers.forEach(layer => {
+          (mapData.layers || []).forEach(layer => {
             mapboxMap.addLayer(layer);
             DEBUG && console.log("ADD LAYER",layer.id,layer);
           })
