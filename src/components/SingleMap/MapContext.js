@@ -304,118 +304,6 @@ export function MapProvider({children}){
 		setLayersDisabled(newDisabled);
 	}
 
-	const zoomOnFeatures = features => {
-
-		//get the area to zoom to; given a set (or a single) feature.
-		const getZoomCircle = features => {
-
-			let selectionBbox = undefined;
-			let selectionPolygon = undefined;
-
-			//force array
-			if ( !Array.isArray(features) ){
-				features = [features];
-			}
-
-			//multiple features
-			if ( features.length > 1 ){
-				console.log("MARK MULTIPLE-FEATURE SELECTION",features);
-				const collection = {
-			    "type": "FeatureCollection",
-			    "features":features
-				};
-				selectionBbox = turf.bbox(collection);
-				selectionPolygon = turf.bboxPolygon(selectionBbox);
-				selectionPolygon = bboxToCircle(selectionBbox);
-			}else{
-				const feature = features[0];
-				const type = feature.geometry?.type;
-
-				switch(type){
-					case 'Point':
-
-						//TOUFIX URGENT ONLY VISIBLE FEATURES
-						const creationFeatures = mapData?.sources.creations?.data.features || [];
-					  const handlesFeatures = mapData?.sources.annotationPolygons?.data.features || [];
-					  const allPoints = creationFeatures.concat(handlesFeatures);
-
-						//get this feature within the new array
-
-						const sortedByDistance = sortFeaturesByDistance(feature.geometry,allPoints)
-						.filter(obj=>obj.distance!==0) //remove current point
-						.map(obj=>obj.feature)
-
-						//get closest feature
-						const closestFeature = sortedByDistance[0];
-
-						//get radius (distance between the closest features)
-						var radius = turf.distance(feature.geometry,closestFeature.geometry);
-
-						const collection = {
-					    "type": "FeatureCollection",
-					    "features":[feature,closestFeature]
-						};
-						selectionBbox = turf.bbox(collection);
-						selectionPolygon = turf.circle(feature.geometry, radius);
-
-					break;
-					case 'Polygon':
-
-						selectionBbox = turf.bbox(feature);
-						selectionPolygon = bboxToCircle(selectionBbox);
-
-					break;
-				}
-
-			}
-
-			return selectionPolygon;
-
-		}
-
-		const zoomCircle = getZoomCircle(features);
-
-		const showSelectionPolygon = selectionPolygon => {
-			try {
-				mapboxMap.removeLayer("selectionBox");
-				mapboxMap.removeSource("selectionFeatures");
-			}
-			catch(err) {
-				//alert("Error!");
-			}
-
-			mapboxMap.addSource('selectionFeatures',{
-				'type': 'geojson',
-				'data': selectionPolygon
-			})
-
-			mapboxMap.addLayer({
-				'id': 'selectionBox',
-				'type': 'fill',
-				'source': 'selectionFeatures', // reference the data source
-				'layout': {},
-				'paint': {
-					'fill-color': '#FF0000', // blue color fill
-					'fill-opacity': 0.1
-				}
-			});
-		}
-
-		if (DEBUG){
-			showSelectionPolygon(zoomCircle);
-		}
-
-		//https://docs.mapbox.com/mapbox-gl-js/api/map/#map#fitbounds
-		mapboxMap.fitBounds(
-			turf.bbox(zoomCircle),
-			{
-				padding:50,
-				maxZoom:16
-			}
-		);
-
-	}
-
 	const filterInTermId = termId => {
 		const term = getMapTermById(termId);
 		if (!term) return false;
@@ -904,7 +792,6 @@ export function MapProvider({children}){
 		selectNoAreas,
 	  toggleIsolateFormat,
 		toggleIsolateArea,
-	  zoomOnFeatures,
 	  featuresFilter,
 	  layersDisabled,
 	  toggleMapLayer,
