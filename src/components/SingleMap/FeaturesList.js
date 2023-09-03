@@ -23,7 +23,7 @@ const FeaturesList = props => {
   const {mapPostId,mapPostSlug} = useParams();
 
   const [mapCenter,setMapCenter] = useState();
-  const [features,setFeatures] = useState();
+  const [featureList,setFeatureList] = useState();
   const scrollRefs = useRef([]);
 
   const sortFeatures = features => {
@@ -75,19 +75,19 @@ const FeaturesList = props => {
     //sort
     sourceFeatures = sortFeatures(sourceFeatures);
 
-    setFeatures(sourceFeatures);
+    setFeatureList(sourceFeatures);
 
   },[mapRenderedFeatures,mapCenter,sortMarkerBy])
 
 
   useEffect(()=>{
-    if (features === undefined) return;
+    if (featureList === undefined) return;
     // Populate scrollable refs
-    scrollRefs.current = [...Array(features.length).keys()].map(
+    scrollRefs.current = [...Array(featureList.length).keys()].map(
       (_, i) => scrollRefs.current[i] ?? createRef()
     );
 
-  },[features])
+  },[featureList])
 
   useEffect(()=>{
 
@@ -112,7 +112,7 @@ const FeaturesList = props => {
 
       //using a feature ID, get its index in the filtered features array.
       const getListIndex = feature_id => {
-        let index = (features || []).findIndex(feature => feature.properties.id === feature_id);
+        let index = (featureList || []).findIndex(feature => feature.properties.id === feature_id);
         return (index !== -1) ? index : undefined;
       }
 
@@ -167,11 +167,11 @@ const FeaturesList = props => {
   return(
     <>
     {
-      (features || []).length ?
+      (featureList || []).length ?
       <ul id="features-list">
 
         {
-          features.map((feature,k) => {
+          featureList.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
