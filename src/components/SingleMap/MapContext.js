@@ -22,8 +22,6 @@ export function MapProvider({children}){
 
 	const [mapRenderedFeatures,setMapRenderedFeatures] = useState();
 
-	const [annotationsLayerIds,setAnnotationsLayerIds] = useState();
-
 	const [activeFeature,setActiveFeature] = useState();
 	const prevActiveFeature = useRef();
 
@@ -38,22 +36,6 @@ export function MapProvider({children}){
   const [disabledFormatIds,setDisabledFormatIds] = useState([]);
 
   const [openFilterSlugs,setOpenFilterSlugs] = useState([]);
-
-
-	const getHandlesByAnnotationPolygonId = feature_id => {
-		const sourceCollection = mapData?.sources.annotations.data.features || [];
-    const handleFeatures = sourceCollection.filter(feature => feature.properties.id === feature_id);
-		return handleFeatures;
-	}
-
-	const getAnnotationPolygonByHandle = handleFeature => {
-		if (!handleFeature){
-			throw "Missing 'handleFeature' parameter.";
-		}
-		const sourceCollection = mapData?.sources.annotationPolygons?.data.features;
-		const polygonId = handleFeature.properties.id;
-		return sourceCollection.find(feature => feature.properties.id === polygonId);
-	}
 
 	//find the ID of the source for a feature
 	const getFeatureSourceKey = feature => {
@@ -291,17 +273,8 @@ export function MapProvider({children}){
 
 		if (!bool) {
 			newDisabled.push(layerId);
-			if (layerId === 'annotations'){
-				newDisabled = newDisabled.concat(annotationsLayerIds);//also exclude raster layers
-				newDisabled = newDisabled.concat(['annotationsFill','annotationsStroke']);
-			}
-
     }else{
       newDisabled.splice(index, 1);
-			if (layerId === 'annotations'){
-				newDisabled = newDisabled.filter(x => !annotationsLayerIds.includes(x));//also include raster layers
-				newDisabled = newDisabled.filter(x => !['annotationsFill','annotationsStroke'].includes(x));
-			}
     }
 
 		setLayersDisabled(newDisabled);
@@ -558,93 +531,63 @@ export function MapProvider({children}){
 
 	},[activeFeature])
 
-	useEffect(()=>{
-		if (annotationsLayerIds === undefined) return;
-		const layerIds = annotationsLayerIds || [];
-		DEBUG && console.log("ALL MAP RASTERS INITIALIZED",layerIds.length);
-	},[annotationsLayerIds])
+	const getCategoriesFromSlugs = slugs => {
+		slugs = maybeDecodeJson(slugs);
+		slugs = [...new Set(slugs||[])];
+		return slugs.map(slug=>{
+			return mapCategories().find(item => item.slug === slug);
+		})
+	}
 
-	//filter features that have a minzoom property
-	/*
-	useEffect(()=>{
-    if (maphasInit===undefined) return;
+	const getTagsFromSlugs = slugs => {
 
-		const computeZoomFilter = () => {
-			const currentZoom = Math.floor(mapboxMap.getZoom());
-			//const zoomFilter = ["==", ["number",["get", "minzoom"]], 10];
-			const zoomFilter = ["has",["get", "minzoom"]];
-			setZoomFilter(zoomFilter);
-		}
+		slugs = maybeDecodeJson(slugs);
+		slugs = [...new Set(slugs||[])];
+		return slugs.map(slug=>{
+			return mapTags().find(item => item.slug === slug);
+		})
+	}
 
-		computeZoomFilter();
+	const getFeaturesTags = features => {
+	  let slugs = [];
 
-		//update zoom filter
-    mapboxMap.on('moveend', (e) => {
-			computeZoomFilter();
-    });
+	  (features || []).forEach(feature => {
+			const terms = maybeDecodeJson(feature.properties.tags) || [];
+	    slugs = slugs.concat(terms);
+	  });
 
+		slugs = [...new Set(slugs)];
+	  return getTagsFromSlugs(slugs);
+	}
 
-  },[maphasInit])
+	const getFeaturesCategories = features => {
+	  let slugs = [];
 
-		*/
+	  (features || []).forEach(feature => {
+			const terms = maybeDecodeJson(feature.properties.categories) || [];
+	    slugs = slugs.concat(terms);
+	  });
 
-		const getCategoriesFromSlugs = slugs => {
-			slugs = maybeDecodeJson(slugs);
-			slugs = [...new Set(slugs||[])];
-			return slugs.map(slug=>{
-				return mapCategories().find(item => item.slug === slug);
-			})
-		}
+		slugs = [...new Set(slugs)];
+	  return getCategoriesFromSlugs(slugs);
+	}
 
-		const getTagsFromSlugs = slugs => {
+	const getFeaturesFormats = features => {
+		let slugs = [];
 
-			slugs = maybeDecodeJson(slugs);
-			slugs = [...new Set(slugs||[])];
-			return slugs.map(slug=>{
-				return mapTags().find(item => item.slug === slug);
-			})
-		}
+	  (features || []).forEach(feature => {
+	    slugs = slugs.concat(feature.properties.format);
+	  });
 
-		const getFeaturesTags = features => {
-		  let slugs = [];
+		slugs = [...new Set(slugs)];
+		return slugs;
 
-		  (features || []).forEach(feature => {
-				const terms = maybeDecodeJson(feature.properties.tags) || [];
-		    slugs = slugs.concat(terms);
-		  });
+	}
 
-			slugs = [...new Set(slugs)];
-		  return getTagsFromSlugs(slugs);
-		}
-
-		const getFeaturesCategories = features => {
-		  let slugs = [];
-
-		  (features || []).forEach(feature => {
-				const terms = maybeDecodeJson(feature.properties.categories) || [];
-		    slugs = slugs.concat(terms);
-		  });
-
-			slugs = [...new Set(slugs)];
-		  return getCategoriesFromSlugs(slugs);
-		}
-
-		const getFeaturesFormats = features => {
-			let slugs = [];
-
-		  (features || []).forEach(feature => {
-		    slugs = slugs.concat(feature.properties.format);
-		  });
-
-			slugs = [...new Set(slugs)];
-			return slugs;
-
-		}
-
-		const updateRenderedFeatures = () => {
-			const newRenderedFeatures = mapboxMap.queryRenderedFeatures();
-			setMapRenderedFeatures(newRenderedFeatures);
-		};
+	const updateRenderedFeatures = () => {
+		const newRenderedFeatures = mapboxMap.queryRenderedFeatures();
+		setMapRenderedFeatures(newRenderedFeatures);
+	};
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -656,14 +599,12 @@ export function MapProvider({children}){
 	  setMapboxMap,
 	  mapHasInit,
 	  setMapHasInit,
-	  getAnnotationPolygonByHandle,
 	  activeFeature,
 	  setActiveFeature,
 	  sortMarkerBy,
 	  setSortMarkerBy,
 		setIsolationFilter,
 	  setMapFeatureState,
-	  getHandlesByAnnotationPolygonId,
 	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
 		disabledTermIds,
@@ -686,8 +627,6 @@ export function MapProvider({children}){
 	  featuresFilter,
 	  layersDisabled,
 	  toggleMapLayer,
-	  annotationsLayerIds,
-	  setAnnotationsLayerIds,
 		mapFeatureCollection,
 		mapRenderedFeatures,
 		updateRenderedFeatures,

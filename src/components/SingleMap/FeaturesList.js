@@ -15,8 +15,7 @@ const FeaturesList = props => {
     mapRenderedFeatures,
     sortMarkerBy,
     setMapFeatureState,
-    activeFeature,
-    getAnnotationPolygonByHandle
+    activeFeature
   } = useMap();
 
   const navigate = useNavigate();
