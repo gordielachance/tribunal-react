@@ -3,7 +3,7 @@ import {getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
-const MapSettingsAreas = props => {
+const FilterAreas = props => {
 
   const {
     mapAreaCollection,
@@ -54,4 +54,4 @@ const MapSettingsAreas = props => {
   )
 }
 
-export default MapSettingsAreas
+export default FilterAreas

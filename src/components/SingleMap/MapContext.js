@@ -29,16 +29,13 @@ export function MapProvider({children}){
 
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
 
-	const [termsFilter,setTermsFilter] = useState();
-	const [formatsFilter,setFormatsFilter] = useState();
-	const [areaFilter,setAreaFilter] = useState();
   const [featuresFilter,setFeaturesFilter] = useState();
 	const [isolationFilter,setIsolationFilter] = useState();
 
   const [disabledTermIds,setDisabledTermIds] = useState([]);
 	const [disabledAreaIds,setDisabledAreaIds] = useState([]);
 	const [layersDisabled,setLayersDisabled] = useState([]);
-  const [disabledFormats,setDisabledFormats] = useState([]);
+  const [disabledFormatIds,setDisabledFormatIds] = useState([]);
 
 	const getHandlesByAnnotationPolygonId = feature_id => {
 		const sourceCollection = mapData?.sources.annotations.data.features || [];
@@ -209,20 +206,8 @@ export function MapProvider({children}){
 
   const toggleIsolateTermId = (termId,bool) => {
 
-		const buildFilter = termId => {
-
-			const term = getMapTermById(termId);
-			if (!term) return false;
-
-			const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
-			if (!propertyName) return;
-
-			return ['in',term.slug,['get', propertyName]];
-
-		}
-
 		if (bool){
-			const filter = buildFilter(termId);
+			const filter = filterInTermId(termId);
 			setIsolationFilter(filter);
 		}else{
 			setIsolationFilter();
@@ -246,12 +231,8 @@ export function MapProvider({children}){
 
 	const toggleIsolateFormat = (slug,bool) => {
 
-		const buildFilter = slug => {
-			return ['in', ['get', 'format'], ['literal', slug]];
-	  }
-
 		if (bool){
-			const filter = buildFilter(slug);
+			const filter = filterInFormat(slug);
 			setIsolationFilter(filter);
 		}else{
 			setIsolationFilter();
@@ -260,11 +241,11 @@ export function MapProvider({children}){
   }
 
 	const selectAllFormats = () => {
-		setDisabledFormats();
+		setDisabledFormatIds();
 	}
 
 	const selectNoFormats = () => {
-		setDisabledFormats(WP_FORMATS);
+		setDisabledFormatIds(WP_FORMATS);
 	}
 
 	const filterFeaturesByFormat = (features,slug) => {
@@ -282,12 +263,10 @@ export function MapProvider({children}){
 		setMapFeatureState(feature,'hover',bool);
 
 		//area isolation filter
-		const buildFilter = feature => {
-			return ['within', feature];
-	  }
+
 
 		if (bool){
-			const filter = buildFilter(feature);
+			const filter = filterWithinArea(feature);
 			setIsolationFilter(filter);
 		}else{
 			setIsolationFilter();
@@ -435,6 +414,86 @@ export function MapProvider({children}){
 			}
 		);
 
+	}
+
+	const filterInTermId = termId => {
+		const term = getMapTermById(termId);
+		if (!term) return false;
+
+		const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
+		if (!propertyName) return;
+
+		return ['in',term.slug,['get', propertyName]];
+
+	}
+
+	const filterExcludeTermIds = termIds => {
+
+		if ( (termIds || []).length === 0) return;
+
+		const filters = termIds.map(itemId=>{
+			return filterInTermId(itemId)
+		})
+
+		let filter = ['any'].concat(filters);
+		filter = ['!',filter];//exclude all
+		return filter;
+
+	}
+
+	const filterInFormat = slug => {
+		return ['in', ['get', 'format'], ['literal', slug]];
+	}
+
+	const filterExcludeFormats = slugs => {
+		if ( (slugs || []).length === 0) return;
+
+		const filters = slugs.map(slug=>{
+			return filterInFormat(slug)
+		})
+
+		let filter = ['any'].concat(filters);
+		filter = ['!',filter];//exclude all
+		return filter;
+	}
+
+	const filterWithinAreaId = areaId => {
+		const feature = getMapAreaById(areaId);
+		return filterWithinArea(feature);
+	}
+
+	const filterWithinArea = feature => {
+		return ['within', feature];
+	}
+
+	const filterExcludeAreaIds = areaIds => {
+		if ( (areaIds || []).length === 0) return;
+
+		const filters = areaIds.map(itemId=>{
+			return filterWithinAreaId(itemId)
+		})
+
+		let filter = ['any'].concat(filters);
+		filter = ['!',filter];//exclude all
+		return filter;
+
+	}
+
+	const filterFeatures = (disabledTermIds,disabledAreaIds,disabledFormatIds) => {
+
+		let filters = [
+			filterExcludeTermIds(disabledTermIds),
+			filterExcludeAreaIds(disabledAreaIds),
+			filterExcludeFormats(disabledFormatIds),
+		]
+
+		filters = filters.filter(function(filter) {
+			return filter !== undefined;
+		});
+
+		//no filters
+		if ( (filters || []).length === 0) return;
+		return ['all'].concat(filters);
 	}
 
 	//clean map data input
@@ -604,7 +663,7 @@ export function MapProvider({children}){
 
 	},[rawMapData])
 
-	//build features formats filter
+	//INIT
   useEffect(()=>{
 		if (!mapHasInit) return;
 		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
@@ -626,126 +685,26 @@ export function MapProvider({children}){
 
   },[mapHasInit])
 
-	//build features term filter
+	//features global filter
   useEffect(()=>{
-
-		const disabledTerms = (disabledTermIds || []).map(matchId=>{
-			return getMapTermById(matchId);
-		});
-
-    const buildFilter = terms => {
-
-      if ( (terms || []).length === 0) return;
-
-			const termFilters = (terms || []).map(term=>{
-				const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
-				if (propertyName){
-					return ['in',term.slug,['get', propertyName]];
-				}
-		 	})
-
-      return ['any'].concat(termFilters);
-
-    }
-
-    let filter = buildFilter(disabledTerms);
-
-    if (filter){//exclude all
-      filter = ['!',filter];
-    }
-
-		DEBUG && console.info("SET TERMS FILTERS",filter);
-
-    setTermsFilter(filter);
-  },[disabledTermIds])
-
-	//build features term filter
-  useEffect(()=>{
-
-		const buildFilter = areaIds => {
-
-      if ( (areaIds || []).length === 0) return;
-
-			const areaFilters = (areaIds || []).map(areaId=>{
-				const feature = getMapAreaById(areaId);
-				return ['within', feature];
-		 	})
-
-      return ['any'].concat(areaFilters);
-
-    }
-
-    let filter = buildFilter(disabledAreaIds);
-
-    if (filter){//exclude all
-      filter = ['!',filter];
-    }
-
-    setAreaFilter(filter);
-  },[disabledAreaIds])
-
-  //build features formats filter
-  useEffect(()=>{
-
-		console.info("DISABLED FORMATS",disabledFormats);
-
-    const buildFilter = formats => {
-
-      //no formats set
-      if ( (formats || []).length === 0) return;
-
-      return ['in', ['get', 'format'], ['literal', formats]];
-
-    }
-
-    let filter = buildFilter(disabledFormats);
-
-    if (filter){//exclude all
-      filter = ['!',filter];
-    }
-
-    setFormatsFilter(filter);
-  },[disabledFormats])
-
-
-	//set global features filters
-  useEffect(()=>{
-
-    const filters = [
-      termsFilter,
-      formatsFilter,
-			areaFilter,
-			isolationFilter
-    ]
-
-    const buildFilter = filters => {
-
-      filters = filters.filter(function(filter) {
-        return filter !== undefined;
-      });
-
-      //no filters
-      if ( (filters || []).length === 0) return;
-      return ['all'].concat(filters);
-    }
-
-    const filter = buildFilter(filters);
+    const filter = filterFeatures(disabledTermIds,disabledAreaIds,disabledFormatIds);
     setFeaturesFilter(filter);
+  },[disabledTermIds,disabledAreaIds,disabledFormatIds])
 
-  },[termsFilter,formatsFilter,areaFilter,isolationFilter])
-
-  //set global marker filters
+  //set global feature filters
   useEffect(()=>{
     if (mapboxMap === undefined) return;
-    DEBUG && console.log("RUN FEATURES FILTER",featuresFilter);
 
-		const layers = ['features'];
+		if (isolationFilter){
+			DEBUG && console.log("FEATURES ISOLATION FILTER",isolationFilter);
+			mapboxMap.setFilter('features',isolationFilter);
+		}else{
+			DEBUG && console.log("FEATURES GLOBAL FILTER",featuresFilter);
+			mapboxMap.setFilter('features',featuresFilter);
+		}
 
-		layers.forEach(layerId=>{
-      mapboxMap.setFilter(layerId,featuresFilter);
-    })
 
-  },[featuresFilter])
+  },[featuresFilter,isolationFilter])
 
 	useEffect(()=>{
 		if (!mapHasInit) return;
@@ -935,8 +894,8 @@ export function MapProvider({children}){
 		selectNoTerms,
 		selectSoloTermId,
 	  toggleIsolateTermId,
-		disabledFormats,
-	  setDisabledFormats,
+		disabledFormatIds,
+	  setDisabledFormatIds,
 		selectAllFormats,
 		selectNoFormats,
 		disabledAreaIds,

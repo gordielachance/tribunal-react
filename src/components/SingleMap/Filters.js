@@ -1,8 +1,8 @@
 import React,{useState}  from "react";
 import { Accordion,Icon } from 'semantic-ui-react';
-import MapSettingsTerms from "./mapSettingsTerms";
-import MapSettingsFormats from "./MapSettingsFormats";
-import MapSettingsAreas from "./MapSettingsAreas";
+import FilterTerms from "./FilterTerms";
+import FilterFormats from "./FilterFormats";
+import FilterAreas from "./FilterAreas";
 import MapSettingsSort from "./MapSettingsSort";
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
@@ -35,7 +35,7 @@ const FilterSection = props => {
   )
 }
 
-const MapSettings = (props) => {
+const Filters = (props) => {
 
   const {
     mapFeatureCollection,
@@ -89,7 +89,7 @@ const MapSettings = (props) => {
         onClickNone={e=>selectNoTerms('category')}
         active={activeSlugs.includes('categories')}
       >
-        <MapSettingsTerms
+        <FilterTerms
         items={mapCategories}
         renderedItems={renderedCategories}
         />
@@ -110,7 +110,7 @@ const MapSettings = (props) => {
         onClickNone={e=>selectNoFormats()}
         active={activeSlugs.includes('disciplines')}
       >
-        <MapSettingsFormats
+        <FilterFormats
         items={mapFormats}
         renderedItems={renderedFormats}
         />
@@ -126,7 +126,7 @@ const MapSettings = (props) => {
         onClickNone={e=>selectNoTerms('post_tag')}
         active={activeSlugs.includes('tags')}
       >
-        <MapSettingsTerms
+        <FilterTerms
         items={mapTags}
         renderedItems={renderedTags}
         />
@@ -141,11 +141,11 @@ const MapSettings = (props) => {
         onClickNone={e=>selectNoAreas()}
         active={activeSlugs.includes('areas')}
       >
-        <MapSettingsAreas/>
+        <FilterAreas/>
       </FilterSection>
     }
     </Accordion>
   );
 }
 
-export default MapSettings
+export default Filters

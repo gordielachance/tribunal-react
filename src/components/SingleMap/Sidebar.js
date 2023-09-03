@@ -4,16 +4,16 @@ import { Icon,Menu,Loader,Dimmer } from 'semantic-ui-react';
 
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
-import MapSettings from "./MapSettings";
+import Filters from "./Filters";
 import FeaturesList from "./FeaturesList";
 import {TdpLogoLink} from "./MapPost";
 import PageMenu from "../PageMenu";
-import './MapSidebar.scss';
+import './Sidebar.scss';
 
 import {DEBUG} from "../../Constants";
 
 
-const MapSidebar = (props) => {
+const Sidebar = (props) => {
 
   const {mobileScreen} = useApp();
 
@@ -90,10 +90,10 @@ const MapSidebar = (props) => {
                   Index
                 </Menu.Item>
                 <Menu.Item
-                  id="map-menu-settings"
+                  id="map-menu-filters"
                   name='Filtres'
-                  active={section === 'settings'}
-                  onClick={e=>setSection('settings')}
+                  active={section === 'filters'}
+                  onClick={e=>setSection('filters')}
                 >
                   <Icon name="setting"/>
                   Filtres
@@ -102,8 +102,8 @@ const MapSidebar = (props) => {
             </div>
             <div id="map-sections">
               {
-                (section === 'settings') &&
-                <MapSettings
+                (section === 'filters') &&
+                <Filters
                 sortBy={props.sortMarkerBy}
                 onSortBy={props.onSortBy}
                 />
@@ -130,4 +130,4 @@ const MapSidebar = (props) => {
   );
 }
 
-export default MapSidebar
+export default Sidebar

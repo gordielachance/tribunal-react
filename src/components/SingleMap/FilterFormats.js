@@ -3,12 +3,12 @@ import {getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
-const MapSettingsFormats = props => {
+const FilterFormats = props => {
 
   const {
     mapData,
-    disabledFormats,
-    setDisabledFormats,
+    disabledFormatIds,
+    setDisabledFormatIds,
     toggleIsolateFormat,
     mapRenderedFeatures,
     mapFeatureCollection
@@ -16,7 +16,7 @@ const MapSettingsFormats = props => {
 
   const handleClick = (e,slug) => {
 
-    const newDisabled = [...disabledFormats || []];
+    const newDisabled = [...disabledFormatIds || []];
     const index = newDisabled.indexOf(slug);
 
     if (index > -1) {//exists in array
@@ -25,12 +25,12 @@ const MapSettingsFormats = props => {
       newDisabled.push(slug);
     }
 
-    setDisabledFormats(newDisabled);
+    setDisabledFormatIds(newDisabled);
 
   }
 
   const isDisabled = slug => {
-    return (disabledFormats || []).includes(slug);
+    return (disabledFormatIds || []).includes(slug);
   }
 
   return(
@@ -59,4 +59,4 @@ const MapSettingsFormats = props => {
   )
 }
 
-export default MapSettingsFormats
+export default FilterFormats

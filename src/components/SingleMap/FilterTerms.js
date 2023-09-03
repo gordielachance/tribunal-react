@@ -3,7 +3,7 @@ import { Icon,Popup } from 'semantic-ui-react';
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
-const MapSettingsTerms = props => {
+const FilterTerms = props => {
 
   const {
     mapData,
@@ -51,4 +51,4 @@ const MapSettingsTerms = props => {
   )
 }
 
-export default MapSettingsTerms
+export default FilterTerms

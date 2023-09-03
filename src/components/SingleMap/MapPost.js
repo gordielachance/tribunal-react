@@ -6,7 +6,7 @@ import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
 
 import './Map.scss';
 import WpPostModal from "../WpPostModal";
-import MapSidebar from "./MapSidebar";
+import Sidebar from "./Sidebar";
 import MapLegend from "./MapLegend";
 
 import { useMap } from './MapContext';
@@ -76,7 +76,7 @@ const MapPost = (props) => {
   return (
     <div className="page-content">
 
-      <MapSidebar
+      <Sidebar
       title={props.title}
       id={props.id}
       />
