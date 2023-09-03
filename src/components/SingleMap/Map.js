@@ -60,7 +60,7 @@ const Map = (props) => {
       let hoveredFeature = undefined;
 
       //Update cursors IN
-      map.on('mousemove',['features'], e => {
+      map.on('mousemove',['points'], e => {
         // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
 
@@ -73,7 +73,7 @@ const Map = (props) => {
       });
 
       //Update cursors OUT
-      map.on('mouseleave',['features'], e => {
+      map.on('mouseleave',['points'], e => {
         map.getCanvas().style.cursor = '';
         //Toggle 'hover'
         if(hoveredFeature){
@@ -82,7 +82,7 @@ const Map = (props) => {
       });
 
       //open (add) popup when clicking marker
-      map.on('click',['features'], e => {
+      map.on('click',['points'], e => {
         if (e.features.length === 0) return;
         const feature = e.features[0];
         navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));

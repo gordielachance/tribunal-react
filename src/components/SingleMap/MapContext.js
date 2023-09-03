@@ -585,10 +585,10 @@ export function MapProvider({children}){
 
 		if (isolationFilter){
 			DEBUG && console.log("FEATURES ISOLATION FILTER",isolationFilter);
-			mapboxMap.setFilter('features',isolationFilter);
+			mapboxMap.setFilter('points',isolationFilter);
 		}else{
 			DEBUG && console.log("FEATURES GLOBAL FILTER",featuresFilter);
-			mapboxMap.setFilter('features',featuresFilter);
+			mapboxMap.setFilter('points',featuresFilter);
 		}
 
 

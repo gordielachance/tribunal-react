@@ -50,7 +50,7 @@ const MapSettingsLayers = (props) => {
   } = useMap();
 
   //TOUFIX URGENT WHAT IS IT FOR ?
-  const allowedLayers = ['features'];
+  const allowedLayers = ['points'];
   const initialLayers = mapData?.layers ?
     Object.keys(mapData.layers).map(function(key, index) {
       return key;
