@@ -51,14 +51,17 @@ const Filters = (props) => {
     selectNoAreas
   } = useMap();
 
-  const mapCategories = getFeaturesCategories(mapFeatureCollection());
-  const renderedCategories = getFeaturesCategories(mapRenderedFeatures);
+  const categoryFeatures = getFeaturesCategories(mapFeatureCollection());
+  const renderedCategoryFeatures = getFeaturesCategories(mapRenderedFeatures);
 
-  const mapTags = getFeaturesTags(mapFeatureCollection());
-  const renderedTags = getFeaturesTags(mapRenderedFeatures);
+  const tagFeatures = getFeaturesTags(mapFeatureCollection());
+  const renderedTagFeatures = getFeaturesTags(mapRenderedFeatures);
 
-  const mapFormats = getFeaturesFormats(mapFeatureCollection());
-  const renderedFormats = getFeaturesFormats(mapRenderedFeatures);
+  const formatFeatures = getFeaturesFormats(mapFeatureCollection());
+  const renderedFormatFeatures = getFeaturesFormats(mapRenderedFeatures);
+
+  //const mapAreas = getFeaturesAreas(mapFeatureCollection());
+  //const renderedAreas = getFeaturesAreas(mapRenderedFeatures);
 
   const [activeIndex,setActiveIndex] = useState();
   const [activeSlugs,setActiveSlugs] = useState([]);
@@ -80,7 +83,7 @@ const Filters = (props) => {
   return (
     <Accordion id="map-settings" className="map-section">
     {
-      (mapCategories !== undefined) &&
+      ((categoryFeatures || []).length > 1) &&
       <FilterSection
         label="Catégories"
         index="categories"
@@ -90,8 +93,8 @@ const Filters = (props) => {
         active={activeSlugs.includes('categories')}
       >
         <FilterTerms
-        items={mapCategories}
-        renderedItems={renderedCategories}
+        items={categoryFeatures}
+        renderedItems={renderedCategoryFeatures}
         />
       </FilterSection>
     }
@@ -102,6 +105,7 @@ const Filters = (props) => {
               */
     }
     {
+      ((formatFeatures || []).length > 1) &&
       <FilterSection
         label="Disciplines"
         index="disciplines"
@@ -111,13 +115,13 @@ const Filters = (props) => {
         active={activeSlugs.includes('disciplines')}
       >
         <FilterFormats
-        items={mapFormats}
-        renderedItems={renderedFormats}
+        items={formatFeatures}
+        renderedItems={renderedFormatFeatures}
         />
       </FilterSection>
     }
     {
-      (mapTags !== undefined) &&
+      ((tagFeatures || []).length > 1) &&
       <FilterSection
         label="Tags"
         index="tags"
@@ -127,12 +131,13 @@ const Filters = (props) => {
         active={activeSlugs.includes('tags')}
       >
         <FilterTerms
-        items={mapTags}
-        renderedItems={renderedTags}
+        items={tagFeatures}
+        renderedItems={renderedTagFeatures}
         />
       </FilterSection>
     }
     {
+      //TOUFIX STATEMENT((areaFeatures || []).length > 1) &&
       <FilterSection
         label="Zones"
         index="areas"
