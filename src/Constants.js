@@ -22,6 +22,29 @@ const getWpIframeUrl = url => {
   return url.href;
 }
 
+//relationship between WP taxonomies and feature properties
+export const taxonomiesMap = {
+  post_tag:'tags',
+  category:'categories',
+  tdp_format:'formats'
+}
+export const getTaxonomyFromPropertyName = name => {
+  for (const taxonomy in taxonomiesMap) {
+    if (taxonomiesMap.hasOwnProperty(taxonomy) && taxonomiesMap[taxonomy] === name) {
+      return taxonomy;
+    }
+  }
+  return null;
+}
+export const getPropertyNameFromTaxonomy = taxonomy => {
+  for (const prop in taxonomiesMap) {
+    if (taxonomiesMap.hasOwnProperty(prop) && prop === taxonomy) {
+      return taxonomiesMap[prop];
+    }
+  }
+  return null;
+}
+
 export const getWpIframePostUrl = post_id => {
   if (post_id === undefined) return;
   const url = getWpIframeUrl(WP_URL + '/?p=' + post_id);

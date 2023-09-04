@@ -1,7 +1,7 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {DEBUG,maybeDecodeJson} from "../../Constants";
+import {DEBUG,maybeDecodeJson,getPropertyNameFromTaxonomy} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import * as turf from "@turf/turf";
 
@@ -69,7 +69,7 @@ export function MapProvider({children}){
 		const term = getMapTermById(termId);
 		if (!term) return false;
 
-		const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
+		const propertyName = getPropertyNameFromTaxonomy(term.taxonomy);
 		if (!propertyName) return false;
 
 		return (features || []).filter(feature=>{
@@ -100,20 +100,6 @@ export function MapProvider({children}){
 
   }
 	*/
-
-	const getFeaturePropertyNameForTaxonomy = taxonomy => {
-		switch(taxonomy){
-			case 'post_tag':
-				return 'tags';
-			break;
-			case 'category':
-				return 'categories';
-			break;
-			case 'tdp_format':
-				return 'formats';
-			break;
-		}
-	}
 
 	const getMapTermById = id => {
 		return (mapData.terms || []).find(item => id === item.term_id);
@@ -272,7 +258,7 @@ export function MapProvider({children}){
 		const term = getMapTermById(termId);
 		if (!term) return false;
 
-		const propertyName = getFeaturePropertyNameForTaxonomy(term.taxonomy);
+		const propertyName = getPropertyNameFromTaxonomy(term.taxonomy);
 		if (!propertyName) return;
 
 		return ['in',term.slug,['get', propertyName]];
@@ -356,21 +342,9 @@ export function MapProvider({children}){
 		return mapData?.sources?.areas.data.features || [];
 	}
 
-	const mapTags = () => {
+	const getTerms = taxonomy => {
 		const terms = mapData?.terms || [];
-		const items = terms.filter(term=>term.taxonomy === 'post_tag');
-		return items;
-	}
-
-	const mapCategories = () => {
-		const terms = mapData?.terms || [];
-		const items = terms.filter(term=>term.taxonomy === 'category');
-		return items;
-	}
-
-	const mapFormats = () => {
-		const terms = mapData?.terms || [];
-		const items = terms.filter(term=>term.taxonomy === 'tdp_format');
+		const items = terms.filter(term=>term.taxonomy === taxonomy);
 		return items;
 	}
 
@@ -381,7 +355,7 @@ export function MapProvider({children}){
 
 	const getFeaturesByTerm = (taxonomy,slug) => {
 		if (!slug) return;
-		const propName = getFeaturePropertyNameForTaxonomy(taxonomy);
+		const propName = getPropertyNameFromTaxonomy(taxonomy);
 		if (!propName) return;
 	  return (mapFeatureCollection() || []).filter(feature => feature.properties[propName].includes(slug) );
 	}
@@ -468,68 +442,28 @@ export function MapProvider({children}){
 
 	},[activeFeature])
 
-	const getCategoriesFromSlugs = slugs => {
+	const getTermsFromSlugs = (taxonomy,slugs) => {
 		slugs = maybeDecodeJson(slugs);
 		slugs = [...new Set(slugs||[])];
 		return slugs.map(slug=>{
-			return mapCategories().find(item => item.slug === slug);
+			return getTerms(taxonomy).find(item => item.slug === slug);
 		})
 	}
 
-	const getTagsFromSlugs = slugs => {
-
-		slugs = maybeDecodeJson(slugs);
-		slugs = [...new Set(slugs||[])];
-		return slugs.map(slug=>{
-			return mapTags().find(item => item.slug === slug);
-		})
-	}
-
-	const getFormatsFromSlugs = slugs => {
-
-		slugs = maybeDecodeJson(slugs);
-		slugs = [...new Set(slugs||[])];
-		return slugs.map(slug=>{
-			return mapFormats().find(item => item.slug === slug);
-		})
-	}
-
-	const getFeaturesTags = features => {
+	const getTermFeatures = (taxonomy,features) => {
 	  let slugs = [];
 
+		const propName = getPropertyNameFromTaxonomy(taxonomy);
+		if (!propName) return;
+
 	  (features || []).forEach(feature => {
-			const terms = maybeDecodeJson(feature.properties.tags) || [];
+			const terms = maybeDecodeJson(feature.properties[propName]) || [];
 	    slugs = slugs.concat(terms);
 	  });
 
 		slugs = [...new Set(slugs)];
-	  return getTagsFromSlugs(slugs);
+	  return getTermsFromSlugs(taxonomy,slugs);
 	}
-
-	const getFeaturesCategories = features => {
-	  let slugs = [];
-
-	  (features || []).forEach(feature => {
-			const terms = maybeDecodeJson(feature.properties.categories) || [];
-	    slugs = slugs.concat(terms);
-	  });
-
-		slugs = [...new Set(slugs)];
-	  return getCategoriesFromSlugs(slugs);
-	}
-
-	const getFeaturesFormats = features => {
-		let slugs = [];
-
-	  (features || []).forEach(feature => {
-			const terms = maybeDecodeJson(feature.properties.formats) || [];
-	    slugs = slugs.concat(terms);
-	  });
-
-		slugs = [...new Set(slugs)];
-	  return getFormatsFromSlugs(slugs);
-	}
-
 
 	const getPointsPostIds = () => {
 		if (!mapboxMap.current) return null;
@@ -680,16 +614,9 @@ export function MapProvider({children}){
 		mapFeatureCollection,
 		featuresList,
 		updateFeaturesList,
-		mapTags,
-		mapCategories,
-		mapFormats,
 		mapAreaCollection,
-		getCategoriesFromSlugs,
-		getTagsFromSlugs,
-		getFormatsFromSlugs,
-		getFeaturesTags,
-		getFeaturesCategories,
-		getFeaturesFormats,
+		getTermsFromSlugs,
+		getTermFeatures,
 		openFilterSlugs,
 		setOpenFilterSlugs,
 		getPointByPostId,
@@ -697,7 +624,6 @@ export function MapProvider({children}){
 		getMapUrl,
 		getPointUrl,
 		getPostUrl,
-		getFeaturesByFormat,
 		getFeaturesByTerm,
 		getFeaturesByAreaId
 	};

@@ -28,11 +28,11 @@ const TermLabel = props => {
 
 const FeatureTags = (props) => {
 
-  const {getTagsFromSlugs,categories,getCategoriesFromSlugs,getFormatsFromSlugs} = useMap();
+  const {getTermsFromSlugs} = useMap();
 
-  const featureTags = getTagsFromSlugs(props.tags);
-  const featureCategories = getCategoriesFromSlugs(props.categories);
-  const featureFormats = getFormatsFromSlugs(props.formats);
+  const featureTags = getTermsFromSlugs('post_tag',props.tags);
+  const featureCategories = getTermsFromSlugs('category',props.categories);
+  const featureFormats = getTermsFromSlugs('tdp_format',props.formats);
 
   return (
 

@@ -39,9 +39,7 @@ const Filters = (props) => {
   const {
     mapFeatureCollection,
     featuresList,
-    getFeaturesTags,
-    getFeaturesCategories,
-    getFeaturesFormats,
+    getTermFeatures,
     selectAllTerms,
     selectNoTerms,
     selectAllAreas,
@@ -50,14 +48,14 @@ const Filters = (props) => {
     setOpenFilterSlugs
   } = useMap();
 
-  const categoryFeatures = getFeaturesCategories(mapFeatureCollection());
-  const renderedCategoryFeatures = getFeaturesCategories(featuresList);
+  const categoryFeatures = getTermFeatures('category',mapFeatureCollection());
+  const renderedCategoryFeatures = getTermFeatures('category',featuresList);
 
-  const tagFeatures = getFeaturesTags(mapFeatureCollection());
-  const renderedTagFeatures = getFeaturesTags(featuresList);
+  const tagFeatures = getTermFeatures('post_tag',mapFeatureCollection());
+  const renderedTagFeatures = getTermFeatures('post_tag',featuresList);
 
-  const formatFeatures = getFeaturesFormats(mapFeatureCollection());
-  const renderedFormatFeatures = getFeaturesFormats(featuresList);
+  const formatFeatures = getTermFeatures('tdp_format',mapFeatureCollection());
+  const renderedFormatFeatures = getTermFeatures('tdp_format',featuresList);
 
   //const mapAreas = getFeaturesAreas(mapFeatureCollection());
   //const renderedAreas = getFeaturesAreas(featuresList);

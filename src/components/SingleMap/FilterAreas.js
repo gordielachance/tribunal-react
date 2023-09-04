@@ -1,5 +1,4 @@
 import { Icon } from 'semantic-ui-react';
-import {getFormatText,getFeaturesFormats} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
