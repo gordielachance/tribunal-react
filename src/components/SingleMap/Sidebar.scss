@@ -199,6 +199,10 @@ ul#features-list,
     .filter-item-header{
       @extend .clickable;
     }
+    .filter-item-count{
+      margin-left:.25em;
+      opacity:.6;
+    }
     .filter-item-description{
       opacity:.5;
     }

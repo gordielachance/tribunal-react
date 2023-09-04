@@ -213,11 +213,6 @@ export const getFeaturesFormats = features => {
 
 }
 
-export const getIdsForFormat = (format,features) => {
-  features = (features || []).filter(feature => format === feature.properties.format);
-  return features.map(feature=>feature.properties.id);
-}
-
 export const bboxToCircle = bbox => {
 
   //bbox to polygon

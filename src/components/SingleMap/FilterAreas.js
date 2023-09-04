@@ -1,5 +1,5 @@
 import { Icon } from 'semantic-ui-react';
-import {getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
+import {getFormatText,getFeaturesFormats} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
@@ -44,8 +44,7 @@ const FilterAreas = props => {
             onClick={e=>{handleClick(e,feature)}}
             onMouseEnter={e=>toggleIsolateArea(feature,true)}
             onMouseLeave={e=>toggleIsolateArea(feature,false)}
-            //renderedCount={renderedFeatureCount}
-            //totalCount={allFeatureCount}
+            //count={allFeatureCount}
             />
           )
         })

@@ -1,5 +1,5 @@
 import { Icon,Label } from 'semantic-ui-react';
-import {getFormatText,getFeaturesFormats,getIdsForFormat} from "./MapFunctions";
+import {getFormatText,getFeaturesFormats} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
@@ -11,7 +11,7 @@ const FilterFormats = props => {
     setDisabledFormatIds,
     toggleIsolateFormat,
     featuresList,
-    mapFeatureCollection
+    getFeaturesByFormat
   } = useMap();
 
   const handleClick = (e,slug) => {
@@ -37,8 +37,7 @@ const FilterFormats = props => {
     <ul className="map-filter-formats">
       {
         (props.items||[]).map(function(slug,k) {
-          const allFeatureCount = getIdsForFormat(slug,mapFeatureCollection()).length;
-          const renderedFeatureCount = getIdsForFormat(slug,featuresList).length;
+          const allFeatureCount = getFeaturesByFormat(slug).length;
           const formatText = getFormatText(slug);
 
           return(
@@ -49,8 +48,7 @@ const FilterFormats = props => {
             onClick={e=>{handleClick(e,slug)}}
             onMouseEnter={e=>toggleIsolateFormat(slug,true)}
             onMouseLeave={e=>toggleIsolateFormat(slug,false)}
-            renderedCount={renderedFeatureCount}
-            totalCount={allFeatureCount}
+            count={allFeatureCount}
             />
           )
         })

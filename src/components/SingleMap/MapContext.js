@@ -373,6 +373,18 @@ export function MapProvider({children}){
 		return items;
 	}
 
+	const getFeaturesByFormat = format => {
+		if (!format) return;
+	  return (mapFeatureCollection() || []).filter(feature => feature.properties.format === format);
+	}
+
+	const getFeaturesByTerm = (taxonomy,slug) => {
+		if (!slug) return;
+		const propName = getFeaturePropertyNameForTaxonomy(taxonomy);
+		if (!propName) return;
+	  return (mapFeatureCollection() || []).filter(feature => feature.properties[propName].includes(slug) );
+	}
+
 	//INIT
   useEffect(()=>{
 		if (!mapHasInit) return;
@@ -530,7 +542,7 @@ export function MapProvider({children}){
 	    const clusterId = feature.properties.cluster_id;
 
 	    // Get the leaves for the current cluster
-	    const postIds = await getPostIdsByClusterId(clusterId); // Assuming you have this function
+	    const postIds = await getPostIdsByClusterId(clusterId);
 
 	    // Check if the postId exists in the leaves
 	    if (postIds.includes(postId)) {
@@ -669,7 +681,9 @@ export function MapProvider({children}){
 		getClusterByPostId,
 		getMapUrl,
 		getPointUrl,
-		getPostUrl
+		getPostUrl,
+		getFeaturesByFormat,
+		getFeaturesByTerm
 	};
 
   return (

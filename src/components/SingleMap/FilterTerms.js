@@ -10,7 +10,8 @@ const FilterTerms = props => {
     disabledTermIds,
     toggleIsolateTermId,
     toggleTermId,
-    selectSoloTermId
+    selectSoloTermId,
+    getFeaturesByTerm
   } = useMap();
 
   const handleClick = (e,term) => {
@@ -32,6 +33,8 @@ const FilterTerms = props => {
       {
         (props.items||[]).map(function(term,k) {
 
+          const allFeatureCount = getFeaturesByTerm(term.taxonomy,term.slug).length;
+
           return(
             <FilterItem
             key={k}
@@ -41,8 +44,7 @@ const FilterTerms = props => {
             onClick={e=>handleClick(e,term)}
             onMouseEnter={e=>toggleIsolateTermId(term.term_id,true)}
             onMouseLeave={e=>toggleIsolateTermId(term.term_id,false)}
-            //renderedCount={renderedFeatureCount}
-            //totalCount={allFeatureCount}
+            count={allFeatureCount}
             />
           )
         })

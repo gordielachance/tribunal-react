@@ -93,7 +93,6 @@ const Filters = (props) => {
       >
         <FilterTerms
         items={categoryFeatures}
-        renderedItems={renderedCategoryFeatures}
         />
       </FilterSection>
     }
@@ -115,7 +114,6 @@ const Filters = (props) => {
       >
         <FilterFormats
         items={formatFeatures}
-        renderedItems={renderedFormatFeatures}
         />
       </FilterSection>
     }
@@ -131,7 +129,6 @@ const Filters = (props) => {
       >
         <FilterTerms
         items={tagFeatures}
-        renderedItems={renderedTagFeatures}
         />
       </FilterSection>
     }

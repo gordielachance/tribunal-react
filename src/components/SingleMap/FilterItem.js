@@ -15,8 +15,8 @@ const FilterItem = props => {
         {props.label}
         </span>
         {
-          ((props.renderedCount !== undefined) && (props.totalCount !== undefined)) &&
-          <Label className="filter-item-count">{props.renderedCount}/{props.totalCount}</Label>
+          ((props.count !== undefined)) &&
+          <span className="filter-item-count">{props.count}</span>
         }
       </div>
       {
