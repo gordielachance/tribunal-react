@@ -104,6 +104,7 @@ const Map = (props) => {
         const clusterId = features[0].properties.cluster_id;
         const source = map.getSource('points'); // Replace 'your-source-id' with your source ID
 
+        //zoom on cluster
         source.getClusterExpansionZoom(clusterId, (error, zoom) => {
           if (error) return;
 

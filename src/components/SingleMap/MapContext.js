@@ -503,22 +503,56 @@ export function MapProvider({children}){
 
 	}
 
-	const updateFeaturesList = map => {
-		if (map === undefined) return;
+	// Get the post IDs related to a cluster using a Promise
+	const getPostIdsForCluster = async clusterId => {
+	  return new Promise((resolve, reject) => {
 
-		const onLayers = ['points'];
-		const features = map.queryRenderedFeatures({ layers: onLayers });
+	    mapboxMap.current.getSource("points").getClusterLeaves(clusterId, Infinity, 0, (error, leaves) => {
+	      if (error) {
+	        reject(error);
+	        return;
+	      }
 
-		//get IDs of rendered points
-    const featureIds = (features || [])
-    .map(feature => feature.properties.id);
+	      // Extract individual point IDs from the leaves
+	      const ids = leaves.map((leaf) => leaf.properties.id);
+	      resolve(ids);
+	    });
+	  });
+	};
 
-    //filter source data
-    let data = mapFeatureCollection()
-    .filter(feature => featureIds.includes(feature.properties.id))
+	const updateFeaturesList = async (map) => {
+	  if (!map) return;
 
-		DEBUG && console.info("UPDATED FEATURES LIST");
-		setFeaturesList(data);
+	  // Get IDs of rendered points
+	  const getPointIds = () => {
+	    const features = map.queryRenderedFeatures({ layers: ['points'] });
+	    return (features || []).map((feature) => feature.properties.id);
+	  };
+
+	  const getPointIdsFromClusters = async () => {
+	    const features = map.queryRenderedFeatures({ layers: ['point-clusters'] });
+
+	    const clusterIds = (features || []).map((feature) => feature.properties.cluster_id);
+
+	    const clusterPostIds = await Promise.all(
+	      clusterIds.map(async (clusterId) => {
+	        return await getPostIdsForCluster(clusterId); // Assuming getPostIdsForCluster is defined
+	      })
+	    );
+
+	    // Flatten the array of arrays
+	    return clusterPostIds.flat();
+	  };
+
+	  let postIds = getPointIds();
+	  const clusterPostIds = await getPointIdsFromClusters();
+	  postIds = postIds.concat(clusterPostIds);
+
+	  // Filter source data
+	  let data = mapFeatureCollection().filter((feature) => postIds.includes(feature.properties.id));
+
+	  DEBUG && console.info("UPDATED FEATURES LIST");
+	  setFeaturesList(data);
 	};
 
 	// NOTE: you *might* need to memoize this value
