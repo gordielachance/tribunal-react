@@ -59,9 +59,9 @@ const MapSettingsLayers = (props) => {
 
   const layerIds = allowedLayers.filter( layerId => initialLayers.includes(layerId) );
   const activeLayerIds = layerIds.filter(layerId => {
-    const layerExists = mapboxMap.getLayer(layerId) !== undefined;
+    const layerExists = mapboxMap.current.getLayer(layerId) !== undefined;
     if (!layerExists) return false;
-    return (mapboxMap.getLayoutProperty(layerId, 'visibility') !== 'none')
+    return (mapboxMap.current.getLayoutProperty(layerId, 'visibility') !== 'none')
   })
 
   return(

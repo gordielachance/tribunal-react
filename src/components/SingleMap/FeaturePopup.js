@@ -6,7 +6,7 @@ import { FeatureCard } from "./FeatureCard";
 import { useMap } from './MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
-import {DEBUG,getFeatureUrl,getMapUrl} from "../../Constants";
+import {DEBUG,getFeaturePostUrl,getMapUrl} from "../../Constants";
 
 const FeaturePopup = props => {
 
@@ -31,19 +31,19 @@ const FeaturePopup = props => {
   const handleOpen = e => {
     DEBUG && console.log("HANDLE OPEN",feature.properties.id);
     e.preventDefault();
-    const feature_url = getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id);
+    const feature_url = getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id);
     navigate(feature_url + '/full');
   }
 
   //on init
   useEffect(() => {
-    if (mapboxMap === undefined) return;
+    if (mapboxMap.current === undefined) return;
 
     if (feature){
       popup
       .setLngLat(feature.geometry.coordinates)
       .setDOMContent(popupRef.current)
-      .addTo(mapboxMap)
+      .addTo(mapboxMap.current)
       .on('close',handleClose)
     }
 

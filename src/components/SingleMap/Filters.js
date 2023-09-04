@@ -39,7 +39,7 @@ const Filters = (props) => {
 
   const {
     mapFeatureCollection,
-    mapRenderedFeatures,
+    featuresList,
     getFeaturesTags,
     getFeaturesCategories,
     getFeaturesFormats,
@@ -54,16 +54,16 @@ const Filters = (props) => {
   } = useMap();
 
   const categoryFeatures = getFeaturesCategories(mapFeatureCollection());
-  const renderedCategoryFeatures = getFeaturesCategories(mapRenderedFeatures);
+  const renderedCategoryFeatures = getFeaturesCategories(featuresList);
 
   const tagFeatures = getFeaturesTags(mapFeatureCollection());
-  const renderedTagFeatures = getFeaturesTags(mapRenderedFeatures);
+  const renderedTagFeatures = getFeaturesTags(featuresList);
 
   const formatFeatures = getFeaturesFormats(mapFeatureCollection());
-  const renderedFormatFeatures = getFeaturesFormats(mapRenderedFeatures);
+  const renderedFormatFeatures = getFeaturesFormats(featuresList);
 
   //const mapAreas = getFeaturesAreas(mapFeatureCollection());
-  //const renderedAreas = getFeaturesAreas(mapRenderedFeatures);
+  //const renderedAreas = getFeaturesAreas(featuresList);
 
   const handleSectionClick = slug => {
     const index = openFilterSlugs.indexOf(slug);

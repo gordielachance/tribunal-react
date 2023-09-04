@@ -7,25 +7,11 @@ import {getFormatIcon,getFormatText} from "./MapFunctions";
 
 const TermLabel = props => {
 
-  const {
-    toggleIsolateTermId
-  } = useMap();
-
-  const handleHover = e => {
-    toggleIsolateTermId(props.id,true);
-  }
-
-  const handleOut = e => {
-    toggleIsolateTermId(props.id,false);
-  }
-
   const tagNameEl = <span>{props.label}</span>;
 
 
   return(
     <Label
-    onMouseEnter={handleHover}
-    onMouseLeave={handleOut}
     className={props.className}
     >
       {props.icon &&

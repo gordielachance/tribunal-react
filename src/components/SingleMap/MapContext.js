@@ -14,13 +14,16 @@ import {
 const MapContext = createContext();
 
 export function MapProvider({children}){
-	const [mapboxMap,setMapboxMap] = useState();
-	const [mapHasInit,setMapHasInit] = useState(false);
+
 	const mapContainerRef = useRef();
-	const [rawMapData,setRawMapData] = useState(); //map data before it is cleaned
+	const mapCluster = useRef();
+	const mapboxMap = useRef();
+
+	const [mapHasInit,setMapHasInit] = useState(false);
+
 	const [mapData,setMapData] = useState();
 
-	const [mapRenderedFeatures,setMapRenderedFeatures] = useState();
+	const [featuresList,setFeaturesList] = useState();
 
 	const [activeFeature,setActiveFeature] = useState();
 	const prevActiveFeature = useRef();
@@ -54,17 +57,8 @@ export function MapProvider({children}){
 		})
 	}
 
-	const setMapFeatureState = (feature,key,value) => {
-
-		if (!feature) return;
-
-		const sourceKey = feature.properties.source;
-		const featureId = feature.properties.id;
-
-		if (sourceKey === undefined) return;
-		if (featureId === undefined) return;
-
-		mapboxMap.setFeatureState(
+	const setMapFeatureState = (sourceKey,featureId,key,value) => {
+		mapboxMap.current.setFeatureState(
 			{ source: sourceKey, id: featureId },
 			{ [key]: value }
 		);
@@ -91,7 +85,7 @@ export function MapProvider({children}){
     const matches = filterFeaturesByTermId(mapFeatureCollection(),termId);
 
     (matches || []).forEach(feature=>{
-      setMapFeatureState(feature,'hover',bool);
+      setMapFeatureState('points',feature.id,'hover',bool);
     })
 
   }
@@ -101,7 +95,7 @@ export function MapProvider({children}){
     const matches = filterFeaturesByFormat(mapFeatureCollection(),slug);
 
     matches.forEach(feature=>{
-      setMapFeatureState(feature,'hover',bool);
+      setMapFeatureState('points',feature.id,'hover',bool);
     })
 
   }
@@ -245,10 +239,9 @@ export function MapProvider({children}){
 		if(areaId===undefined) return;
 
 		//hover area
-		setMapFeatureState(feature,'hover',bool);
+		setMapFeatureState('areas',areaId,'hover',bool);
 
 		//area isolation filter
-
 
 		if (bool){
 			const filter = filterWithinArea(feature);
@@ -360,74 +353,6 @@ export function MapProvider({children}){
 		return ['all'].concat(filters);
 	}
 
-	//clean map data input
-	useEffect(()=>{
-		if (rawMapData === undefined) return;
-
-		DEBUG && console.log("RAW MAP DATA",{...rawMapData})
-
-		let newMapData = {...rawMapData};
-
-		const getFeatureSourceKeys = () => {
-			const sources = newMapData.sources || {};
-			return Object.keys(sources).filter(sourceKey => isFeaturesSource(sources[sourceKey]) );
-		}
-
-    //clean sources
-		getFeatureSourceKeys().forEach(sourceKey => {
-
-			//remove features that do not have geometry
-			const filterFeaturesWithGeometry = features => {
-				features = (features || []);
-				const noGeometryFeatures = features.filter(feature => !feature?.geometry);
-				if (noGeometryFeatures.length){
-					DEBUG && console.error("removing "+noGeometryFeatures.length+"/"+features.length+" source features that have no geometry",sourceKey,noGeometryFeatures);
-					features = features.filter(x => !noGeometryFeatures.includes(x));
-				}
-				return features;
-			}
-
-			newMapData.sources[sourceKey].data.features = filterFeaturesWithGeometry(newMapData.sources[sourceKey].data.features);
-
-			//remove features that have no IDs
-			const filterFeaturesWithIDs = features => {
-				features = (features || []);
-				const noIDfeatures = features.filter(feature => (feature?.id !== undefined));
-				if (noIDfeatures.length){
-					DEBUG && console.error("removing "+noIDfeatures.length+"/"+features.length+" source features that have no IDs",sourceKey,noIDfeatures);
-					features = features.filter(x => !noIDfeatures.includes(x));
-				}
-				return features;
-			}
-
-			newMapData.sources[sourceKey].data.features = filterFeaturesWithIDs(newMapData.sources[sourceKey].data.features);
-
-		})
-
-
-		//append source Ids
-
-		getFeatureSourceKeys().forEach(sourceKey => {
-
-			const setSourceIds = features => {
-				features = (features || []);
-				const newFeatures = [...features];
-				newFeatures.forEach(feature =>{
-					feature.properties.source = sourceKey;
-				})
-				return newFeatures;
-			}
-
-			newMapData.sources[sourceKey].data.features = setSourceIds(newMapData.sources[sourceKey].data.features);
-
-		})
-
-		DEBUG && console.log("***MAP DATA***",newMapData);
-
-		setMapData(newMapData);
-
-	},[rawMapData])
-
 	const mapFeatureCollection = () => {
 		return mapData?.sources?.points.data.features || [];
 	}
@@ -459,7 +384,7 @@ export function MapProvider({children}){
   useEffect(()=>{
 		if (!mapHasInit) return;
 
-		const hiddenLayers = mapboxMap.getStyle().layers.filter(layer => {
+		const hiddenLayers = mapboxMap.current.getStyle().layers.filter(layer => {
 	    return (layer.layout?.visibility === 'none')
 	  })
 
@@ -479,35 +404,29 @@ export function MapProvider({children}){
 
   //set global feature filters
   useEffect(()=>{
-    if (mapboxMap === undefined) return;
+    if (mapboxMap.current === undefined) return;
 
-		mapboxMap.setFilter('points',featuresFilter);
-
-		/* TOUFIX / ISOLATION / BREAKS WITH FEATURES LIST
+		mapboxMap.current.setFilter('points',featuresFilter);
 
 		if (isolationFilter){
 			DEBUG && console.log("FEATURES ISOLATION FILTER",isolationFilter);
-			mapboxMap.setFilter('points',isolationFilter);
+			mapboxMap.current.setFilter('points',isolationFilter);
 		}else{
 			DEBUG && console.log("FEATURES GLOBAL FILTER",featuresFilter);
-
 		}
-		*/
-
-
 
   },[featuresFilter,isolationFilter])
 
 	useEffect(()=>{
 		if (!mapHasInit) return;
 
-		const allLayerIds = mapboxMap.getStyle().layers.map(layer=>layer.id);
+		const allLayerIds = mapboxMap.current.getStyle().layers.map(layer=>layer.id);
 		const disabledIds = (layersDisabled || []);
 
 		allLayerIds.forEach(layerId => {
 			const isVisible = !disabledIds.includes(layerId);
 			const value = isVisible ? 'visible' : 'none';
-		  mapboxMap.setLayoutProperty(layerId, 'visibility', value);
+		  mapboxMap.current.setLayoutProperty(layerId, 'visibility', value);
 		})
 
   },[layersDisabled])
@@ -518,13 +437,13 @@ export function MapProvider({children}){
 
 		//hide old
 		if (prevActiveFeature.current){
-			setMapFeatureState(prevActiveFeature.current,'active',false);
+			setMapFeatureState('points',prevActiveFeature.current.id,'active',false);
 		}
 
 		//show new
 		if (activeFeature){
 			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
-			setMapFeatureState(activeFeature,'active',true);
+			setMapFeatureState('points',prevActiveFeature.current.id,'active',true);
 		}
 
 		prevActiveFeature.current = activeFeature;
@@ -584,26 +503,38 @@ export function MapProvider({children}){
 
 	}
 
-	const updateRenderedFeatures = () => {
-		const newRenderedFeatures = mapboxMap.queryRenderedFeatures();
-		setMapRenderedFeatures(newRenderedFeatures);
+	const updateFeaturesList = map => {
+		if (map === undefined) return;
+
+		const onLayers = ['points'];
+		const features = map.queryRenderedFeatures({ layers: onLayers });
+
+		//get IDs of rendered points
+    const featureIds = (features || [])
+    .map(feature => feature.properties.id);
+
+    //filter source data
+    let data = mapFeatureCollection()
+    .filter(feature => featureIds.includes(feature.properties.id))
+
+		DEBUG && console.info("UPDATED FEATURES LIST");
+		setFeaturesList(data);
 	};
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
 	const value = {
-	  mapContainerRef,
+		setMapData,
 	  mapData,
-	  setRawMapData,
-	  mapboxMap,
-	  setMapboxMap,
+	  mapContainerRef,
+		mapboxMap,
+		mapCluster,
 	  mapHasInit,
 	  setMapHasInit,
 	  activeFeature,
 	  setActiveFeature,
 	  sortMarkerBy,
 	  setSortMarkerBy,
-		setIsolationFilter,
 	  setMapFeatureState,
 	  filterFeaturesByTermId,
 	  filterFeaturesByFormat,
@@ -628,8 +559,8 @@ export function MapProvider({children}){
 	  layersDisabled,
 	  toggleMapLayer,
 		mapFeatureCollection,
-		mapRenderedFeatures,
-		updateRenderedFeatures,
+		featuresList,
+		updateFeaturesList,
 		mapTags,
 		mapCategories,
 		mapAreaCollection,

@@ -34,7 +34,7 @@ export const getMapUrl = (id,slug) => {
 }
 
 
-export const getFeatureUrl = (mapId,mapSlug,sourceId,featureId) => {
+export const getFeaturePostUrl = (mapId,mapSlug,sourceId,featureId) => {
   const mapUrl = getMapUrl(mapId,mapSlug);
   let url = mapUrl + `/${sourceId}/${featureId}`;
   return url;

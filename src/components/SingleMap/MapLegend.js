@@ -6,14 +6,14 @@ const MapLegend = (props) => {
 
   const {
     mapHasInit,
-    mapRenderedFeatures
+    featuresList
   } = useMap();
 
   return(
     <div id="mapBottom">
       {
         mapHasInit &&
-        <MapSettingsLayers features={mapRenderedFeatures}/>
+        <MapSettingsLayers features={featuresList}/>
       }
       <p id="mapBottomText">
       Le <Link to="/">Tribunal des Préjugés</Link> est un terrain d’expérimentations et d’échanges pour interroger et chercher de nouveaux outils de déconstruction des préjugés liés au territoire.

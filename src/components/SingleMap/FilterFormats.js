@@ -10,7 +10,7 @@ const FilterFormats = props => {
     disabledFormatIds,
     setDisabledFormatIds,
     toggleIsolateFormat,
-    mapRenderedFeatures,
+    featuresList,
     mapFeatureCollection
   } = useMap();
 
@@ -38,7 +38,7 @@ const FilterFormats = props => {
       {
         (props.items||[]).map(function(slug,k) {
           const allFeatureCount = getIdsForFormat(slug,mapFeatureCollection()).length;
-          const renderedFeatureCount = getIdsForFormat(slug,mapRenderedFeatures).length;
+          const renderedFeatureCount = getIdsForFormat(slug,featuresList).length;
           const formatText = getFormatText(slug);
 
           return(

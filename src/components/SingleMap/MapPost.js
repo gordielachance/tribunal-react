@@ -1,7 +1,7 @@
 import React, { useEffect,useState }  from "react";
 import { Link,useParams,useNavigate } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
+import {DEBUG,ImageLogo,getFeaturePostUrl} from "../../Constants";
 
 
 import './Map.scss';
@@ -25,7 +25,7 @@ export const TdpLogoLink = props => {
 const MapPost = (props) => {
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled,updateRenderedFeatures} = useMap();
+  const {mapboxMap,mapData,setMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled} = useMap();
   const [loading,setLoading] = useState(true);
 
   const [modalPostId,setModalPostId] = useState();
@@ -33,7 +33,7 @@ const MapPost = (props) => {
   //initialize map data
   useEffect(()=>{
     if (props.mapData === undefined) return;
-    setRawMapData(props.mapData);
+    setMapData(props.mapData);
   },[props.mapData]);
 
   useEffect(()=>{
@@ -54,7 +54,7 @@ const MapPost = (props) => {
   },[activeFeature,urlFeatureAction])
 
   const handleCloseModal = () => {
-    const url = getFeatureUrl(mapPostId,mapPostSlug,activeFeature.properties.source,activeFeature.properties.id);
+    const url = getFeaturePostUrl(mapPostId,mapPostSlug,activeFeature.source,activeFeature.properties.id);
     navigate(url);
   }
 

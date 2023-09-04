@@ -1,7 +1,7 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
-import {DEBUG,getMapUrl,getFeatureUrl} from "../../Constants";
+import {DEBUG,getMapUrl,getFeaturePostUrl} from "../../Constants";
 import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
 import { useMap } from './MapContext';
 import { FeatureCard } from "./FeatureCard";
@@ -12,17 +12,18 @@ const FeaturesList = props => {
     mapboxMap,
     mapHasInit,
     mapFeatureCollection,
-    mapRenderedFeatures,
+    featuresList,
     sortMarkerBy,
     setMapFeatureState,
-    activeFeature
+    activeFeature,
+    updateFeaturesList
   } = useMap();
 
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug} = useParams();
 
   const [mapCenter,setMapCenter] = useState();
-  const [featureList,setFeatureList] = useState();
+  const [sortedFeatures,setSortedFeatures] = useState();
   const scrollRefs = useRef([]);
 
   const sortFeatures = features => {
@@ -54,50 +55,56 @@ const FeaturesList = props => {
 
   }
 
+  //listen to changes on the map and update features list
+  useEffect(() => {
+    // Define the listener function
+    const updateList = () => {
+      updateFeaturesList(mapboxMap.current);
+    };
+
+    if (mapboxMap.current) {
+      mapboxMap.current.on('idle', updateList);
+    }
+
+    // Return the cleanup function to remove the listener
+    return () => {
+      if (mapboxMap.current) {
+        mapboxMap.current.off('idle', updateList);
+      }
+    };
+  }, [mapboxMap.current]);
+
   useEffect(()=>{
 
-    if (mapRenderedFeatures === undefined) return;
-
-    //get IDs of rendered points
-    const renderedPointIds = (mapRenderedFeatures || [])
-    .filter(feature => {
-      const isPoint = feature.properties.source === "points";
-      const postId = feature.properties.post_id;
-      return (isPoint && postId);
-    })
-    .map(feature => feature.properties.id);
-
-    //filter source data
-    let sourceFeatures = mapFeatureCollection()
-    .filter(feature => renderedPointIds.includes(feature.properties.id))
+    if (featuresList === undefined) return;
 
     //sort
-    sourceFeatures = sortFeatures(sourceFeatures);
+    const features = sortFeatures(featuresList);
 
-    setFeatureList(sourceFeatures);
+    setSortedFeatures(features);
 
-  },[mapRenderedFeatures,mapCenter,sortMarkerBy])
+  },[featuresList,mapCenter,sortMarkerBy])
 
 
   useEffect(()=>{
-    if (featureList === undefined) return;
+    if (sortedFeatures === undefined) return;
     // Populate scrollable refs
-    scrollRefs.current = [...Array(featureList.length).keys()].map(
+    scrollRefs.current = [...Array(sortedFeatures.length).keys()].map(
       (_, i) => scrollRefs.current[i] ?? createRef()
     );
 
-  },[featureList])
+  },[sortedFeatures])
 
   useEffect(()=>{
 
     if (!mapHasInit) return;
 
     //on init
-    setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
+    setMapCenter([mapboxMap.current.getCenter().lng,mapboxMap.current.getCenter().lat]);
 
     //When the map is animated
-    mapboxMap.on('moveend', (e) => {
-      setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
+    mapboxMap.current.on('moveend', (e) => {
+      setMapCenter([mapboxMap.current.getCenter().lng,mapboxMap.current.getCenter().lat]);
     });
 
   },[mapHasInit])
@@ -111,7 +118,7 @@ const FeaturesList = props => {
 
       //using a feature ID, get its index in the filtered features array.
       const getListIndex = feature_id => {
-        let index = (featureList || []).findIndex(feature => feature.properties.id === feature_id);
+        let index = (sortedFeatures || []).findIndex(feature => feature.properties.id === feature_id);
         return (index !== -1) ? index : undefined;
       }
 
@@ -149,28 +156,22 @@ const FeaturesList = props => {
       const url = getMapUrl(mapPostId,mapPostSlug);
       navigate(url);
     }else{//set active
-      switch(feature.source){
-        case 'creations':
-          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id) + '/full');
-        break;
-        default:
-          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
-      }
+      navigate(getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id) + '/full');
     }
   }
 
   const toggleHoverFeature = (feature,bool) => {
-    setMapFeatureState(feature,'hover',bool);
+    setMapFeatureState('points',feature.properties.id,'hover',bool);
   }
 
   return(
     <>
     {
-      (featureList || []).length ?
+      (sortedFeatures || []).length ?
       <ul id="features-list">
 
         {
-          featureList.map((feature,k) => {
+          sortedFeatures.map((feature,k) => {
 
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );

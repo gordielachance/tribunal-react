@@ -1,12 +1,13 @@
 import React, { useEffect,useCallback }  from "react";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
+import supercluster from 'supercluster';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as turf from "@turf/turf";
 import { useNavigate,useParams } from 'react-router-dom';
 
 
-import {MAPBOX_TOKEN,DEBUG,getFeatureUrl} from "../../Constants";
+import {MAPBOX_TOKEN,DEBUG,getFeaturePostUrl} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FeaturePopup from "./FeaturePopup";
@@ -24,72 +25,76 @@ const Map = (props) => {
     mapContainerRef,
     mapData,
     mapboxMap,
-    setMapboxMap,
+    mapCluster,
     setMapHasInit,
     setMapFeatureState,
-    featuresFilter,
-    updateRenderedFeatures
+    featuresFilter
   } = useMap();
 
-  const initializeMap = data => {
+  const initMap = map => {
 
-    DEBUG && console.log("INIT MAPBOX MAP",data.map);
-
-    const urlFeature = getUrlFeature();
-
-    if (urlFeature){
-      const featureCenter = urlFeature.geometry.coordinates;
-      DEBUG && console.log("INIT MAPBOX MAP ON FEATURE CENTER",featureCenter);
-      data.map.center = featureCenter;
+    //init mapbox sources
+    for (var sourceId in mapData.sources) {
+      const sourceData = mapData.sources[sourceId];
+      DEBUG && console.log("ADD SOURCE",sourceId,sourceData);
+      map.addSource(sourceId,sourceData);
     }
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    const map = new mapboxgl.Map({
-      ...data.map,
-      container: mapContainerRef.current
-    });
+    //init mapbox layers
+    (mapData.layers || []).forEach(layer => {
+      map.addLayer(layer);
+      DEBUG && console.log("ADD LAYER",layer.id,layer);
+    })
 
-    setMapboxMap(map);
+    // fit to container
+    map.resize();
+
+    // Add search
+    map.addControl(
+      new MapboxGeocoder({
+        accessToken: MAPBOX_TOKEN,
+        mapboxgl: mapboxgl
+      })
+    );
+
+    // Add navigation control (the +/- zoom buttons)
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
   }
 
-  const initMapListeners = map => {
+  const initMapFeatures = map => {
 
-    const initMapFeaturesListeners = () => {
+    let hoveredFeature = undefined;
 
-      let hoveredFeature = undefined;
+    //Update cursors IN
+    map.on('mousemove',['points'], e => {
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
 
-      //Update cursors IN
-      map.on('mousemove',['points'], e => {
-        // Change the cursor style as a UI indicator.
-        map.getCanvas().style.cursor = 'pointer';
+      //Toggle 'hover'
+      hoveredFeature = e.features[0];//first found feature.
+      if(hoveredFeature){
+        setMapFeatureState('points',hoveredFeature.id,'hover',true);
+      }
 
-        //Toggle 'hover'
-        hoveredFeature = e.features[0];//first found feature.
-        if(hoveredFeature){
-          setMapFeatureState(hoveredFeature,'hover',true);
-        }
+    });
 
-      });
+    //Update cursors OUT
+    map.on('mouseleave',['points'], e => {
+      map.getCanvas().style.cursor = '';
+      //Toggle 'hover'
+      if(hoveredFeature){
+        setMapFeatureState('points',hoveredFeature.id,'hover',false);
+      }
+    });
 
-      //Update cursors OUT
-      map.on('mouseleave',['points'], e => {
-        map.getCanvas().style.cursor = '';
-        //Toggle 'hover'
-        if(hoveredFeature){
-          setMapFeatureState(hoveredFeature,'hover',false);
-        }
-      });
-
-      //open (add) popup when clicking point
-      map.on('click',['points'], e => {
-        if (e.features.length === 0) return;
-        const feature = e.features[0];
-        navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
-      });
-
-    }
-
-    initMapFeaturesListeners();
+    //open (add) popup when clicking point
+    map.on('click',['points'], e => {
+      if (e.features.length === 0) return;
+      const feature = e.features[0];
+      console.log("CLICKED FEAT",feature);
+      navigate(getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id));
+    });
 
   }
 
@@ -119,7 +124,7 @@ const Map = (props) => {
     if (urlFeature){
 
       //center on the marker since we need to have it in the viewport
-      mapboxMap.easeTo({
+      mapboxMap.current.easeTo({
         //center: [-75,43],
         center: urlFeature.geometry.coordinates
       })
@@ -128,91 +133,41 @@ const Map = (props) => {
 
   },[mapHasInit,urlSourceId,urlFeatureId]);
 
-  //on data init
-  useEffect(() => {
-    if (mapData === undefined) return;
-    initializeMap(mapData);
-  },[mapData]);
+  //main map init
+  useEffect(()=>{
+    if(mapData === undefined) return;
+    if (!mapboxMap.current) {
 
-  //on map init
-  useEffect(() => {
+      //update map center based on loaded feature
+      const urlFeature = getUrlFeature();
 
-    if (mapboxMap !== undefined){
-
-      if(mapData !== undefined){
-        mapboxMap.on('load', () => {
-
-          //init mapbox sources
-          for (var sourceId in mapData.sources) {
-            const sourceData = mapData.sources[sourceId];
-            DEBUG && console.log("ADD SOURCE",sourceId,sourceData);
-            mapboxMap.addSource(sourceId,sourceData);
-          }
-
-          //init mapbox layers
-          (mapData.layers || []).forEach(layer => {
-            mapboxMap.addLayer(layer);
-            DEBUG && console.log("ADD LAYER",layer.id,layer);
-          })
-
-          //list all layers
-          DEBUG && console.log("ALL MAP LAYERS INITIALIZED",mapboxMap.getStyle().layers.length);
-
-          mapboxMap.resize(); // fit to container
-
-          // Add search
-          mapboxMap.addControl(
-            new MapboxGeocoder({
-              accessToken: MAPBOX_TOKEN,
-              mapboxgl: mapboxgl
-            })
-          );
-
-          // Add navigation control (the +/- zoom buttons)
-          mapboxMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-          initMapListeners(mapboxMap);
-
-          mapboxMap.once('idle',(e)=>{
-            setMapHasInit(true);
-          })
-
-        });
+      if (urlFeature){
+        const featureCenter = urlFeature.geometry.coordinates;
+        DEBUG && console.log("UPDATE MAP CENTER BASED ON FEATURE URL",featureCenter);
+        mapData.map.center = featureCenter;
       }
 
-      mapboxMap.on('moveend', (e) => {
-
-        console.log({
-          'center':[mapboxMap.getCenter().lng.toFixed(4),mapboxMap.getCenter().lat.toFixed(4)],
-          'zoom':mapboxMap.getZoom().toFixed(2),
-          'bounds':mapboxMap.getBounds(),
-        })
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+      mapboxMap.current = new mapboxgl.Map({
+        ...mapData.map,
+        container: mapContainerRef.current
       });
 
-      //when a specific source has been loaded
-      mapboxMap.once('sourcedata', (e) => {
-        if (e.sourceId !== 'markers') return;
-        if (!e.isSourceLoaded) return;
-        console.log("SOURCE DATA LOADED",e.source);
-        const sourceObject = mapboxMap.getSource('markers');
-        console.log("RESOURCE YO",sourceObject);
-        var features = mapboxMap.querySourceFeatures('markers');
-        console.log("FEATURES YO",features);
+      mapCluster.current = new supercluster({
+        radius: 40, // Adjust the clustering radius as needed
+        maxZoom: 15, // Adjust the maximum zoom level
       });
 
-      mapboxMap.on('idle', updateRenderedFeatures);
+      mapboxMap.current.on('load', () => initMap(mapboxMap.current) )
+      mapboxMap.current.on('load', () => initMapFeatures(mapboxMap.current) )
+      mapboxMap.current.once('idle',()=> setMapHasInit(true) )
 
     }
+    console.log("INITIALIZING MAP WITH DATA",mapData.map);
 
-    // Clean up on unmount
-    return () => {
-      if (mapboxMap){
-        mapboxMap.off('idle', updateRenderedFeatures);
-        mapboxMap.remove();
-      }
-    }
+    return () => mapboxMap.current.remove();
 
-  },[mapboxMap]);
+  }, [mapData]);
 
   return (
     <div id="map-container">
