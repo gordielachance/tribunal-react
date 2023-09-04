@@ -599,7 +599,7 @@ export function MapProvider({children}){
 
 	const getPointUrl = (featureId) => {
 	  const mapUrl = getMapUrl();
-	  let url = mapUrl + `/point/${featureId}`;
+	  let url = mapUrl + `/points/${featureId}`;
 	  return url;
 	}
 

@@ -122,29 +122,30 @@ const Map = (props) => {
 
   }
 
-  //set active point from URL
+  //set active feature from current URL
   useEffect(()=>{
 
     if (!mapHasInit) return;
 
-
-    const urlFeature = mapFeatureCollection()
-    .find(feature => feature.properties.post_id === parseInt(urlItemId));
-
-
-    if (urlFeature){
-
-      //center on the marker since we need to have it in the viewport
-      mapboxMap.current.easeTo({
-        //center: [-75,43],
-        center: urlFeature.geometry.coordinates
-      })
-
-      setActiveFeature(urlFeature);
-
+    const getUrlFeature = (type,id) => {
+      id = parseInt(id);
+      switch(type){
+        case 'points':
+          return mapFeatureCollection()
+            .find(feature => feature.properties.id === id);
+        break;
+        case 'posts':
+          return mapFeatureCollection()
+            .find(feature => feature.properties.post_id === id);
+        break;
+      }
     }
 
-  },[mapHasInit,urlItemId]);
+    const urlFeature = getUrlFeature(urlItemType,urlItemId)
+
+    setActiveFeature(urlFeature);
+
+  },[mapHasInit,urlItemType,urlItemId]);
 
   //main map init
   useEffect(()=>{
@@ -179,6 +180,18 @@ const Map = (props) => {
     return () => mapboxMap.current.remove();
 
   }, [mapData]);
+
+  //center on the active feature
+  useEffect(()=>{
+    if (!mapboxMap.current) return;
+    if (activeFeature === undefined) return;
+
+    mapboxMap.current.easeTo({
+      //center: [-75,43],
+      center: activeFeature.geometry.coordinates
+    })
+
+  },[activeFeature])
 
   return (
     <div id="map-container">
