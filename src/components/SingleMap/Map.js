@@ -28,7 +28,8 @@ const Map = (props) => {
     mapCluster,
     setMapHasInit,
     setMapFeatureState,
-    featuresFilter
+    featuresFilter,
+    mapFeatureCollection
   } = useMap();
 
   const initMap = map => {
@@ -94,6 +95,28 @@ const Map = (props) => {
       const feature = e.features[0];
       console.log("CLICKED FEAT",feature);
       navigate(getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id));
+    });
+
+    //zoom on cluster on click
+    map.on('click', 'point-clusters', (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: ['point-clusters'] });
+      if (features.length) {
+        const clusterId = features[0].properties.cluster_id;
+        const source = map.getSource('points'); // Replace 'your-source-id' with your source ID
+
+        source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+          if (error) return;
+
+          // Get the center coordinates of the clicked cluster
+          const coordinates = features[0].geometry.coordinates;
+
+          // Change the map's center and zoom to zoom in on the cluster
+          map.easeTo({
+            center: coordinates,
+            zoom: zoom + 1, // You can adjust this value for the desired zoom level
+          });
+        });
+      }
     });
 
   }
