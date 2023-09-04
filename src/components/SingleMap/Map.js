@@ -1,6 +1,6 @@
 import React, { useEffect,useCallback }  from "react";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
-import supercluster from 'supercluster';
+import Supercluster from 'supercluster';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import * as turf from "@turf/turf";
@@ -102,10 +102,10 @@ const Map = (props) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ['pointClusters'] });
       if (features.length) {
         const clusterId = features[0].properties.cluster_id;
-        const source = map.getSource('points'); // Replace 'your-source-id' with your source ID
+        const clusterSource = map.getSource('points');
 
         //zoom on cluster
-        source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+        clusterSource.getClusterExpansionZoom(clusterId, (error, zoom) => {
           if (error) return;
 
           // Get the center coordinates of the clicked cluster
@@ -165,10 +165,11 @@ const Map = (props) => {
         container: mapContainerRef.current
       });
 
-      mapCluster.current = new supercluster({
+      // Initialize supercluster
+      mapCluster.current = new Supercluster({
         radius: 40, // Adjust the clustering radius as needed
         maxZoom: 15, // Adjust the maximum zoom level
-      });
+      })
 
       mapboxMap.current.on('load', () => initMap(mapboxMap.current) )
       mapboxMap.current.on('load', () => initMapFeatures(mapboxMap.current) )
