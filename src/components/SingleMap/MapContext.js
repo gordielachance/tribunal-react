@@ -580,14 +580,14 @@ export function MapProvider({children}){
 	    return clusterPostIds.flat();
 	  };
 
-	  let postIds = getPointIds();
+	  const pointPosts = getPointIds();
 	  const clusterPostIds = await getPostIdsFromClusters();
-	  postIds = postIds.concat(clusterPostIds);
+	  const postIds = pointPosts.concat(clusterPostIds);
 
 	  // Filter source data
-	  let data = mapFeatureCollection().filter((feature) => postIds.includes(feature.properties.id));
+	  let data = mapFeatureCollection().filter((feature) => postIds.includes(feature.properties.post_id));
 
-	  DEBUG && console.info("UPDATED FEATURES LIST");
+	  DEBUG && console.info("UPDATED FEATURES LIST",data.length);
 	  setFeaturesList(data);
 	};
 
