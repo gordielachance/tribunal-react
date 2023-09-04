@@ -37,7 +37,7 @@ const FilterFormats = props => {
     <ul className="map-filter-formats">
       {
         (props.items||[]).map(function(slug,k) {
-          const allFeatureCount = getFeaturesByFormat(slug).length;
+          const featureCount = (getFeaturesByFormat(slug) || []).length;
           const formatText = getFormatText(slug);
 
           return(
@@ -48,7 +48,7 @@ const FilterFormats = props => {
             onClick={e=>{handleClick(e,slug)}}
             onMouseEnter={e=>toggleIsolateFormat(slug,true)}
             onMouseLeave={e=>toggleIsolateFormat(slug,false)}
-            count={allFeatureCount}
+            count={featureCount}
             />
           )
         })

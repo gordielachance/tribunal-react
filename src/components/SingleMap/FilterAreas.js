@@ -38,7 +38,7 @@ const FilterAreas = props => {
       {
         mapAreaCollection().map(function(feature,k) {
 
-          const allFeatureCount = (getFeaturesByAreaId(feature.properties.id) || []).length;
+          const featureCount = (getFeaturesByAreaId(feature.properties.id) || []).length;
 
           return(
             <FilterItem
@@ -48,7 +48,7 @@ const FilterAreas = props => {
             onClick={e=>{handleClick(e,feature)}}
             onMouseEnter={e=>toggleIsolateArea(feature,true)}
             onMouseLeave={e=>toggleIsolateArea(feature,false)}
-            count={allFeatureCount}
+            count={featureCount}
             />
           )
         })
