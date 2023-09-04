@@ -25,6 +25,7 @@ const Sidebar = (props) => {
 
   const {
     mapboxMap,
+    mapData,
     mapHasInit
   } = useMap();
 
@@ -65,19 +66,17 @@ const Sidebar = (props) => {
         active:   isActive
       })}
       >
-
+        <div id="sidebar-container">
           <div id="sidebar-header">
             <TdpLogoLink/>
             <PageMenu/>
           </div>
-          <Dimmer.Dimmable dimmed={loading} id="sidebar-container">
+          <Dimmer.Dimmable as="div" dimmed={loading} id="sidebar-content">
             <Dimmer active={loading} inverted>
               <Loader />
             </Dimmer>
-            <div id="sidebar-content">
               <div id="map-header">
-                <h3>{props.title}</h3>
-
+                <h3>{mapData?.post.name}</h3>
                 <Menu id="map-menu" pointing secondary>
                   <Menu.Item
                       id="map-menu-index"
@@ -116,8 +115,8 @@ const Sidebar = (props) => {
                     />
                   }
                 </div>
-          </div>
-            </Dimmer.Dimmable>
+          </Dimmer.Dimmable>
+        </div>
         <div className="sidebar-toggle clickable" onClick={e=>{setisActive(!isActive)}}>
           <span>
           {

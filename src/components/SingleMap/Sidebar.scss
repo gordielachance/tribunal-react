@@ -4,7 +4,9 @@
   position: absolute;
   z-index: 5;
   background: white;
-  height: 100%;
+  display:flex;
+  flex-direction: column;
+  height:100vh;
   transition:margin-left .5s, width .5s;
   width:$sidebarWidth;
   padding-right:$sidebarHandleWidth;
@@ -30,17 +32,17 @@
   #sidebar-container {
     padding: .5em;
     transition:padding-bottom .5s;
-
     height:100%;
-    display:flex;
+    position: relative;
+    display: flex;
     flex-direction: column;
     #sidebar-header{
     }
     #sidebar-content{
       display: flex;
       flex-direction: column;
-      height:95%;//TOUFIX
       overflow: hidden;
+      height:100%;
       #map-header{
         margin-bottom:2em;
         text-align:center;
@@ -61,6 +63,7 @@
         }
       }
       #map-sections{
+        flex-grow: 1;
         overflow-y: auto;
         &.mapTransition{
           opacity:.5;
@@ -104,7 +107,9 @@
           }
         }
       }
-
+      #no-features-list{
+        padding:.5em;
+      }
     }
   }
 

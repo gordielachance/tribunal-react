@@ -60,11 +60,6 @@ const MapPost = (props) => {
 
   return (
     <div className="page-content">
-
-      <Sidebar
-      title={props.title}
-      id={props.id}
-      />
       {
         ( modalPostId !== undefined ) &&
         <WpPostModal
@@ -72,7 +67,7 @@ const MapPost = (props) => {
         onClose={handleCloseModal}
         />
       }
-      <TdpLogoLink/>
+      <Sidebar/>
       <MapLegend/>
       <Map/>
     </div>
