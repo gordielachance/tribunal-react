@@ -385,6 +385,11 @@ export function MapProvider({children}){
 	  return (mapFeatureCollection() || []).filter(feature => feature.properties[propName].includes(slug) );
 	}
 
+	const getFeaturesByAreaId = areaId => {
+		if (areaId === undefined) return;
+		return (mapFeatureCollection() || []).filter(feature => feature.properties.areas.includes(areaId) );
+	}
+
 	//INIT
   useEffect(()=>{
 		if (!mapHasInit) return;
@@ -596,7 +601,7 @@ export function MapProvider({children}){
 	  const clusterPostIds = await getClustersPostIds();
 	  let postIds = pointPostIds
 			.concat(clusterPostIds)
-			.sort((a, b) => a - b)//sort for debug purposes
+			.sort((a, b) => a - b)//for debug purposes
 
 		postIds = [...new Set(postIds)];//make unique
 
@@ -683,7 +688,8 @@ export function MapProvider({children}){
 		getPointUrl,
 		getPostUrl,
 		getFeaturesByFormat,
-		getFeaturesByTerm
+		getFeaturesByTerm,
+		getFeaturesByAreaId
 	};
 
   return (

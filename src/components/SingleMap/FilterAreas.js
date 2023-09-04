@@ -9,7 +9,8 @@ const FilterAreas = props => {
     mapAreaCollection,
     toggleIsolateArea,
     disabledAreaIds,
-    setDisabledAreaIds
+    setDisabledAreaIds,
+    getFeaturesByAreaId
   } = useMap();
 
   const handleClick = (e,feature) => {
@@ -36,6 +37,9 @@ const FilterAreas = props => {
     <ul className="map-filter-areas">
       {
         mapAreaCollection().map(function(feature,k) {
+
+          const allFeatureCount = (getFeaturesByAreaId(feature.properties.id) || []).length;
+
           return(
             <FilterItem
             key={k}
@@ -44,7 +48,7 @@ const FilterAreas = props => {
             onClick={e=>{handleClick(e,feature)}}
             onMouseEnter={e=>toggleIsolateArea(feature,true)}
             onMouseLeave={e=>toggleIsolateArea(feature,false)}
-            //count={allFeatureCount}
+            count={allFeatureCount}
             />
           )
         })
