@@ -504,10 +504,10 @@ export function MapProvider({children}){
 	}
 
 
-	const getPointIds = () => {
+	const getPointsPostIds = () => {
 		if (!mapboxMap.current) return null;
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
-		return (features || []).map((feature) => feature.properties.id);
+		return (features || []).map((feature) => feature.properties.post_id);
 	};
 
 	const getPointByPostId = post_id => {
@@ -565,7 +565,7 @@ export function MapProvider({children}){
 	const updateFeaturesList = async (map) => {
 	  if (!map) return;
 
-	  const getPostIdsFromClusters = async () => {
+	  const getClustersPostIds = async () => {
 	    const features = map.queryRenderedFeatures({ layers: ['pointClusters'] });
 
 	    const clusterIds = (features || []).map((feature) => feature.properties.cluster_id);
@@ -580,12 +580,18 @@ export function MapProvider({children}){
 	    return clusterPostIds.flat();
 	  };
 
-	  const pointPosts = getPointIds();
-	  const clusterPostIds = await getPostIdsFromClusters();
-	  const postIds = pointPosts.concat(clusterPostIds);
+	  const pointPostIds = getPointsPostIds();
+	  const clusterPostIds = await getClustersPostIds();
+	  let postIds = pointPostIds
+			.concat(clusterPostIds)
+			.sort((a, b) => a - b)//sort for debug purposes
+
+		postIds = [...new Set(postIds)];//make unique
 
 	  // Filter source data
-	  let data = mapFeatureCollection().filter((feature) => postIds.includes(feature.properties.post_id));
+		const features = mapFeatureCollection();
+	  let data = features
+			.filter((feature) => postIds.includes(feature.properties.post_id));
 
 	  DEBUG && console.info("UPDATED FEATURES LIST",data.length);
 	  setFeaturesList(data);
