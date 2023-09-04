@@ -1,7 +1,6 @@
 import React,{useState}  from "react";
 import { Accordion,Icon } from 'semantic-ui-react';
 import FilterTerms from "./FilterTerms";
-import FilterFormats from "./FilterFormats";
 import FilterAreas from "./FilterAreas";
 import MapSettingsSort from "./MapSettingsSort";
 import { useApp } from '../../AppContext';
@@ -45,8 +44,6 @@ const Filters = (props) => {
     getFeaturesFormats,
     selectAllTerms,
     selectNoTerms,
-    selectAllFormats,
-    selectNoFormats,
     selectAllAreas,
     selectNoAreas,
     openFilterSlugs,
@@ -108,11 +105,11 @@ const Filters = (props) => {
         label="Disciplines"
         index="disciplines"
         onClick={e=>handleSectionClick('disciplines')}
-        onClickAll={e=>selectAllFormats()}
-        onClickNone={e=>selectNoFormats()}
+        onClickAll={e=>selectAllTerms('tdp_format')}
+        onClickNone={e=>selectNoTerms('tdp_format')}
         active={openFilterSlugs.includes('disciplines')}
       >
-        <FilterFormats
+        <FilterTerms
         items={formatFeatures}
         />
       </FilterSection>

@@ -1,7 +1,7 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {DEBUG,WP_FORMATS,maybeDecodeJson} from "../../Constants";
+import {DEBUG,maybeDecodeJson} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import * as turf from "@turf/turf";
 
@@ -108,6 +108,9 @@ export function MapProvider({children}){
 			break;
 			case 'category':
 				return 'categories';
+			break;
+			case 'tdp_format':
+				return 'formats';
 			break;
 		}
 	}
@@ -218,14 +221,6 @@ export function MapProvider({children}){
 		}
 
   }
-
-	const selectAllFormats = () => {
-		setDisabledFormatIds();
-	}
-
-	const selectNoFormats = () => {
-		setDisabledFormatIds(WP_FORMATS);
-	}
 
 	const filterFeaturesByFormat = (features,slug) => {
 		return (features || []).filter(feature=>{
@@ -373,6 +368,12 @@ export function MapProvider({children}){
 		return items;
 	}
 
+	const mapFormats = () => {
+		const terms = mapData?.terms || [];
+		const items = terms.filter(term=>term.taxonomy === 'tdp_format');
+		return items;
+	}
+
 	const getFeaturesByFormat = format => {
 		if (!format) return;
 	  return (mapFeatureCollection() || []).filter(feature => feature.properties.format === format);
@@ -484,6 +485,15 @@ export function MapProvider({children}){
 		})
 	}
 
+	const getFormatsFromSlugs = slugs => {
+
+		slugs = maybeDecodeJson(slugs);
+		slugs = [...new Set(slugs||[])];
+		return slugs.map(slug=>{
+			return mapFormats().find(item => item.slug === slug);
+		})
+	}
+
 	const getFeaturesTags = features => {
 	  let slugs = [];
 
@@ -512,12 +522,12 @@ export function MapProvider({children}){
 		let slugs = [];
 
 	  (features || []).forEach(feature => {
-	    slugs = slugs.concat(feature.properties.format);
+			const terms = maybeDecodeJson(feature.properties.formats) || [];
+	    slugs = slugs.concat(terms);
 	  });
 
 		slugs = [...new Set(slugs)];
-		return slugs;
-
+	  return getFormatsFromSlugs(slugs);
 	}
 
 
@@ -658,8 +668,6 @@ export function MapProvider({children}){
 	  toggleIsolateTermId,
 		disabledFormatIds,
 	  setDisabledFormatIds,
-		selectAllFormats,
-		selectNoFormats,
 		disabledAreaIds,
 	  setDisabledAreaIds,
 		selectAllAreas,
@@ -674,9 +682,11 @@ export function MapProvider({children}){
 		updateFeaturesList,
 		mapTags,
 		mapCategories,
+		mapFormats,
 		mapAreaCollection,
 		getCategoriesFromSlugs,
 		getTagsFromSlugs,
+		getFormatsFromSlugs,
 		getFeaturesTags,
 		getFeaturesCategories,
 		getFeaturesFormats,

@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { Label,Icon,Popup } from 'semantic-ui-react';
 import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
-import {getFormatIcon,getFormatText} from "./MapFunctions";
 
 const TermLabel = props => {
 
@@ -29,20 +28,17 @@ const TermLabel = props => {
 
 const FeatureTags = (props) => {
 
-  const {getTagsFromSlugs,categories,getCategoriesFromSlugs} = useMap();
+  const {getTagsFromSlugs,categories,getCategoriesFromSlugs,getFormatsFromSlugs} = useMap();
 
   const featureTags = getTagsFromSlugs(props.tags);
   const featureCategories = getCategoriesFromSlugs(props.categories);
-
-  const featureFormat = props.format;
-  const formatIcon = featureFormat ? getFormatIcon(featureFormat) : undefined;
-  const formatText = featureFormat ? getFormatText(featureFormat) : undefined;
+  const featureFormats = getFormatsFromSlugs(props.formats);
 
   return (
 
     <>
     {
-      (featureTags || formatText || featureCategories) &&
+      (featureTags || featureFormats || featureCategories) &&
         <ul className="feature-terms feature-meta">
         {
           featureCategories.map((term,k) => {
@@ -55,10 +51,14 @@ const FeatureTags = (props) => {
           })
         }
         {
-          formatText &&
-          <li className="feature-format">
-            <TermLabel label={formatText} icon={formatIcon}/>
-          </li>
+          featureFormats.map((term,k) => {
+
+            return(
+              <li key={k} className="feature-format">
+                <TermLabel id={term.term_id} label={term.name} description={term.description}/>
+              </li>
+            )
+          })
         }
         {
           featureTags.map((term,k) => {
@@ -82,7 +82,6 @@ export const FeatureCard = props => {
 
   const title = feature?.properties?.title;
   const description=  feature?.properties?.excerpt;
-  const format = feature?.properties?.format;
   const color = feature?.properties?.color;
 
   return(
@@ -100,9 +99,9 @@ export const FeatureCard = props => {
           {title}
         </p>
         <FeatureTags
-        tags={feature?.properties?.tags}
-        categories={feature?.properties?.categories}
-        format={format}
+        tags={feature?.properties.tags}
+        categories={feature?.properties.categories}
+        formats={feature?.properties.formats}
         />
 
       </div>
