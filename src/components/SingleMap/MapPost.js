@@ -97,7 +97,7 @@ const MapPost = (props) => {
           data.sources.areas.data.features = areas.filter(area => area.properties.count > 0);
         }
 
-        //this could be done in PHP but it would probably be more difficult.
+        //TOUFIX it would be better to handle all this as Wordpress taxonomies.
         assignAreasToPoints(data);
         assignCountToAreas(data);
         removeEmptyAreas(data);
