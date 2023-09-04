@@ -6,13 +6,12 @@ import { FeatureCard } from "./FeatureCard";
 import { useMap } from './MapContext';
 import { useParams,useNavigate } from 'react-router-dom';
 
-import {DEBUG,getFeaturePostUrl,getMapUrl} from "../../Constants";
+import {DEBUG} from "../../Constants";
 
 const FeaturePopup = props => {
 
   const navigate = useNavigate();
-  const {mapPostSlug,mapPostId} = useParams();
-  const {mapboxMap,activeFeature,setActiveFeature} = useMap();
+  const {mapboxMap,activeFeature,setActiveFeature,getPostUrl,getMapUrl} = useMap();
   const popupRef = useRef();
   const feature = activeFeature;
 
@@ -24,14 +23,14 @@ const FeaturePopup = props => {
 
   const handleClose = () => {
     DEBUG && console.log("CLOSE FEATURE POPUP",feature.properties.id);
-    const url = getMapUrl(mapPostId,mapPostSlug);
+    const url = getMapUrl();
     navigate(url);
   }
 
   const handleOpen = e => {
     DEBUG && console.log("HANDLE OPEN",feature.properties.id);
     e.preventDefault();
-    const feature_url = getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id);
+    const feature_url = getPostUrl(feature.properties.post_id);
     navigate(feature_url + '/full');
   }
 

@@ -1,7 +1,7 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
-import {DEBUG,getMapUrl,getFeaturePostUrl} from "../../Constants";
+import {DEBUG} from "../../Constants";
 import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
 import { useMap } from './MapContext';
 import { FeatureCard } from "./FeatureCard";
@@ -16,7 +16,11 @@ const FeaturesList = props => {
     sortMarkerBy,
     setMapFeatureState,
     activeFeature,
-    updateFeaturesList
+    updateFeaturesList,
+    getPointByPostId,
+    getClusterByPostId,
+    getPostUrl,
+    getMapUrl
   } = useMap();
 
   const navigate = useNavigate();
@@ -150,18 +154,27 @@ const FeaturesList = props => {
 
   }
 
-  const handleClick = feature => {
-
-    if ( activeFeature && (feature.properties.id === activeFeature.properties.id) ){//unset active
-      const url = getMapUrl(mapPostId,mapPostSlug);
-      navigate(url);
-    }else{//set active
-      navigate(getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id) + '/full');
-    }
+  const toggleClickPost = post_id => {
+    navigate(getPostUrl(post_id) + '/full');
   }
 
-  const toggleHoverFeature = (feature,bool) => {
-    setMapFeatureState('points',feature.properties.id,'hover',bool);
+  const toggleHoverPost = async(post_id,bool) => {
+    //hover on 'points' layer
+    const point = getPointByPostId(post_id);
+
+    //get feature on 'points' layer
+
+    if (point){
+      setMapFeatureState('points',point.id,'hover',bool);
+    }else{
+      //hover on 'pointClusters' layer
+      const cluster = await getClusterByPostId(post_id);
+      if (cluster){
+        const clusterId = cluster.properties.cluster_id;
+        //TOUFIX
+      }
+    }
+
   }
 
   return(
@@ -173,14 +186,15 @@ const FeaturesList = props => {
         {
           sortedFeatures.map((feature,k) => {
 
+            const post_id = feature.properties.post_id;
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
 
             return <li
             key={k}
-            onMouseEnter={e=>toggleHoverFeature(feature,true)}
-            onMouseLeave={e=>toggleHoverFeature(feature,false)}
-            onClick={e=>{handleClick(feature)}}
+            onMouseEnter={e=>toggleHoverPost(post_id,true)}
+            onMouseLeave={e=>toggleHoverPost(post_id,false)}
+            onClick={e=>{toggleClickPost(post_id)}}
             className={classNames({
               active:   active
             })}
@@ -195,9 +209,9 @@ const FeaturesList = props => {
               <li
               ref={scrollRefs.current[k]}
               key={"feature-card-"+k}
-              onMouseEnter={e=>toggleHoverFeature(feature,true)}
-              onMouseLeave={e=>toggleHoverFeature(feature,false)}
-              onClick={e=>{handleClick(feature)}}
+              onMouseEnter={e=>toggleHoverPost(feature,true)}
+              onMouseLeave={e=>toggleHoverPost(feature,false)}
+              onClick={e=>{toggleClickPost(feature)}}
 
               >
                 <p className='sorted-value'>{sortValue}</p>

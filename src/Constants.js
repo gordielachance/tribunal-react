@@ -29,17 +29,6 @@ export const getWpIframePostUrl = post_id => {
   return url;
 }
 
-export const getMapUrl = (id,slug) => {
-  return `/cartes/${id}/${slug}`;
-}
-
-
-export const getFeaturePostUrl = (mapId,mapSlug,sourceId,featureId) => {
-  const mapUrl = getMapUrl(mapId,mapSlug);
-  let url = mapUrl + `/${sourceId}/${featureId}`;
-  return url;
-}
-
 //sometime we parse features from mapbox, sometimes from wordpress.
 //It seems that from mapbox, some properties are rendered as strings while it should be objects.
 export function maybeDecodeJson(value){

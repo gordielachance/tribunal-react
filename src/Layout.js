@@ -100,8 +100,8 @@ const Layout = props => {
         <Route path="/cartes">
           <Route index element={<PageMaps/>} />
           <Route path=":mapPostId/:mapPostSlug" element={singleMapPage} />
-          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId" element={singleMapPage} />
-          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlFeatureId/:urlFeatureAction" element={singleMapPage} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlPostId" element={singleMapPage} />
+          <Route path=":mapPostId/:mapPostSlug/:urlSourceId/:urlPostId/:urlFeatureAction" element={singleMapPage} />
         </Route>
         <Route path='*' element={<Page404/>} />
       </Routes>

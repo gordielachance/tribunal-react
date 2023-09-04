@@ -7,7 +7,7 @@ import * as turf from "@turf/turf";
 import { useNavigate,useParams } from 'react-router-dom';
 
 
-import {MAPBOX_TOKEN,DEBUG,getFeaturePostUrl} from "../../Constants";
+import {MAPBOX_TOKEN,DEBUG} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import { useMap } from './MapContext';
 import FeaturePopup from "./FeaturePopup";
@@ -16,7 +16,7 @@ import './Map.scss';
 const Map = (props) => {
 
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug,urlSourceId,urlFeatureId} = useParams();
+  const {mapPostId,mapPostSlug,urlSourceId,urlPostId} = useParams();
 
   const {
     mapHasInit,
@@ -29,7 +29,8 @@ const Map = (props) => {
     setMapHasInit,
     setMapFeatureState,
     featuresFilter,
-    mapFeatureCollection
+    mapFeatureCollection,
+    getPostUrl
   } = useMap();
 
   const initMap = map => {
@@ -94,12 +95,12 @@ const Map = (props) => {
       if (e.features.length === 0) return;
       const feature = e.features[0];
       console.log("CLICKED FEAT",feature);
-      navigate(getFeaturePostUrl(mapPostId,mapPostSlug,feature.source,feature.properties.id));
+      navigate(getPostUrl(feature.properties.post_id));
     });
 
     //zoom on cluster on click
-    map.on('click', 'point-clusters', (e) => {
-      const features = map.queryRenderedFeatures(e.point, { layers: ['point-clusters'] });
+    map.on('click', 'pointClusters', (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: ['pointClusters'] });
       if (features.length) {
         const clusterId = features[0].properties.cluster_id;
         const source = map.getSource('points'); // Replace 'your-source-id' with your source ID
@@ -125,16 +126,11 @@ const Map = (props) => {
   const getUrlFeature = useCallback(() => {
 
     if (!mapData) return;
-    if (urlSourceId === undefined) return;
-    if (urlFeatureId === undefined) return;
+    if (urlPostId === undefined) return;
 
-    const sources = mapData?.sources || {};
-    const source = sources[urlSourceId];
-    const features = source?.data.features || [];
+    return mapFeatureCollection().find(feature => feature.properties.post_id === parseInt(urlPostId));
 
-    return features.find(feature => feature.properties.id === parseInt(urlFeatureId));
-
-  },[mapData,urlSourceId,urlFeatureId])
+  },[mapData,urlPostId])
 
   //set active marker from URL
   useEffect(()=>{
@@ -143,7 +139,7 @@ const Map = (props) => {
 
 
     const urlFeature = getUrlFeature();
-    setActiveFeature(urlFeature);
+
 
     if (urlFeature){
 
@@ -153,9 +149,11 @@ const Map = (props) => {
         center: urlFeature.geometry.coordinates
       })
 
+      setActiveFeature(urlFeature);
+
     }
 
-  },[mapHasInit,urlSourceId,urlFeatureId]);
+  },[mapHasInit,urlPostId]);
 
   //main map init
   useEffect(()=>{

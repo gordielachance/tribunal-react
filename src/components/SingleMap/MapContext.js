@@ -437,13 +437,13 @@ export function MapProvider({children}){
 
 		//hide old
 		if (prevActiveFeature.current){
-			setMapFeatureState('points',prevActiveFeature.current.id,'active',false);
+			setMapFeatureState('points',prevActiveFeature.current.properties.id,'active',false);
 		}
 
 		//show new
 		if (activeFeature){
 			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
-			setMapFeatureState('points',prevActiveFeature.current.id,'active',true);
+			setMapFeatureState('points',activeFeature.properties.id,'active',true);
 		}
 
 		prevActiveFeature.current = activeFeature;
@@ -503,8 +503,49 @@ export function MapProvider({children}){
 
 	}
 
+
+	const getPointIds = () => {
+		if (!mapboxMap.current) return null;
+		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
+		return (features || []).map((feature) => feature.properties.id);
+	};
+
+	const getPointByPostId = post_id => {
+		if (!mapboxMap.current) return null;
+		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
+		return (features || []).find((feature) => feature.properties.post_id === post_id);
+	}
+
+	//Get the cluser ID based on a post ID
+	const getClusterByPostId = async postId => {
+	  if (!mapboxMap.current) return null;
+
+		if (!postId){
+			throw "Missing 'postId' parameter .";
+		}
+
+	  const features = mapboxMap.current.queryRenderedFeatures({ layers: ['pointClusters'] });
+
+	  for (const feature of features) {
+	    const clusterId = feature.properties.cluster_id;
+
+	    // Get the leaves for the current cluster
+	    const postIds = await getPostIdsByClusterId(clusterId); // Assuming you have this function
+
+	    // Check if the postId exists in the leaves
+	    if (postIds.includes(postId)) {
+	      return feature; // Found the cluster containing the postId
+	    }
+	  }
+
+	  return null; // Post ID not found in any clusters
+	};
+
 	// Get the post IDs related to a cluster using a Promise
-	const getPostIdsForCluster = async clusterId => {
+	const getPostIdsByClusterId = async clusterId => {
+
+		if (!mapboxMap.current) return null;
+
 	  return new Promise((resolve, reject) => {
 
 	    mapboxMap.current.getSource("points").getClusterLeaves(clusterId, Infinity, 0, (error, leaves) => {
@@ -514,7 +555,8 @@ export function MapProvider({children}){
 	      }
 
 	      // Extract individual point IDs from the leaves
-	      const ids = leaves.map((leaf) => leaf.properties.id);
+	      const ids = leaves.map((leaf) => leaf.properties.post_id);
+
 	      resolve(ids);
 	    });
 	  });
@@ -523,20 +565,14 @@ export function MapProvider({children}){
 	const updateFeaturesList = async (map) => {
 	  if (!map) return;
 
-	  // Get IDs of rendered points
-	  const getPointIds = () => {
-	    const features = map.queryRenderedFeatures({ layers: ['points'] });
-	    return (features || []).map((feature) => feature.properties.id);
-	  };
-
-	  const getPointIdsFromClusters = async () => {
-	    const features = map.queryRenderedFeatures({ layers: ['point-clusters'] });
+	  const getPostIdsFromClusters = async () => {
+	    const features = map.queryRenderedFeatures({ layers: ['pointClusters'] });
 
 	    const clusterIds = (features || []).map((feature) => feature.properties.cluster_id);
 
 	    const clusterPostIds = await Promise.all(
 	      clusterIds.map(async (clusterId) => {
-	        return await getPostIdsForCluster(clusterId); // Assuming getPostIdsForCluster is defined
+					return await getPostIdsByClusterId(clusterId);
 	      })
 	    );
 
@@ -545,7 +581,7 @@ export function MapProvider({children}){
 	  };
 
 	  let postIds = getPointIds();
-	  const clusterPostIds = await getPointIdsFromClusters();
+	  const clusterPostIds = await getPostIdsFromClusters();
 	  postIds = postIds.concat(clusterPostIds);
 
 	  // Filter source data
@@ -554,6 +590,18 @@ export function MapProvider({children}){
 	  DEBUG && console.info("UPDATED FEATURES LIST");
 	  setFeaturesList(data);
 	};
+
+	const getMapUrl = () => {
+		const id = mapData.post.term_id;
+		const slug = mapData.post.slug;
+	  return `/cartes/${id}/${slug}`;
+	}
+
+	const getPostUrl = (postId) => {
+	  const mapUrl = getMapUrl();
+	  let url = mapUrl + `/posts/${postId}`;
+	  return url;
+	}
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
@@ -604,7 +652,11 @@ export function MapProvider({children}){
 		getFeaturesCategories,
 		getFeaturesFormats,
 		openFilterSlugs,
-		setOpenFilterSlugs
+		setOpenFilterSlugs,
+		getPointByPostId,
+		getClusterByPostId,
+		getMapUrl,
+		getPostUrl
 	};
 
   return (
