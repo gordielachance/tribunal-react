@@ -16,7 +16,7 @@ import './Map.scss';
 const Map = (props) => {
 
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug,urlSourceId,urlPostId} = useParams();
+  const {mapPostId,mapPostSlug,urlItemType,urlItemId} = useParams();
 
   const {
     mapHasInit,
@@ -30,7 +30,7 @@ const Map = (props) => {
     setMapFeatureState,
     featuresFilter,
     mapFeatureCollection,
-    getPostUrl
+    getPointUrl
   } = useMap();
 
   const initMap = map => {
@@ -94,8 +94,7 @@ const Map = (props) => {
     map.on('click',['points'], e => {
       if (e.features.length === 0) return;
       const feature = e.features[0];
-      console.log("CLICKED FEAT",feature);
-      navigate(getPostUrl(feature.properties.post_id));
+      navigate(getPointUrl(feature.properties.id));
     });
 
     //zoom on cluster on click
@@ -123,22 +122,14 @@ const Map = (props) => {
 
   }
 
-  const getUrlFeature = useCallback(() => {
-
-    if (!mapData) return;
-    if (urlPostId === undefined) return;
-
-    return mapFeatureCollection().find(feature => feature.properties.post_id === parseInt(urlPostId));
-
-  },[mapData,urlPostId])
-
-  //set active marker from URL
+  //set active point from URL
   useEffect(()=>{
 
     if (!mapHasInit) return;
 
 
-    const urlFeature = getUrlFeature();
+    const urlFeature = mapFeatureCollection()
+    .find(feature => feature.properties.post_id === parseInt(urlItemId));
 
 
     if (urlFeature){
@@ -153,7 +144,7 @@ const Map = (props) => {
 
     }
 
-  },[mapHasInit,urlPostId]);
+  },[mapHasInit,urlItemId]);
 
   //main map init
   useEffect(()=>{
@@ -161,10 +152,8 @@ const Map = (props) => {
     if (!mapboxMap.current) {
 
       //update map center based on loaded feature
-      const urlFeature = getUrlFeature();
-
-      if (urlFeature){
-        const featureCenter = urlFeature.geometry.coordinates;
+      if (activeFeature){
+        const featureCenter = activeFeature.geometry.coordinates;
         DEBUG && console.log("UPDATE MAP CENTER BASED ON FEATURE URL",featureCenter);
         mapData.map.center = featureCenter;
       }

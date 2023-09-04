@@ -597,6 +597,12 @@ export function MapProvider({children}){
 	  return `/cartes/${id}/${slug}`;
 	}
 
+	const getPointUrl = (featureId) => {
+	  const mapUrl = getMapUrl();
+	  let url = mapUrl + `/point/${featureId}`;
+	  return url;
+	}
+
 	const getPostUrl = (postId) => {
 	  const mapUrl = getMapUrl();
 	  let url = mapUrl + `/posts/${postId}`;
@@ -656,6 +662,7 @@ export function MapProvider({children}){
 		getPointByPostId,
 		getClusterByPostId,
 		getMapUrl,
+		getPointUrl,
 		getPostUrl
 	};
 

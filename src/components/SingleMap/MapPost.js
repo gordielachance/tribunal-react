@@ -24,8 +24,8 @@ export const TdpLogoLink = props => {
 
 const MapPost = (props) => {
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
-  const {mapboxMap,mapData,setMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled,getPostUrl} = useMap();
+  const {mapPostId,mapPostSlug,urlItemType} = useParams();
+  const {mapboxMap,mapData,setMapData,mapHasInit,activeFeature,featuresFilter,layersDisabled,getPointUrl} = useMap();
   const [loading,setLoading] = useState(true);
 
   const [modalPostId,setModalPostId] = useState();
@@ -46,15 +46,15 @@ const MapPost = (props) => {
 
     let postId = undefined;
 
-    if ( (urlFeatureAction==='full') && activeFeature){
-      postId = activeFeature?.properties.id;
+    if ( (urlItemType==='posts') && activeFeature){
+      postId = activeFeature?.properties.post_id;
     }
     setModalPostId(postId);
 
-  },[activeFeature,urlFeatureAction])
+  },[activeFeature,urlItemType])
 
   const handleCloseModal = () => {
-    const url = getPostUrl(activeFeature.properties.post_id);
+    const url = getPointUrl(activeFeature.properties.id);
     navigate(url);
   }
 

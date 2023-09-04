@@ -155,7 +155,7 @@ const FeaturesList = props => {
   }
 
   const toggleClickPost = post_id => {
-    navigate(getPostUrl(post_id) + '/full');
+    navigate(getPostUrl(post_id));
   }
 
   const toggleHoverPost = async(post_id,bool) => {
