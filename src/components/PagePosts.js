@@ -42,6 +42,7 @@ const PagePosts = (props) => {
             :
             <ul className="page-content posts-list">
               {
+                //TOUFIX URGENT HANDLE NO POSTS
                 (props.posts || []).map((post,key) => {
 
                   return(
