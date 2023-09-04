@@ -8,6 +8,7 @@ import './Map.scss';
 import WpPostModal from "../WpPostModal";
 import Sidebar from "./Sidebar";
 import MapLegend from "./MapLegend";
+import DatabaseAPI from "../../databaseAPI/api";
 
 import { useMap } from './MapContext';
 import Map from "./Map";
@@ -26,21 +27,30 @@ const MapPost = (props) => {
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug,urlItemType} = useParams();
   const {mapboxMap,mapData,setMapData,mapHasInit,activeFeature,featuresFilter,layersDisabled,getPointUrl} = useMap();
-  const [loading,setLoading] = useState(true);
 
   const [modalPostId,setModalPostId] = useState();
 
-  //initialize map data
-  useEffect(()=>{
-    if (props.mapData === undefined) return;
-    setMapData(props.mapData);
-  },[props.mapData]);
+  const [item,setItem] = useState();
 
+  //load map on init
   useEffect(()=>{
-    if (mapHasInit){
-      setLoading(false);
-    }
-  },[mapHasInit]);
+
+    let isSubscribed = true;
+
+    const fetchData = async mapId => {
+	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{mapbox:true});
+			if (isSubscribed) {
+        DEBUG && console.log("GOT MAP ITEM",mapPostId,JSON.parse(JSON.stringify(data || [])))
+        setMapData(data);
+	    }
+		}
+
+	  fetchData(props.id);
+
+		//clean up fn
+		return () => isSubscribed = false;
+
+  },[props.id])
 
   useEffect(()=>{
 
