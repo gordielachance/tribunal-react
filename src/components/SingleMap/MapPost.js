@@ -56,6 +56,9 @@ const MapPost = (props) => {
 	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{mapbox:true});
 			if (isSubscribed) {
 
+        /*
+        Keep this for dev purpose
+
         //add areas as an array in the point properties
       	const assignAreasToPoints = data => {
           const areas = data.sources.areas?.data.features || [];
@@ -91,9 +94,10 @@ const MapPost = (props) => {
 
         }
 
-        //TOUFIX it would be better to handle all this in Wordpress
         assignAreasToPoints(data);
         removeEmptyAreaTerms(data);
+
+        */
 
         DEBUG && console.log("GOT MAP ITEM",mapPostId,JSON.parse(JSON.stringify(data || [])))
         setMapData(data);

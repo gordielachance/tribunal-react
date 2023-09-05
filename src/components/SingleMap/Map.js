@@ -38,14 +38,14 @@ const Map = (props) => {
     //init mapbox sources
     for (var sourceId in mapData.sources) {
       const sourceData = mapData.sources[sourceId];
-      DEBUG && console.log("ADD SOURCE",sourceId,sourceData);
+      //DEBUG && console.log("ADD SOURCE",sourceId,sourceData);
       map.addSource(sourceId,sourceData);
     }
 
     //init mapbox layers
     (mapData.layers || []).forEach(layer => {
       map.addLayer(layer);
-      DEBUG && console.log("ADD LAYER",layer.id,layer);
+      //DEBUG && console.log("ADD LAYER",layer.id,layer);
     })
 
     // fit to container
@@ -174,6 +174,7 @@ const Map = (props) => {
       mapboxMap.current.on('load', () => initMap(mapboxMap.current) )
       mapboxMap.current.on('load', () => initMapFeatures(mapboxMap.current) )
       mapboxMap.current.once('idle',()=> setMapHasInit(true) )
+
 
     }
     console.log("INITIALIZING MAP WITH DATA",mapData.map);
