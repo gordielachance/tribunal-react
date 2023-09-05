@@ -26,7 +26,8 @@ const getWpIframeUrl = url => {
 export const taxonomiesMap = {
   post_tag:'tags',
   category:'categories',
-  tdp_format:'formats'
+  tdp_format:'formats',
+  tdp_area:'areas'
 }
 export const getTaxonomyFromPropertyName = name => {
   for (const taxonomy in taxonomiesMap) {

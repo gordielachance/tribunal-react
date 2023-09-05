@@ -172,38 +172,18 @@ export function MapProvider({children}){
 
   }
 
-  const toggleIsolateTermId = (termId,bool) => {
-
+  const toggleIsolateTerm = (term,bool) => {
 		if (bool){
-			const filter = filterInTermId(termId);
+			const filter = filterInTermId(term.term_id);
 			setIsolationFilter(filter);
 		}else{
 			setIsolationFilter();
 		}
-  }
 
-	const selectAllAreas = () => {
-		setDisabledAreaIds();
-	}
-
-	const selectNoAreas = () => {
-		let targetFeatures = mapAreaCollection();
-
-		const targetIds = targetFeatures.map(item=>item.properties.id);
-
-		let newDisabledIds = disabledTermIds.concat(targetIds);
-		newDisabledIds = [...new Set(newDisabledIds)];
-
-		setDisabledAreaIds(newDisabledIds);
-	}
-
-	const toggleIsolateFormat = (slug,bool) => {
-
-		if (bool){
-			const filter = filterInFormat(slug);
-			setIsolationFilter(filter);
-		}else{
-			setIsolationFilter();
+		switch(term.taxonomy){
+			case 'tdp_area':
+				toggleIsolateArea(term,bool);
+			break;
 		}
 
   }
@@ -215,7 +195,12 @@ export function MapProvider({children}){
 		})
 	}
 
-	const toggleIsolateArea = (feature,bool) =>{
+	const toggleIsolateArea = (term,bool) =>{
+
+		//get area feature
+		const feature = mapAreaCollection().find(feature => feature.properties.term_id === term.term_id);
+		if (!feature) return;
+
 		const areaId = feature.properties.id;
 		if(areaId===undefined) return;
 
@@ -450,7 +435,7 @@ export function MapProvider({children}){
 		})
 	}
 
-	const getTermFeatures = (taxonomy,features) => {
+	const filterTermsByFeatures = (taxonomy,features) => {
 	  let slugs = [];
 
 		const propName = getPropertyNameFromTaxonomy(taxonomy);
@@ -599,15 +584,11 @@ export function MapProvider({children}){
 		selectAllTerms,
 		selectNoTerms,
 		selectSoloTermId,
-	  toggleIsolateTermId,
+	  toggleIsolateTerm,
 		disabledFormatIds,
 	  setDisabledFormatIds,
 		disabledAreaIds,
 	  setDisabledAreaIds,
-		selectAllAreas,
-		selectNoAreas,
-	  toggleIsolateFormat,
-		toggleIsolateArea,
 	  featuresFilter,
 	  layersDisabled,
 	  toggleMapLayer,
@@ -616,7 +597,7 @@ export function MapProvider({children}){
 		updateFeaturesList,
 		mapAreaCollection,
 		getTermsFromSlugs,
-		getTermFeatures,
+		filterTermsByFeatures,
 		openFilterSlugs,
 		setOpenFilterSlugs,
 		getPointByPostId,

@@ -65,42 +65,35 @@ const MapPost = (props) => {
             features.forEach(feature=>{
               const within = turf.booleanPointInPolygon(feature, area);
               if (within){
-                feature.properties.areas = (feature.properties.areas || []).concat(area.properties.id);
-                console.log(feature.properties);
+                feature.properties.areas = (feature.properties.areas || []).concat(area.properties.slug);
               }
             })
           })
         }
 
-        //count features in areas
-      	const assignCountToAreas = data => {
-          const areas = data.sources.areas?.data.features || [];
+        //remove no features areas
+      	const removeEmptyAreaTerms = data => {
           const features = data.sources.points?.data.features || [];
+          const areaFeatures = features.filter(feature=>(feature.properties.areas || []).length > 0);
 
-          areas.forEach(area=>{
-            let count = 0;
-            features.forEach(feature=>{
-              const within = (feature.properties.areas || []).includes(area.properties.id);
-              if (within) {
-                count++;
+          let areaSlugs = areaFeatures.map(feature=>feature.properties.areas).flat();
+      		areaSlugs = [...new Set(areaSlugs)];//make unique
 
+          //remove unused areas
+          data.terms = data.terms
+            .filter(term=>{
+              if (term.taxonomy === 'tdp_area'){
+                return areaSlugs.includes(term.slug);
+              }else{
+                return true;
               }
             })
-            area.properties.count = count;
-          })
+
         }
 
-        //count features in areas
-      	const removeEmptyAreas = data => {
-          if (data.sources.areas === undefined) return;
-          const areas = data.sources.areas.data.features || [];
-          data.sources.areas.data.features = areas.filter(area => area.properties.count > 0);
-        }
-
-        //TOUFIX it would be better to handle all this as Wordpress taxonomies.
+        //TOUFIX it would be better to handle all this in Wordpress
         assignAreasToPoints(data);
-        assignCountToAreas(data);
-        removeEmptyAreas(data);
+        removeEmptyAreaTerms(data);
 
         DEBUG && console.log("GOT MAP ITEM",mapPostId,JSON.parse(JSON.stringify(data || [])))
         setMapData(data);

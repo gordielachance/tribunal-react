@@ -8,7 +8,7 @@ const FilterTerms = props => {
   const {
     mapData,
     disabledTermIds,
-    toggleIsolateTermId,
+    toggleIsolateTerm,
     toggleTermId,
     selectSoloTermId,
     getFeaturesByTerm
@@ -22,7 +22,6 @@ const FilterTerms = props => {
       toggleTermId(term.term_id)
     }
   }
-
 
   const isDisabled = term => {
     return (disabledTermIds || []).includes(term.term_id);
@@ -42,8 +41,8 @@ const FilterTerms = props => {
             description={term.description}
             disabled={isDisabled(term)}
             onClick={e=>handleClick(e,term)}
-            onMouseEnter={e=>toggleIsolateTermId(term.term_id,true)}
-            onMouseLeave={e=>toggleIsolateTermId(term.term_id,false)}
+            onMouseEnter={e=>toggleIsolateTerm(term,true)}
+            onMouseLeave={e=>toggleIsolateTerm(term,false)}
             count={featureCount}
             />
           )
