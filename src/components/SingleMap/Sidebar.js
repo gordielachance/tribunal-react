@@ -76,7 +76,7 @@ const Sidebar = (props) => {
               <Loader />
             </Dimmer>
               <div id="map-header">
-                <h3>{mapData?.post.name}</h3>
+                <h3>{mapData?.post.name ?? 'Carte'}</h3>
                 <Menu id="map-menu" pointing secondary>
                   <Menu.Item
                       id="map-menu-index"
