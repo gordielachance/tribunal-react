@@ -128,7 +128,7 @@ const MapPost = (props) => {
   }
 
   return (
-    <div className="page-content">
+    <div className="page-content" id={`map-${props.id}`}>
       {
         ( modalPostId !== undefined ) &&
         <WpPostModal
