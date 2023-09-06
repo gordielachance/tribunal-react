@@ -3,7 +3,9 @@ import { Icon,Popup } from 'semantic-ui-react';
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
-const FilterTerms = props => {
+const TermListItem = props => {
+
+  const { term } = props;
 
   const {
     mapData,
@@ -13,6 +15,10 @@ const FilterTerms = props => {
     selectSoloTermId,
     getFeaturesByTerm
   } = useMap();
+
+
+  const featureCount = (getFeaturesByTerm(term.taxonomy,term.slug) || []).length;
+
 
   const handleClick = (e,term) => {
     if (e.shiftKey) {
@@ -28,28 +34,55 @@ const FilterTerms = props => {
   }
 
   return(
-    <ul className="map-filter-terms">
-      {
-        (props.items||[]).map(function(term,k) {
+    <FilterItem
+    label={term.name}
+    description={term.description}
+    disabled={isDisabled(term)}
+    onClick={e=>handleClick(e,term)}
+    onMouseEnter={e=>toggleIsolateTerm(term,true)}
+    onMouseLeave={e=>toggleIsolateTerm(term,false)}
+    count={featureCount}
+    />
+  )
 
-          const featureCount = (getFeaturesByTerm(term.taxonomy,term.slug) || []).length;
+}
+
+const TermsList = props => {
+  const { terms = [], level = 0, parent = 0, ...otherProps } = props;
+
+  const getChildren = parentId => {
+    return terms.filter(term => term.parent === parentId);
+  }
+
+  const rootItems = getChildren(parent);
+
+  return(
+    <ul
+    data-level={level}
+    data-parent={parent}
+    {...otherProps}
+    >
+      {
+        rootItems.map(term => {
 
           return(
-            <FilterItem
-            key={k}
-            label={term.name}
-            description={term.description}
-            disabled={isDisabled(term)}
-            onClick={e=>handleClick(e,term)}
-            onMouseEnter={e=>toggleIsolateTerm(term,true)}
-            onMouseLeave={e=>toggleIsolateTerm(term,false)}
-            count={featureCount}
-            />
+            <li data-id={term.term_id}>
+              <TermListItem term={term}/>
+              <TermsList terms={terms} parent={term.term_id} level={level+1}/>
+            </li>
           )
+
         })
       }
     </ul>
   )
+}
+
+
+const FilterTerms = props => {
+  return (
+    <TermsList terms={props.items} className="map-filter-terms"/>
+  );
 }
 
 export default FilterTerms
