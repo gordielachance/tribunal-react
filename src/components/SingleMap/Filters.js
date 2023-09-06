@@ -6,28 +6,31 @@ import { useApp } from '../../AppContext';
 import { useMap } from './MapContext';
 
 const FilterSection = props => {
+
+  const { label,active,children,onClick,onClickAll,onClickNone,...otherProps } = props;
+
   return (
-    <div className="filters-section">
+    <div className="filters-section" {...otherProps}>
       <Accordion.Title
-        active={props.active}
+        active={active}
         index={0}
 
       >
-        <Icon name='dropdown' onClick={props.onClick}/>
-        <span onClick={props.onClick}>
-          {props.label}
+        <Icon name='dropdown' onClick={onClick}/>
+        <span onClick={onClick}>
+          {label}
         </span>
         <ul className="filters-section-shortcuts">
-          {props.onClickAll &&
-            <li onClick={props.onClickAll}>All</li>
+          {onClickAll &&
+            <li onClick={onClickAll}>All</li>
           }
-          {props.onClickNone &&
-            <li onClick={props.onClickNone}>None</li>
+          {onClickNone &&
+            <li onClick={onClickNone}>None</li>
           }
         </ul>
       </Accordion.Title>
-      <Accordion.Content active={props.active}>
-        {props.children}
+      <Accordion.Content active={active}>
+        {children}
       </Accordion.Content>
     </div>
   )
@@ -75,12 +78,12 @@ const Filters = (props) => {
  }
 
   return (
-    <Accordion id="map-settings" className="map-section">
+    <Accordion id="map-filters" className="map-section">
     {
       ((categories || []).length > 1) &&
       <FilterSection
         label="Catégories"
-        index="categories"
+        id="categories"
         onClick={e=>handleSectionClick('categories')}
         active={openFilterSlugs.includes('categories')}
         onClickAll={e=>selectAllTerms('category')}
@@ -101,7 +104,7 @@ const Filters = (props) => {
       ((formats || []).length > 1) &&
       <FilterSection
         label="Disciplines"
-        index="disciplines"
+        id="filter-section-disciplines"
         onClick={e=>handleSectionClick('disciplines')}
         active={openFilterSlugs.includes('disciplines')}
         onClickAll={e=>selectAllTerms('tdp_format')}
@@ -116,7 +119,7 @@ const Filters = (props) => {
       ((tags || []).length > 1) &&
       <FilterSection
         label="Tags"
-        index="tags"
+        id="filter-section-tags"
         onClick={e=>handleSectionClick('tags')}
         active={openFilterSlugs.includes('tags')}
         onClickAll={e=>selectAllTerms('post_tag')}
@@ -131,7 +134,7 @@ const Filters = (props) => {
       ((areas || []).length > 1) &&
       <FilterSection
         label="Zones"
-        index="areas"
+        id="filter-section-areas"
         onClick={e=>handleSectionClick('areas')}
         active={openFilterSlugs.includes('areas')}
         onClickAll={e=>selectAllTerms('tdp_area')}

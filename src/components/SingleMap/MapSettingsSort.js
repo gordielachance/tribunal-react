@@ -17,7 +17,7 @@ const MapSettingsSort = props => {
   }
 
   return(
-    <div id="map-settings-orderby">
+    <div id="map-filters-orderby">
       <h5>Tri</h5>
       <ul>
         {

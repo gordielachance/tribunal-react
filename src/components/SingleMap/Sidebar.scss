@@ -51,22 +51,17 @@
         > * {
           padding: 1em 0.5em;
         }
-        #map-menu-creations{
-          .icon{
-            color:$creationsColor;
-          }
-        }
-        #map-menu-annotations{
-          .icon{
-            color:$annotationsColor;
-          }
-        }
       }
       #map-sections{
         flex-grow: 1;
         overflow-y: auto;
         &.mapTransition{
           opacity:.5;
+        }
+      }
+      .map-filter-terms{
+        ul{
+          padding-left:1em;
         }
       }
 
@@ -125,7 +120,7 @@
   }
 }
 
-#map-settings{
+#map-filters{
   > * {
     margin: 0 1em;
     &:not(:last-child){
@@ -139,7 +134,7 @@
 }
 
 
-#map-settings-orderby{
+#map-filters-orderby{
   li{
     .icon{
       opacity:.25;
@@ -210,7 +205,7 @@ ul#features-list,
 
 }
 
-#map-settings-layers{
+#map-filters-layers{
   li{
     @extend .clickable;
     display:inline;

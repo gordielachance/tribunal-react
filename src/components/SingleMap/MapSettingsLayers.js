@@ -65,7 +65,7 @@ const MapSettingsLayers = (props) => {
   })
 
   return(
-    <div id="map-settings-layers">
+    <div id="map-filters-layers">
       <h5>Calques</h5>
       <ul>
       {
