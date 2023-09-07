@@ -105,6 +105,28 @@ export function MapProvider({children}){
 		return (mapData.terms || []).find(item => id === item.term_id);
 	}
 
+	//we need a taxonomy to filter items since a lot of them have parentId = 0
+	const getTermChildren = (parentId, taxonomy, recursive = false) => {
+	  if (taxonomy === undefined) {
+	    throw "Missing 'taxonomy' parameter.";
+	  }
+
+	  const children = (mapData.terms || [])
+	    .filter((term) => term.taxonomy === taxonomy)
+	    .filter((term) => term.parent === parentId);
+
+	  if (recursive) {
+	    const childrenTerms = children.map((child) =>
+	      getTermChildren(child.term_id, taxonomy, true)
+	    );
+
+	    // Concatenate and flatten the recursive results into a single array
+	    return children.concat(...childrenTerms);
+	  }
+
+	  return children;
+	};
+
 	const getMapAreaById = areaId => {
 		const sourceCollection = mapData?.sources.areas?.data.features || [];
 	  return sourceCollection.find(feature => feature.properties.id === areaId);
@@ -159,22 +181,33 @@ export function MapProvider({children}){
 	}
 
 	const toggleTermId = termId => {
-    const newDisabled = [...disabledTermIds];
-    const index = newDisabled.indexOf(termId);
 
-    if (index > -1) {//exists in array
-      newDisabled.splice(index, 1);
+		const term = getMapTermById(termId);
+		if (!term) return;
+
+		//also get children
+		const childrenIds = (getTermChildren(term.term_id,term.taxonomy,true) || [])
+			.map(term => term.term_id);
+
+	  const termIds = [term.term_id].concat(childrenIds);
+
+		let newIds = [];
+
+		const bool = (disabledTermIds || []).includes(term.term_id);
+
+		if (!bool){
+      newIds = [...disabledTermIds, ...termIds];
     }else{
-      newDisabled.push(termId);
+      newIds = disabledTermIds.filter(id => !termIds.includes(id));
     }
 
-    setDisabledTermIds(newDisabled);
+		setDisabledTermIds(newIds);
 
-  }
+	};
 
   const toggleIsolateTerm = (term,bool) => {
 		if (bool){
-			const filter = filterInTermId(term.term_id);
+			const filter = filterInTerm(term);
 			setIsolationFilter(filter);
 		}else{
 			setIsolationFilter();
@@ -239,9 +272,8 @@ export function MapProvider({children}){
 		setLayersDisabled(newDisabled);
 	}
 
-	const filterInTermId = termId => {
-		const term = getMapTermById(termId);
-		if (!term) return false;
+	const filterInTerm = term => {
+		if (!term) return;
 
 		const propertyName = getPropertyNameFromTaxonomy(term.taxonomy);
 		if (!propertyName) return;
@@ -255,7 +287,8 @@ export function MapProvider({children}){
 		if ( (termIds || []).length === 0) return;
 
 		const filters = termIds.map(itemId=>{
-			return filterInTermId(itemId)
+			const term = getMapTermById(itemId);
+			return filterInTerm(term)
 		})
 
 		let filter = ['any'].concat(filters);
@@ -606,7 +639,8 @@ export function MapProvider({children}){
 		getPointUrl,
 		getPostUrl,
 		getFeaturesByTerm,
-		getFeaturesByAreaId
+		getFeaturesByAreaId,
+		getTermChildren
 	};
 
   return (

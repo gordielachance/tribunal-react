@@ -7,32 +7,34 @@ import { useMap } from './MapContext';
 
 const FilterSection = props => {
 
-  const { label,active,children,onClick,onClickAll,onClickNone,...otherProps } = props;
+  const { label,open,children,onClick,onClickAll,onClickNone,...otherProps } = props;
 
   return (
-    <div className="filters-section" {...otherProps}>
+    <Accordion as="li" className="filters-section parent-accordion" {...otherProps}>
       <Accordion.Title
-        active={active}
+        active={open}
         index={0}
 
       >
-        <Icon name='dropdown' onClick={onClick}/>
-        <span onClick={onClick}>
-          {label}
-        </span>
-        <ul className="filters-section-shortcuts">
-          {onClickAll &&
-            <li onClick={onClickAll}>All</li>
-          }
-          {onClickNone &&
-            <li onClick={onClickNone}>None</li>
-          }
-        </ul>
+        <div className="accordion-title-block">
+          <span onClick={onClick}>
+            {label}
+          </span>
+          <ul className="filters-section-shortcuts">
+            {onClickAll &&
+              <li onClick={onClickAll}>All</li>
+            }
+            {onClickNone &&
+              <li onClick={onClickNone}>None</li>
+            }
+          </ul>
+        </div>
+        <Icon name={`angle ${open ? 'up' : 'down'}`} onClick={onClick} className="accordion-handle"/>
       </Accordion.Title>
-      <Accordion.Content active={active}>
+      <Accordion.Content active={open}>
         {children}
       </Accordion.Content>
-    </div>
+    </Accordion>
   )
 }
 
@@ -78,18 +80,19 @@ const Filters = (props) => {
  }
 
   return (
-    <Accordion id="map-filters" className="map-section">
+    <ul id="map-filters" className="map-section">
     {
       ((categories || []).length > 1) &&
       <FilterSection
         label="Catégories"
         id="categories"
         onClick={e=>handleSectionClick('categories')}
-        active={openFilterSlugs.includes('categories')}
+        open={openFilterSlugs.includes('categories')}
         onClickAll={e=>selectAllTerms('category')}
         onClickNone={e=>selectNoTerms('category')}
       >
         <FilterTerms
+        taxonomy='category'
         items={categories}
         />
       </FilterSection>
@@ -106,11 +109,12 @@ const Filters = (props) => {
         label="Disciplines"
         id="filter-section-disciplines"
         onClick={e=>handleSectionClick('disciplines')}
-        active={openFilterSlugs.includes('disciplines')}
+        open={openFilterSlugs.includes('disciplines')}
         onClickAll={e=>selectAllTerms('tdp_format')}
         onClickNone={e=>selectNoTerms('tdp_format')}
       >
         <FilterTerms
+        taxonomy='tdp_format'
         items={formats}
         />
       </FilterSection>
@@ -121,11 +125,12 @@ const Filters = (props) => {
         label="Tags"
         id="filter-section-tags"
         onClick={e=>handleSectionClick('tags')}
-        active={openFilterSlugs.includes('tags')}
+        open={openFilterSlugs.includes('tags')}
         onClickAll={e=>selectAllTerms('post_tag')}
         onClickNone={e=>selectNoTerms('post_tag')}
       >
         <FilterTerms
+        taxonomy='post_tag'
         items={tags}
         />
       </FilterSection>
@@ -136,16 +141,17 @@ const Filters = (props) => {
         label="Zones"
         id="filter-section-areas"
         onClick={e=>handleSectionClick('areas')}
-        active={openFilterSlugs.includes('areas')}
+        open={openFilterSlugs.includes('areas')}
         onClickAll={e=>selectAllTerms('tdp_area')}
         onClickNone={e=>selectNoTerms('tdp_area')}
       >
         <FilterTerms
+        taxonomy='tdp_area'
         items={areas}
         />
       </FilterSection>
     }
-    </Accordion>
+    </ul>
   );
 }
 

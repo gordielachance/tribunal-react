@@ -60,9 +60,13 @@
         }
       }
       .map-filter-terms{
-        ul{
-          padding-left:1em;
+        /*
+        .accordion :not(:last-child){
+          border-bottom: 1px solid lightgrey;
+          margin-bottom: 1em;
+          padding-bottom: 1em;
         }
+        */
       }
 
       #features-list{
@@ -120,19 +124,6 @@
   }
 }
 
-#map-filters{
-  > * {
-    margin: 0 1em;
-    &:not(:last-child){
-      border-bottom:1px solid lightgrey;
-      margin-bottom: 1em;
-      padding-bottom: 1em;
-    }
-
-  }
-
-}
-
 
 #map-filters-orderby{
   li{
@@ -158,6 +149,70 @@ ul#features-list,
   }
 }
 
+
+li.accordion{
+  margin:0!important;
+
+  line-height:2em;
+
+
+  .filter-item-count{
+    margin-left:.25em;
+    opacity:.6;
+  }
+
+  .accordion-title-block{
+    display:flex;
+    flex-grow: 1;
+    align-items: center;
+  }
+  .accordion-handle{
+
+    display:block;
+    width:2em;
+    height:2em;
+    margin-left:auto;
+    border-radius: 50%;
+    opacity:.7;
+    &:hover{
+      opacity:1;
+    }
+  }
+
+  .title{
+    padding:1em 0!important;
+    .filter-item-header{
+      display:flex;
+      width: 100%;
+      .filter-item-label{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .filter-item-icon{
+        opacity:.25;
+      }
+      &.active .filter-item-icon{
+          opacity:1;
+      }
+    }
+  }
+  .content{
+    padding:0!important;
+    margin:0!important;
+  }
+  > .title,
+  &.parent-accordion > .title.active{
+    border-bottom: 1px solid lightgrey;
+  }
+
+  ul{
+    padding-left:1em;
+  }
+
+}
+
+
 .filters-section{
   .title{
     display:flex;
@@ -180,27 +235,6 @@ ul#features-list,
   }
   .content{
     margin-left:.5em;
-  }
-  li{
-    line-height:2em;
-    .icon.check{
-      opacity:.25;
-    }
-    &.active{
-      .icon.check{
-        opacity:1;
-      }
-    }
-    .filter-item-header{
-      @extend .clickable;
-    }
-    .filter-item-count{
-      margin-left:.25em;
-      opacity:.6;
-    }
-    .filter-item-description{
-      opacity:.5;
-    }
   }
 
 }

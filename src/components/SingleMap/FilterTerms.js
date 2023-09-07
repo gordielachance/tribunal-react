@@ -1,9 +1,9 @@
 import React, { useEffect,useState }  from "react";
-import { Icon,Popup } from 'semantic-ui-react';
+import { Accordion,Icon,Popup } from 'semantic-ui-react';
 import { useMap } from './MapContext';
 import FilterItem from './FilterItem';
 
-const TermListItem = props => {
+const TermItem = props => {
 
   const { term } = props;
 
@@ -21,6 +21,7 @@ const TermListItem = props => {
 
 
   const handleClick = (e,term) => {
+    e.stopPropagation();
     if (e.shiftKey) {
       //solo
       selectSoloTermId(term.term_id)
@@ -37,7 +38,7 @@ const TermListItem = props => {
     <FilterItem
     label={term.name}
     description={term.description}
-    disabled={isDisabled(term)}
+    active={!isDisabled(term)}
     onClick={e=>handleClick(e,term)}
     onMouseEnter={e=>toggleIsolateTerm(term,true)}
     onMouseLeave={e=>toggleIsolateTerm(term,false)}
@@ -47,41 +48,85 @@ const TermListItem = props => {
 
 }
 
-const TermsList = props => {
-  const { terms = [], level = 0, parent = 0, ...otherProps } = props;
+const TermsList = (props) => {
+  const { terms = [], level = 0, parent = 0, active = false, taxonomy='', ...otherProps } = props;
 
-  const getChildren = parentId => {
-    return terms.filter(term => term.parent === parentId);
-  }
+  const [activeIds, setActiveIds] = useState([]);
 
-  const rootItems = getChildren(parent);
+  const {
+    getTermChildren
+  } = useMap();
 
-  return(
-    <ul
-    data-level={level}
-    data-parent={parent}
-    {...otherProps}
-    >
-      {
-        rootItems.map(term => {
+  const rootItems = getTermChildren(parent,taxonomy) || [];
 
-          return(
-            <li data-id={term.term_id}>
-              <TermListItem term={term}/>
-              <TermsList terms={terms} parent={term.term_id} level={level+1}/>
-            </li>
-          )
+  const toggleOpen = (term, bool) => {
+    const termId = term.term_id;
+    if (bool) {
+      setActiveIds([...activeIds, termId]);
+    } else {
+      setActiveIds(activeIds.filter((id) => id !== termId));
+    }
+  };
 
-        })
-      }
+  //from prop
+  useEffect(()=>{
+    const children = getTermChildren(parent,taxonomy) || [];
+    const childrenIds = children.map(term=>term.term_id);
+
+    if (active){
+      setActiveIds([...activeIds, ...childrenIds]);
+    }else{
+      setActiveIds(activeIds.filter(id => !childrenIds.includes(id)));
+    }
+  },[active])
+
+  return (
+    <ul data-level={level} data-parent={parent} {...otherProps}>
+      {rootItems.map((term, k) => {
+        const children = getTermChildren(term.term_id,term.taxonomy,true) || [];
+        const hasChildren = children.length > 0;
+        const isActive = activeIds.includes(term.term_id);
+
+        return (
+          <Accordion
+            key={k}
+            as="li"
+            data-id={term.term_id}
+            className={hasChildren ? "parent-accordion" : ""}
+          >
+            <Accordion.Title
+              active={isActive}
+              onClick={() => toggleOpen(term,!isActive)}
+            >
+              <TermItem term={term} />
+              {hasChildren && (
+                <Icon
+                  name={`angle ${isActive ? "up" : "down"}`}
+                  className="accordion-handle"
+                />
+              )}
+            </Accordion.Title>
+            <Accordion.Content active={isActive}>
+              <TermsList
+                taxonomy={taxonomy}
+                terms={children}
+                parent={term.term_id}
+                level={level + 1}
+                active={isActive}
+              />
+            </Accordion.Content>
+          </Accordion>
+        );
+      })}
     </ul>
-  )
-}
+  );
+};
 
 
 const FilterTerms = props => {
+  const { items, taxonomy, ...otherProps } = props;
   return (
-    <TermsList terms={props.items} className="map-filter-terms"/>
+    <TermsList terms={items} taxonomy={taxonomy} active={true} className="map-filter-terms" {...otherProps}/>
   );
 }
 
