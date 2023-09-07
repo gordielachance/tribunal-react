@@ -662,8 +662,8 @@ export function MapProvider({children}){
 	};
 
 	const getMapUrl = () => {
-		const id = mapTerm?.term_id;
-		const slug = mapTerm?.slug;
+		const id = mapTerm.term_id;
+		const slug = mapTerm.slug;
 	  return `/cartes/${id}/${slug}`;
 	}
 

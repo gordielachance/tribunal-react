@@ -24,6 +24,7 @@ const Map = (props) => {
     activeFeature,
     mapContainerRef,
     mapData,
+    mapTerm,
     mapboxMap,
     mapCluster,
     setMapHasInit,
@@ -149,7 +150,7 @@ const Map = (props) => {
 
   //main map init
   useEffect(()=>{
-    if(mapData === undefined) return;
+    if(mapTerm === undefined) return;//wait everything is loaded.
     if (!mapboxMap.current) {
 
       //update map center based on loaded feature
@@ -181,7 +182,7 @@ const Map = (props) => {
 
     return () => mapboxMap.current.remove();
 
-  }, [mapData]);
+  }, [mapTerm]);
 
   //center on the active feature
   useEffect(()=>{
