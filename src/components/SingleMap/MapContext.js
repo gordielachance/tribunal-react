@@ -568,16 +568,17 @@ export function MapProvider({children}){
 	  return getTermsFromSlugs(taxonomy,slugs);
 	}
 
-	const getPointsPostIds = () => {
+	const getRenderedPointIds = () => {
 		if (!mapboxMap.current) return null;
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
-		return (features || []).map((feature) => feature.properties.post_id);
+		return (features || [])
+			.map((feature) => feature.properties.post_id)
+			.filter(id=>(id!==undefined))
 	};
 
 	const getPointByPostId = post_id => {
 		if (!mapboxMap.current) return null;
-		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
-		return (features || []).find((feature) => feature.properties.post_id === post_id);
+		return (getRenderedPointIds() || []).find((feature) => feature.properties.post_id === post_id);
 	}
 
 	//Get the cluser ID based on a post ID
@@ -644,7 +645,7 @@ export function MapProvider({children}){
 	    return clusterPostIds.flat();
 	  };
 
-	  const pointPostIds = getPointsPostIds();
+	  const pointPostIds = getRenderedPointIds();
 	  const clusterPostIds = await getClustersPostIds();
 	  let postIds = pointPostIds
 			.concat(clusterPostIds)

@@ -150,7 +150,7 @@ const Map = (props) => {
 
   //main map init
   useEffect(()=>{
-    if(mapTerm === undefined) return;//wait everything is loaded.
+    if(mapTerm === undefined) return;//wait all data is loaded.
     if (!mapboxMap.current) {
 
       //update map center based on loaded feature
