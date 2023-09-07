@@ -11,7 +11,13 @@ import {DEBUG} from "../../Constants";
 const FeaturePopup = props => {
 
   const navigate = useNavigate();
-  const {mapboxMap,activeFeature,getMapUrl,getPostUrl} = useMap();
+  const {
+    mapboxMap,
+    activeFeature,
+    getMapUrl,
+    getPostUrl,
+    getMapPostById
+  } = useMap();
   const popupRef = useRef();
   const feature = activeFeature;
 
@@ -30,7 +36,10 @@ const FeaturePopup = props => {
   const handleOpen = e => {
     DEBUG && console.log("HANDLE OPEN",feature.properties.id);
     e.preventDefault();
-    const feature_url = getPostUrl(feature.properties.post_id);
+    const postId = feature.properties.post_id;
+    const post = getMapPostById(postId);
+    if (!post) return;
+    const feature_url = getPostUrl(post);
     navigate(feature_url);
   }
 

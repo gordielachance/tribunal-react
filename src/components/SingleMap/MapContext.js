@@ -11,6 +11,8 @@ import {
 	bboxToCircle,
 } from "./MapFunctions";
 
+import DatabaseAPI from "../../databaseAPI/api";
+
 const MapContext = createContext();
 
 export function MapProvider({children}){
@@ -21,7 +23,9 @@ export function MapProvider({children}){
 
 	const [mapHasInit,setMapHasInit] = useState(false);
 
+	const [mapId,setMapId] = useState();
 	const [mapData,setMapData] = useState();
+	const [mapTerm,setMapTerm] = useState();
 
 	const [featuresList,setFeaturesList] = useState();
 
@@ -103,6 +107,10 @@ export function MapProvider({children}){
 
 	const getMapTermById = id => {
 		return (mapData.terms || []).find(item => id === item.term_id);
+	}
+
+	const getMapPostById = id => {
+		return (mapData.posts || []).find(item => id === item.id);
 	}
 
 	//we need a taxonomy to filter items since a lot of them have parentId = 0
@@ -384,6 +392,83 @@ export function MapProvider({children}){
 	}
 
 	//INIT
+
+  //Get data based on map ID
+  useEffect(()=>{
+
+    let isSubscribed = true;
+
+    const fetchData = async mapId => {
+	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{mapbox:true});
+			if (isSubscribed) {
+
+        /*
+        Keep this for dev purpose
+
+        //add areas as an array in the point properties
+      	const assignAreasToPoints = data => {
+          const areas = data.sources.areas?.data.features || [];
+          const features = data.sources.points?.data.features || [];
+
+          areas.forEach(area=>{
+            features.forEach(feature=>{
+              const within = turf.booleanPointInPolygon(feature, area);
+              if (within){
+                feature.properties.areas = (feature.properties.areas || []).concat(area.properties.slug);
+              }
+            })
+          })
+        }
+
+        //remove no features areas
+      	const removeEmptyAreaTerms = data => {
+          const features = data.sources.points?.data.features || [];
+          const areaFeatures = features.filter(feature=>(feature.properties.areas || []).length > 0);
+
+          let areaSlugs = areaFeatures.map(feature=>feature.properties.areas).flat();
+      		areaSlugs = [...new Set(areaSlugs)];//make unique
+
+          //remove unused areas
+          data.terms = data.terms
+            .filter(term=>{
+              if (term.taxonomy === 'tdp_area'){
+                return areaSlugs.includes(term.slug);
+              }else{
+                return true;
+              }
+            })
+
+        }
+
+        assignAreasToPoints(data);
+        removeEmptyAreaTerms(data);
+
+        */
+
+        setMapData(data);
+	    }
+		}
+
+		if (mapId){
+			fetchData(mapId);
+		}
+
+		//clean up fn
+		return () => isSubscribed = false;
+
+  },[mapId])
+
+	useEffect(()=>{
+		if (mapData === undefined) return;
+
+		const term = getMapTermById(mapId);
+		setMapTerm(term);
+
+		console.log("MAP DATA LOADED FOR POST",mapId,mapData);
+
+	},[mapData])
+
+	//Map ready
   useEffect(()=>{
 		if (!mapHasInit) return;
 		console.log("***MAP HAS BEEN FULLY INITIALIZED***");
@@ -577,8 +662,8 @@ export function MapProvider({children}){
 	};
 
 	const getMapUrl = () => {
-		const id = mapData.post.term_id;
-		const slug = mapData.post.slug;
+		const id = mapTerm?.term_id;
+		const slug = mapTerm?.slug;
 	  return `/cartes/${id}/${slug}`;
 	}
 
@@ -588,16 +673,16 @@ export function MapProvider({children}){
 	  return url;
 	}
 
-	const getPostUrl = (postId) => {
+	const getPostUrl = post => {
 	  const mapUrl = getMapUrl();
-	  let url = mapUrl + `/posts/${postId}`;
+		//const url = mapUrl + `/posts/${post.id}/${post.slug}`;
+	  const url = mapUrl + `/posts/${post.id}`;
 	  return url;
 	}
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
 	const value = {
-		setMapData,
 	  mapData,
 	  mapContainerRef,
 		mapboxMap,
@@ -640,7 +725,11 @@ export function MapProvider({children}){
 		getPostUrl,
 		getFeaturesByTerm,
 		getFeaturesByAreaId,
-		getTermChildren
+		getTermChildren,
+		mapId,
+		mapTerm,
+		setMapId,
+		getMapPostById
 	};
 
   return (

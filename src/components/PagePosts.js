@@ -9,23 +9,57 @@ const PagePosts = (props) => {
   const navigate = useNavigate();
   const loading = (props.posts === undefined);
   const {urlPostId} = useParams();
-  const [modalPostId,setModalPostId] = useState();
+  const [modalPost,setModalPost] = useState();
+
+  const getPostById = id => {
+    return (props.posts || []).find(item => id === item.id);
+  }
 
   useEffect(()=>{
-    setModalPostId(urlPostId);
-  },[urlPostId])
+
+    if (props.posts === undefined) return;
+
+    let post = undefined;
+    const postId = parseInt(urlPostId);
+
+    if (postId){
+      post = getPostById(postId);
+    }
+
+    setModalPost(post);
+
+  },[props.posts,urlPostId])
+
+  const getPageUrl = () => {
+    return location.pathname.replace('/'+modalPost?.id, '');
+  }
 
   const handleCloseModal = () => {
-    const url = location.pathname.replace('/'+modalPostId, '');
-    navigate(url);
+    navigate(getPageUrl());
+  }
+
+  const getPostUrl = post => {
+
+    if (!post) return;
+
+    //const url = `${getPageUrl()}/${post.id}/${post.slug}`;
+    const url = `${getPageUrl()}/${post.id}`;
+    return url;
+  };
+
+  const handleClick = postId => {
+    const post = getPostById(postId);
+    if(!post) return;
+    navigate(getPostUrl(post));
   }
 
   return(
     <div id={props.id} className="page posts-page padding-page">
       {
-        ( modalPostId !== undefined ) &&
+        ( modalPost !== undefined ) &&
         <WpPostModal
-        postId={modalPostId}
+        id={modalPost.id}
+        title={modalPost.title.rendered}
         onClose={handleCloseModal}
         />
       }
@@ -47,16 +81,14 @@ const PagePosts = (props) => {
 
                   return(
                     <li post_id={post.id} key={post.id}>
-                      <div className="post-thumbnail">
+                      <div className="post-thumbnail clickable" onClick={()=>handleClick(post.id)}>
                         {
                           post.thumbnail_url &&
                           <img alt='' src={post.thumbnail_url} className="cover-img"/>
                         }
                       </div>
                       <div className="post-details">
-                        <h3 className="post-title">
-                          <Link to={post.guid.rendered}>{post.title.rendered}</Link>
-                        </h3>
+                        <h3 className="post-title clickable" onClick={()=>handleClick(post.id)}>{post.title.rendered}</h3>
                         <div className="post-excerpt">
                           {post.excerpt.rendered}
                         </div>

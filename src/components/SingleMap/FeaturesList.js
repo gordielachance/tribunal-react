@@ -19,6 +19,7 @@ const FeaturesList = props => {
     updateFeaturesList,
     getPointByPostId,
     getClusterByPostId,
+    getMapPostById,
     getPostUrl,
     getMapUrl
   } = useMap();
@@ -154,8 +155,10 @@ const FeaturesList = props => {
 
   }
 
-  const toggleClickPost = post_id => {
-    navigate(getPostUrl(post_id));
+  const toggleClickPost = postId => {
+    const post = getMapPostById(postId);
+    if (!post) return;
+    navigate(getPostUrl(post));
   }
 
   const toggleHoverPost = async(post_id,bool) => {

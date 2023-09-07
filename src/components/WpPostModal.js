@@ -10,34 +10,26 @@ import { useApp } from '../AppContext';
 
 const WpPostModal = (props) => {
   const iframeContent = useRef(null);
-  const [title,setTitle] = useState('...');
+  const [title,setTitle] = useState(props.title ?? '...');
   const [loading,setLoading] = useState(false);
   const [url,setUrl] = useState();
   const {verticalScreen,mobileScreen} = useApp();
 
   useEffect(()=>{
 
-    if (props.postId){
+    let url;
+
+    if (props.id){
       setLoading(true);
-      const url = getWpIframePostUrl(props.postId);
-      console.log("LOAD POST ID IN MODAL",props.postId,url);
-      setUrl(url);
-    }else{
-      setUrl();
+      url = getWpIframePostUrl(props.id);
+      console.log("LOAD POST ID IN MODAL",props.id,url);
     }
 
-  },[props.postId])
+    setUrl(url);
+
+  },[props.id])
 
   const handleLoaded = () => {
-    const iframeItem = iframeContent.current;
-
-    try{
-      const iFrameTitle = iframeItem.contentWindow.document.title;
-      setTitle(iFrameTitle);
-    } catch (error) {
-      DEBUG && console.log("Error getting iframe title",error);
-    }
-
     setLoading(false);
   }
 

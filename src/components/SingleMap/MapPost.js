@@ -31,96 +31,38 @@ const MapPost = (props) => {
   const {
     mapboxMap,
     mapData,
-    setMapData,
+    setMapId,
     mapHasInit,
     activeFeature,
     featuresFilter,
     layersDisabled,
     getPointUrl,
-    assignAreasToPoints
+    assignAreasToPoints,
+    getMapPostById
   } = useMap();
 
-  const [modalPostId,setModalPostId] = useState();
+  const [modalPost,setModalPost] = useState();
 
   const [item,setItem] = useState();
 
-
-
-
-  //load map on init
+  //pass ID to context
   useEffect(()=>{
-
-    let isSubscribed = true;
-
-    const fetchData = async mapId => {
-	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{mapbox:true});
-			if (isSubscribed) {
-
-        /*
-        Keep this for dev purpose
-
-        //add areas as an array in the point properties
-      	const assignAreasToPoints = data => {
-          const areas = data.sources.areas?.data.features || [];
-          const features = data.sources.points?.data.features || [];
-
-          areas.forEach(area=>{
-            features.forEach(feature=>{
-              const within = turf.booleanPointInPolygon(feature, area);
-              if (within){
-                feature.properties.areas = (feature.properties.areas || []).concat(area.properties.slug);
-              }
-            })
-          })
-        }
-
-        //remove no features areas
-      	const removeEmptyAreaTerms = data => {
-          const features = data.sources.points?.data.features || [];
-          const areaFeatures = features.filter(feature=>(feature.properties.areas || []).length > 0);
-
-          let areaSlugs = areaFeatures.map(feature=>feature.properties.areas).flat();
-      		areaSlugs = [...new Set(areaSlugs)];//make unique
-
-          //remove unused areas
-          data.terms = data.terms
-            .filter(term=>{
-              if (term.taxonomy === 'tdp_area'){
-                return areaSlugs.includes(term.slug);
-              }else{
-                return true;
-              }
-            })
-
-        }
-
-        assignAreasToPoints(data);
-        removeEmptyAreaTerms(data);
-
-        */
-
-        DEBUG && console.log("GOT MAP ITEM",mapPostId,JSON.parse(JSON.stringify(data || [])))
-        setMapData(data);
-	    }
-		}
-
-	  fetchData(props.id);
-
-		//clean up fn
-		return () => isSubscribed = false;
-
+    setMapId(props.id);
   },[props.id])
 
   useEffect(()=>{
 
-    let postId = undefined;
+    if (mapData === undefined) return;
+
+    let post = undefined;
 
     if ( (urlItemType==='posts') && activeFeature){
-      postId = activeFeature?.properties.post_id;
+      const postId = activeFeature?.properties.post_id;
+      post = getMapPostById(postId);
     }
-    setModalPostId(postId);
+    setModalPost(post);
 
-  },[activeFeature,urlItemType])
+  },[mapData,activeFeature,urlItemType])
 
   const handleCloseModal = () => {
     const url = getPointUrl(activeFeature.properties.id);
@@ -130,9 +72,10 @@ const MapPost = (props) => {
   return (
     <div className="page-content" id={`map-${props.id}`}>
       {
-        ( modalPostId !== undefined ) &&
+        ( modalPost !== undefined ) &&
         <WpPostModal
-        postId={modalPostId}
+        id={modalPost?.id}
+        title={modalPost?.title.rendered}
         onClose={handleCloseModal}
         />
       }

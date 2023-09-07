@@ -26,6 +26,7 @@ const Sidebar = (props) => {
   const {
     mapboxMap,
     mapData,
+    mapTerm,
     mapHasInit
   } = useMap();
 
@@ -76,7 +77,7 @@ const Sidebar = (props) => {
               <Loader />
             </Dimmer>
               <div id="map-header">
-                <h3>{mapData?.post.name ?? 'Carte'}</h3>
+                <h3>{mapTerm?.name ?? 'Carte'}</h3>
                 <Menu id="map-menu" pointing secondary>
                   <Menu.Item
                       id="map-menu-index"

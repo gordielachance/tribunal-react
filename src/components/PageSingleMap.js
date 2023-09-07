@@ -17,7 +17,7 @@ const PageSingleMap = (props) => {
     <div className="page-container">
       <div id="singleMapPage" className="page">
         <MapProvider>
-          <MapPost id={mapPostId}/>
+          <MapPost id={parseInt(mapPostId)}/>
         </MapProvider>
       </div>
     </div>
