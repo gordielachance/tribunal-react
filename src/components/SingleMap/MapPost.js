@@ -74,8 +74,7 @@ const MapPost = (props) => {
       {
         ( modalPost !== undefined ) &&
         <WpPostModal
-        id={modalPost?.id}
-        title={modalPost?.title.rendered}
+        post={modalPost}
         onClose={handleCloseModal}
         />
       }

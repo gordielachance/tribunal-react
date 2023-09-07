@@ -3,6 +3,30 @@ import { Link,useParams,useNavigate,useLocation } from 'react-router-dom';
 import { Loader } from 'semantic-ui-react';
 import PageMenu from "./PageMenu";
 import WpPostModal from "./WpPostModal";
+import he from 'he';
+
+const SinglePost = props => {
+  const post = props.post;
+  const post_title = he.decode(post.title.rendered);
+  const post_excerpt = he.decode(post.excerpt.rendered);
+
+  return(
+    <li post_id={post.id}>
+      <div className="post-thumbnail clickable" onClick={props.onClick}>
+        {
+          post.thumbnail_url &&
+          <img alt='' src={post.thumbnail_url} className="cover-img"/>
+        }
+      </div>
+      <div className="post-details">
+        <h3 className="post-title clickable" onClick={props.onClick}>{post_title}</h3>
+        <div className="post-excerpt">
+          {post_excerpt}
+        </div>
+      </div>
+    </li>
+  )
+}
 
 const PagePosts = (props) => {
   const location = useLocation();
@@ -58,8 +82,7 @@ const PagePosts = (props) => {
       {
         ( modalPost !== undefined ) &&
         <WpPostModal
-        id={modalPost.id}
-        title={modalPost.title.rendered}
+        post={modalPost}
         onClose={handleCloseModal}
         />
       }
@@ -77,25 +100,14 @@ const PagePosts = (props) => {
             <ul className="page-content posts-list">
               {
                 //TOUFIX URGENT HANDLE NO POSTS
-                (props.posts || []).map((post,key) => {
-
+                (props.posts || []).map((post,k) => {
                   return(
-                    <li post_id={post.id} key={post.id}>
-                      <div className="post-thumbnail clickable" onClick={()=>handleClick(post.id)}>
-                        {
-                          post.thumbnail_url &&
-                          <img alt='' src={post.thumbnail_url} className="cover-img"/>
-                        }
-                      </div>
-                      <div className="post-details">
-                        <h3 className="post-title clickable" onClick={()=>handleClick(post.id)}>{post.title.rendered}</h3>
-                        <div className="post-excerpt">
-                          {post.excerpt.rendered}
-                        </div>
-                      </div>
-                    </li>
+                    <SinglePost
+                    key={k}
+                    post={post}
+                    onClick={()=>handleClick(post.id)}
+                    />
                   )
-
                 })
               }
             </ul>
