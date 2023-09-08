@@ -34,12 +34,9 @@ export function MapProvider({children}){
 
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
 
+	const [disabledTermIds,setDisabledTermIds] = useState([]);
   const [featuresFilter,setFeaturesFilter] = useState();
 	const [isolationFilter,setIsolationFilter] = useState();
-
-  const [disabledTermIds,setDisabledTermIds] = useState([]);
-	const [disabledAreaIds,setDisabledAreaIds] = useState([]);
-  const [disabledFormatIds,setDisabledFormatIds] = useState([]);
 
   const [openFilterSlugs,setOpenFilterSlugs] = useState([]);
 
@@ -81,28 +78,19 @@ export function MapProvider({children}){
 		})
 	}
 
-	/*
-	//hover features  matching this tag
-	const toggleHoverTermId = (termId,bool) => {
 
-    const matches = filterFeaturesByTermId(mapFeatureCollection(),termId);
+	const filterFeaturesByTermSlug = (features,taxonomy,slug) => {
 
-    (matches || []).forEach(feature=>{
-      setMapFeatureState('points',feature.id,'hover',bool);
-    })
+		if (!slug) return false;
 
-  }
-	//hover features matching this format
-	const toggleHoverFormat = (slug,bool) => {
+		const propertyName = getPropertyNameFromTaxonomy(taxonomy);
+		if (!propertyName) return false;
 
-    const matches = filterFeaturesByFormat(mapFeatureCollection(),slug);
-
-    matches.forEach(feature=>{
-      setMapFeatureState('points',feature.id,'hover',bool);
-    })
-
-  }
-	*/
+		return (features || []).filter(feature=>{
+			const format = feature.properties[propertyName];
+			return format === slug;
+		})
+	}
 
 	const getMapTermById = id => {
 		return (mapData.terms || []).find(item => id === item.term_id);
@@ -213,6 +201,9 @@ export function MapProvider({children}){
 	};
 
   const toggleIsolateTerm = (term,bool) => {
+
+		if (!term) return;
+
 		if (bool){
 			const filter = filterInTerm(term);
 			setIsolationFilter(filter);
@@ -222,41 +213,29 @@ export function MapProvider({children}){
 
 		switch(term.taxonomy){
 			case 'tdp_area':
-				toggleIsolateArea(term,bool);
+
+				const area = getAreaByTermId(term.term_id);
+				if(area===undefined) return;
+
+				//hover area
+				setMapFeatureState('areas',area.properties.id,'hover',bool);
 			break;
 		}
 
   }
 
-	const filterFeaturesByFormat = (features,slug) => {
-		return (features || []).filter(feature=>{
-			const format = feature.properties?.format;
-			return format === slug;
-		})
-	}
+	/*
+	//hover features  matching this tag
+	const toggleHoverTermId = (termId,bool) => {
 
-	const toggleIsolateArea = (term,bool) =>{
+    const matches = filterFeaturesByTermId(mapFeatureCollection(),termId);
 
-		//get area feature
-		const feature = mapAreaCollection().find(feature => feature.properties.term_id === term.term_id);
-		if (!feature) return;
+    (matches || []).forEach(feature=>{
+      setMapFeatureState('points',feature.id,'hover',bool);
+    })
 
-		const areaId = feature.properties.id;
-		if(areaId===undefined) return;
-
-		//hover area
-		setMapFeatureState('areas',areaId,'hover',bool);
-
-		//area isolation filter
-
-		if (bool){
-			const filter = filterWithinArea(feature);
-			setIsolationFilter(filter);
-		}else{
-			setIsolationFilter();
-		}
-
-	}
+  }
+	*/
 
 	const filterInTerm = term => {
 		if (!term) return;
@@ -283,50 +262,10 @@ export function MapProvider({children}){
 
 	}
 
-	const filterInFormat = slug => {
-		return ['in', ['get', 'format'], ['literal', slug]];
-	}
-
-	const filterExcludeFormats = slugs => {
-		if ( (slugs || []).length === 0) return;
-
-		const filters = slugs.map(slug=>{
-			return filterInFormat(slug)
-		})
-
-		let filter = ['any'].concat(filters);
-		filter = ['!',filter];//exclude all
-		return filter;
-	}
-
-	const filterWithinAreaId = areaId => {
-		const feature = getMapAreaById(areaId);
-		return filterWithinArea(feature);
-	}
-
-	const filterWithinArea = feature => {
-		return ['within', feature];
-	}
-
-	const filterExcludeAreaIds = areaIds => {
-		if ( (areaIds || []).length === 0) return;
-
-		const filters = areaIds.map(itemId=>{
-			return filterWithinAreaId(itemId)
-		})
-
-		let filter = ['any'].concat(filters);
-		filter = ['!',filter];//exclude all
-		return filter;
-
-	}
-
-	const filterFeatures = (disabledTermIds,disabledAreaIds,disabledFormatIds) => {
+	const filterFeatures = (disabledTermIds) => {
 
 		let filters = [
-			filterExcludeTermIds(disabledTermIds),
-			filterExcludeAreaIds(disabledAreaIds),
-			filterExcludeFormats(disabledFormatIds),
+			filterExcludeTermIds(disabledTermIds)
 		]
 
 		filters = filters.filter(function(filter) {
@@ -480,9 +419,9 @@ export function MapProvider({children}){
 
 	//features global filter
   useEffect(()=>{
-    const filter = filterFeatures(disabledTermIds,disabledAreaIds,disabledFormatIds);
+    const filter = filterFeatures(disabledTermIds);
     setFeaturesFilter(filter);
-  },[disabledTermIds,disabledAreaIds,disabledFormatIds])
+  },[disabledTermIds])
 
   //set global feature filters
   useEffect(()=>{
@@ -549,10 +488,16 @@ export function MapProvider({children}){
 			.filter(id=>(id!==undefined))
 	};
 
-	const getPointByPostId = post_id => {
+	const getRenderedPointByPostId = post_id => {
 		if (!post_id) return;
 		if (!mapboxMap.current) return null;
 		return (getRenderedPointIds() || []).find(feature => feature.properties?.post_id === post_id);
+	}
+
+	const getAreaByTermId = term_id => {
+		if (!term_id) return;
+		if (!mapboxMap.current) return null;
+		return (mapAreaCollection() || []).find(feature => feature.properties?.term_id === term_id);
 	}
 
 	//Get the cluser ID based on a post ID
@@ -670,7 +615,7 @@ export function MapProvider({children}){
 	  setSortMarkerBy,
 	  setMapFeatureState,
 	  filterFeaturesByTermId,
-	  filterFeaturesByFormat,
+	  filterFeaturesByTermSlug,
 		disabledTermIds,
 	  setDisabledTermIds,
 		toggleTermId,
@@ -678,10 +623,6 @@ export function MapProvider({children}){
 		selectNoTerms,
 		selectSoloTermId,
 	  toggleIsolateTerm,
-		disabledFormatIds,
-	  setDisabledFormatIds,
-		disabledAreaIds,
-	  setDisabledAreaIds,
 	  featuresFilter,
 		mapFeatureCollection,
 		featuresList,
@@ -691,7 +632,7 @@ export function MapProvider({children}){
 		filterTermsByFeatures,
 		openFilterSlugs,
 		setOpenFilterSlugs,
-		getPointByPostId,
+		getRenderedPointByPostId,
 		getClusterByPostId,
 		getMapUrl,
 		getPointUrl,

@@ -17,7 +17,7 @@ const FeaturesList = props => {
     setMapFeatureState,
     activeFeature,
     updateFeaturesList,
-    getPointByPostId,
+    getRenderedPointByPostId,
     getClusterByPostId,
     getMapPostById,
     getPostUrl,
@@ -163,7 +163,7 @@ const FeaturesList = props => {
 
   const toggleHoverPost = async(post_id,bool) => {
     //hover on 'points' layer
-    const point = getPointByPostId(post_id);
+    const point = getRenderedPointByPostId(post_id);
 
     //get feature on 'points' layer
 
