@@ -120,7 +120,7 @@
     margin-left:calc(-100% + #{$sidebarHandleWidth});
   }
   #sidebar-container{
-    padding-bottom: calc(#{$mapLegendHeight} + #{$sidebarHandleWidth} + 1em + 1em);//+padding+sextra
+    padding-bottom: calc( #{$sidebarHandleWidth} + 1em + 1em);//+padding+sextra
   }
 }
 
