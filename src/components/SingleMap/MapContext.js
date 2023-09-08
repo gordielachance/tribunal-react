@@ -39,7 +39,6 @@ export function MapProvider({children}){
 
   const [disabledTermIds,setDisabledTermIds] = useState([]);
 	const [disabledAreaIds,setDisabledAreaIds] = useState([]);
-	const [layersDisabled,setLayersDisabled] = useState([]);
   const [disabledFormatIds,setDisabledFormatIds] = useState([]);
 
   const [openFilterSlugs,setOpenFilterSlugs] = useState([]);
@@ -259,27 +258,6 @@ export function MapProvider({children}){
 
 	}
 
-	const toggleMapLayer = (layerId,bool) => {
-
-		let newDisabled = [...(layersDisabled || [])];
-    const index = newDisabled.indexOf(layerId);
-
-		//default bool
-		if (bool === undefined){
-			bool = (index !== -1);
-		}
-
-		DEBUG && console.log("TOGGLE MAP LAYER",layerId,bool);
-
-		if (!bool) {
-			newDisabled.push(layerId);
-    }else{
-      newDisabled.splice(index, 1);
-    }
-
-		setLayersDisabled(newDisabled);
-	}
-
 	const filterInTerm = term => {
 		if (!term) return;
 
@@ -475,21 +453,30 @@ export function MapProvider({children}){
 
   },[mapHasInit])
 
-	//detect hidden layers
+	//when filters are updated, clear and set clusters source
+  //(it does not work with layer filters, so we have to edit its source)
+
   useEffect(()=>{
-		if (!mapHasInit) return;
+    if (!mapHasInit) return;
+		if (!mapCluster.current) return;
 
-		const hiddenLayers = mapboxMap.current.getStyle().layers.filter(layer => {
-	    return (layer.layout?.visibility === 'none')
-	  })
+    const updateClusters = filter => {
 
-		const hiddenIds = hiddenLayers.map(layer => {
-	    return layer.id;
-	  })
+      // Filter your data based on filterCriteria
+			let newData = JSON.parse(JSON.stringify(mapData.sources.points.data));
 
-		setLayersDisabled(hiddenIds);
+			const randomIndex = Math.floor(Math.random() * newData.features.length);
+			newData.features.splice(randomIndex);
 
-  },[mapHasInit])
+			console.log();
+			console.log("UPDATE DATA FOR CLUSTERS",filter,newData);
+
+      mapboxMap.current.getSource('points').setData(newData);
+    }
+
+		updateClusters(featuresFilter);
+
+  },[mapHasInit,featuresFilter])
 
 	//features global filter
   useEffect(()=>{
@@ -511,20 +498,6 @@ export function MapProvider({children}){
 		}
 
   },[featuresFilter,isolationFilter])
-
-	useEffect(()=>{
-		if (!mapHasInit) return;
-
-		const allLayerIds = mapboxMap.current.getStyle().layers.map(layer=>layer.id);
-		const disabledIds = (layersDisabled || []);
-
-		allLayerIds.forEach(layerId => {
-			const isVisible = !disabledIds.includes(layerId);
-			const value = isVisible ? 'visible' : 'none';
-		  mapboxMap.current.setLayoutProperty(layerId, 'visibility', value);
-		})
-
-  },[layersDisabled])
 
 	useEffect(()=>{
 
@@ -709,8 +682,6 @@ export function MapProvider({children}){
 		disabledAreaIds,
 	  setDisabledAreaIds,
 	  featuresFilter,
-	  layersDisabled,
-	  toggleMapLayer,
 		mapFeatureCollection,
 		featuresList,
 		updateFeaturesList,

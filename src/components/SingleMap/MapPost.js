@@ -35,7 +35,6 @@ const MapPost = (props) => {
     mapHasInit,
     activeFeature,
     featuresFilter,
-    layersDisabled,
     getPointUrl,
     assignAreasToPoints,
     getMapPostById
