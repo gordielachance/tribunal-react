@@ -552,7 +552,7 @@ export function MapProvider({children}){
 	const getPointByPostId = post_id => {
 		if (!post_id) return;
 		if (!mapboxMap.current) return null;
-		return (getRenderedPointIds() || []).find((feature) => feature.properties.post_id === post_id);
+		return (getRenderedPointIds() || []).find(feature => feature.properties?.post_id === post_id);
 	}
 
 	//Get the cluser ID based on a post ID
