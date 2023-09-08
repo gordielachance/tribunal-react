@@ -1,7 +1,7 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {DEBUG,maybeDecodeJson,getPropertyNameFromTaxonomy} from "../../Constants";
+import {DEBUG,maybeDecodeJson,taxonomiesMap,getPropertyNameFromTaxonomy} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import * as turf from "@turf/turf";
 
@@ -24,6 +24,7 @@ export function MapProvider({children}){
 	const [mapHasInit,setMapHasInit] = useState(false);
 
 	const [mapId,setMapId] = useState();
+	const initialMapData = useRef();
 	const [mapData,setMapData] = useState();
 	const [mapTerm,setMapTerm] = useState();
 
@@ -35,8 +36,7 @@ export function MapProvider({children}){
 	const [sortMarkerBy,setSortMarkerBy] = useState('distance');
 
 	const [disabledTermIds,setDisabledTermIds] = useState([]);
-  const [featuresFilter,setFeaturesFilter] = useState();
-	const [isolationFilter,setIsolationFilter] = useState();
+	const [isolationFilter,setIsolationFilter] = useState();//TOUFIX STILL USED ?
 
   const [openFilterSlugs,setOpenFilterSlugs] = useState([]);
 
@@ -262,19 +262,68 @@ export function MapProvider({children}){
 
 	}
 
-	const filterFeatures = (disabledTermIds) => {
+	const filterPointSourceByDisabledTermIds = (disabledTermIds) => {
+		if (!initialMapData.current) return;
+		let newPointsData = initialMapData.current.sources.points.data;
+		newPointsData = JSON.parse(JSON.stringify(newPointsData));//clone
 
-		let filters = [
-			filterExcludeTermIds(disabledTermIds)
-		]
+		const slugProps = Object.values((taxonomiesMap || []));
 
-		filters = filters.filter(function(filter) {
-			return filter !== undefined;
+		const ignorePropValues = {};
+
+		// get all disabled slugs, sorted by taxonomy
+		(disabledTermIds || []).forEach(termId => {
+		  const term = getMapTermById(termId);
+		  if (!term) return;
+		  const propName = getPropertyNameFromTaxonomy(term.taxonomy);
+		  if (!propName) return;
+
+		  // update array
+		  ignorePropValues[propName] = (ignorePropValues[propName] || []).concat(term.slug);
 		});
 
-		//no filters
-		if ( (filters || []).length === 0) return;
-		return ['all'].concat(filters);
+		//console.info("PROPS WITH VALUES TO IGNORE",ignorePropValues);
+
+		//function responsible for ignoring a feature
+		const shouldIgnoreFeature = feature => {
+
+		  for (const propName in ignorePropValues) {
+		    if (feature.properties.hasOwnProperty(propName)) {
+		      const featureValues = feature.properties[propName];
+		      const ignoreValues = ignorePropValues[propName];
+
+					const match = (ignoreValues || []).filter(slug => {
+						const exists = featureValues.includes(slug);
+						if (exists){
+							//console.info(`FILTER OUT FEATURE #${feature.properties.id} BECAUSE PROPERTY '${propName}' CONTAINS '${slug}'`)
+						}
+						return exists;
+					})
+
+		      if (match.length > 0){
+						return true;
+					}
+		    }
+		  }
+
+		  return false;
+		}
+
+		const ignoredFeature = (newPointsData.features || [])
+			.filter(feature => {
+				return shouldIgnoreFeature(feature);
+			})
+
+		const ignoredFeatureIds = (ignoredFeature || [])
+			.map(feature => feature.properties.id)
+
+		const keepFeatures = (newPointsData.features || []).filter(feature => {
+			return !ignoredFeatureIds.includes(feature.properties.id);
+		})
+
+		newPointsData.features = keepFeatures;
+
+		mapboxMap.current.getSource('points').setData(newPointsData);
 	}
 
 	const mapFeatureCollection = () => {
@@ -362,7 +411,10 @@ export function MapProvider({children}){
 
         */
 
+
+				initialMapData.current = data;
         setMapData(data);
+
 	    }
 		}
 
@@ -392,51 +444,10 @@ export function MapProvider({children}){
 
   },[mapHasInit])
 
-	//when filters are updated, clear and set clusters source
-  //(it does not work with layer filters, so we have to edit its source)
-
-  useEffect(()=>{
-    if (!mapHasInit) return;
-		if (!mapCluster.current) return;
-
-    const updateClusters = filter => {
-
-      // Filter your data based on filterCriteria
-			let newData = JSON.parse(JSON.stringify(mapData.sources.points.data));
-
-			const randomIndex = Math.floor(Math.random() * newData.features.length);
-			newData.features.splice(randomIndex);
-
-			console.log();
-			console.log("UPDATE DATA FOR CLUSTERS",filter,newData);
-
-      mapboxMap.current.getSource('points').setData(newData);
-    }
-
-		updateClusters(featuresFilter);
-
-  },[mapHasInit,featuresFilter])
-
 	//features global filter
   useEffect(()=>{
-    const filter = filterFeatures(disabledTermIds);
-    setFeaturesFilter(filter);
+    const newPointsData = filterPointSourceByDisabledTermIds(disabledTermIds);
   },[disabledTermIds])
-
-  //set global feature filters
-  useEffect(()=>{
-    if (mapboxMap.current === undefined) return;
-
-		mapboxMap.current.setFilter('points',featuresFilter);
-
-		if (isolationFilter){
-			DEBUG && console.log("FEATURES ISOLATION FILTER",isolationFilter);
-			mapboxMap.current.setFilter('points',isolationFilter);
-		}else{
-			DEBUG && console.log("FEATURES GLOBAL FILTER",featuresFilter);
-		}
-
-  },[featuresFilter,isolationFilter])
 
 	useEffect(()=>{
 
@@ -623,7 +634,6 @@ export function MapProvider({children}){
 		selectNoTerms,
 		selectSoloTermId,
 	  toggleIsolateTerm,
-	  featuresFilter,
 		mapFeatureCollection,
 		featuresList,
 		updateFeaturesList,
