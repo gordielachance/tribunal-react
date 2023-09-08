@@ -10,7 +10,7 @@ const TermItem = props => {
   const {
     mapData,
     disabledTermIds,
-    toggleIsolateTerm,
+    toggleHoverTerm,
     toggleTermId,
     selectSoloTermId,
     getFeaturesByTerm
@@ -40,8 +40,8 @@ const TermItem = props => {
     description={term.description}
     active={!isDisabled(term)}
     onClick={e=>handleClick(e,term)}
-    onMouseEnter={e=>toggleIsolateTerm(term,true)}
-    onMouseLeave={e=>toggleIsolateTerm(term,false)}
+    onMouseEnter={e=>toggleHoverTerm(term,true)}
+    onMouseLeave={e=>toggleHoverTerm(term,false)}
     count={featureCount}
     />
   )

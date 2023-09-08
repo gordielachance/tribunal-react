@@ -72,6 +72,8 @@ export function MapProvider({children}){
 		const propertyName = getPropertyNameFromTaxonomy(term.taxonomy);
 		if (!propertyName) return false;
 
+		//console.info(`FILTER FEATURES FOR TERM '${term.slug}' OF TYPE '${term.taxonomy}'`)
+
 		return (features || []).filter(feature=>{
 			const slugs = feature.properties[propertyName] || [];
 			return slugs.includes(term.slug);
@@ -213,29 +215,35 @@ export function MapProvider({children}){
 
 		switch(term.taxonomy){
 			case 'tdp_area':
-
-				const area = getAreaByTermId(term.term_id);
-				if(area===undefined) return;
-
-				//hover area
-				setMapFeatureState('areas',area.properties.id,'hover',bool);
+				toggleShowArea(term.term_id);
 			break;
 		}
 
   }
 
-	/*
-	//hover features  matching this tag
-	const toggleHoverTermId = (termId,bool) => {
+	const toggleShowArea = (termId,bool) => {
+		const area = getAreaByTermId(termId);
+		if(area===undefined) return;
+		setMapFeatureState('areas',area.properties.id,'hover',bool);
+	}
 
-    const matches = filterFeaturesByTermId(mapFeatureCollection(),termId);
+	//hover features  matching this tag
+	const toggleHoverTerm = (term,bool) => {
+
+		if (!term) return;
+		if (!term.term_id) return;
+
+    const matches = filterFeaturesByTermId(mapFeatureCollection(),term.term_id);
 
     (matches || []).forEach(feature=>{
-      setMapFeatureState('points',feature.id,'hover',bool);
+      setMapFeatureState('points',feature.properties.id,'hover',bool);
     })
 
+		if (term.taxonomy === 'tdp_area'){
+			toggleShowArea(term.term_id,bool);
+		}
+
   }
-	*/
 
 	const filterInTerm = term => {
 		if (!term) return;
@@ -634,6 +642,7 @@ export function MapProvider({children}){
 		selectNoTerms,
 		selectSoloTermId,
 	  toggleIsolateTerm,
+		toggleHoverTerm,
 		mapFeatureCollection,
 		featuresList,
 		updateFeaturesList,
