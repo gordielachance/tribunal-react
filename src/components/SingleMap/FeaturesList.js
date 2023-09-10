@@ -62,12 +62,14 @@ const FeaturesList = props => {
 
   //listen to changes on the map and update features list
   useEffect(() => {
+
     // Define the listener function
     const updateList = () => {
       updateFeaturesList(mapboxMap.current);
     };
 
     if (mapboxMap.current) {
+      updateList();//first init
       mapboxMap.current.on('idle', updateList);
     }
 
