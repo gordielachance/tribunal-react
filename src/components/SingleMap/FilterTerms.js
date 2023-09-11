@@ -5,7 +5,8 @@ import FilterItem from './FilterItem';
 
 const TermItem = props => {
 
-  const { term } = props;
+  const { termId, ...otherProps } = props;
+
 
   const {
     mapData,
@@ -13,11 +14,12 @@ const TermItem = props => {
     toggleHoverTerm,
     toggleTermId,
     selectSoloTermId,
-    getFeaturesByTerm
+    getRenderedFeaturesByTermId,
+    getMapTermById
   } = useMap();
 
-
-  const featureCount = (getFeaturesByTerm(term.taxonomy,term.slug) || []).length;
+  const term = getMapTermById(termId);
+  const featureCount = (getRenderedFeaturesByTermId(term.term_id) || []).length;
 
 
   const handleClick = (e,term) => {
@@ -98,7 +100,7 @@ const TermsList = (props) => {
               active={isActive}
               onClick={() => toggleOpen(term,!isActive)}
             >
-              <TermItem term={term} />
+              <TermItem termId={term.term_id} />
               {hasChildren && (
                 <Icon
                   name={`angle ${isActive ? "up" : "down"}`}

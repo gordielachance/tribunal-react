@@ -3,12 +3,9 @@ import { Link,useParams,useNavigate,useLocation } from 'react-router-dom';
 import { Loader } from 'semantic-ui-react';
 import PageMenu from "./PageMenu";
 import WpPostModal from "./WpPostModal";
-import he from 'he';
 
 const SinglePost = props => {
   const post = props.post;
-  const post_title = he.decode(post.title.rendered);
-  const post_excerpt = he.decode(post.excerpt.rendered);
 
   return(
     <li post_id={post.id}>
@@ -19,9 +16,9 @@ const SinglePost = props => {
         }
       </div>
       <div className="post-details">
-        <h3 className="post-title clickable" onClick={props.onClick}>{post_title}</h3>
+        <h3 className="post-title clickable" onClick={props.onClick}>{post.title}</h3>
         <div className="post-excerpt">
-          {post_excerpt}
+          {post.excerpt}
         </div>
       </div>
     </li>

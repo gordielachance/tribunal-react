@@ -1,7 +1,5 @@
 import React, {useState,useEffect,useRef} from 'react';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
-import he from 'he';
-
 import classNames from "classnames";
 import {DEBUG,getWpIframePostUrl} from "../Constants";
 import {BGPopup} from "./PageBackgrounds";
@@ -15,8 +13,6 @@ const WpPostModal = (props) => {
   const [loading,setLoading] = useState(false);
   const [url,setUrl] = useState();
   const {verticalScreen,mobileScreen} = useApp();
-
-  const title = he.decode(props.post?.title.rendered);//decode HTML entities
 
   useEffect(()=>{
 
@@ -48,7 +44,7 @@ const WpPostModal = (props) => {
     >
       <Modal.Header>
       {
-          <span>{title}</span>
+          <span>{props.post?.title}</span>
       }
       </Modal.Header>
         <Dimmer.Dimmable as={Modal.Content} dimmed={loading}>

@@ -17,7 +17,7 @@ const FeaturesList = props => {
     setMapFeatureState,
     activeFeature,
     updateFeaturesList,
-    getRenderedPointByPostId,
+    getRenderedFeatureByPostId,
     getClusterByPostId,
     getMapPostById,
     getPostUrl,
@@ -163,17 +163,17 @@ const FeaturesList = props => {
     navigate(getPostUrl(post));
   }
 
-  const toggleHoverPost = async(post_id,bool) => {
+  const toggleHoverPost = async(postId,bool) => {
     //hover on 'points' layer
-    const point = getRenderedPointByPostId(post_id);
+    const feature = getRenderedFeatureByPostId(postId);
 
     //get feature on 'points' layer
 
-    if (point){
-      setMapFeatureState('points',point.id,'hover',bool);
+    if (feature){
+      setMapFeatureState('points',feature.id,'hover',bool);
     }else{
       //hover on 'pointClusters' layer
-      const cluster = await getClusterByPostId(post_id);
+      const cluster = await getClusterByPostId(postId);
       if (cluster){
         const clusterId = cluster.properties.cluster_id;
         //TOUFIX
@@ -190,22 +190,22 @@ const FeaturesList = props => {
 
         {
           sortedFeatures.map((feature,k) => {
-
-            const post_id = feature.properties.post_id;
+            const postId = feature.properties.post_id;
+            const postType = feature.properties.type;
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
 
             return <li
             key={k}
-            onMouseEnter={e=>toggleHoverPost(post_id,true)}
-            onMouseLeave={e=>toggleHoverPost(post_id,false)}
-            onClick={e=>{toggleClickPost(post_id)}}
+            onMouseEnter={e=>toggleHoverPost(postId,true)}
+            onMouseLeave={e=>toggleHoverPost(postId,false)}
+            onClick={e=>{toggleClickPost(postId)}}
             className={classNames({
               active:   active
             })}
             >
             <p className='sorted-value'>{sortValue}</p>
-            <FeatureCard feature={feature}/>
+            <FeatureCard type={postType} id={postId}/>
             </li>
             /*
 

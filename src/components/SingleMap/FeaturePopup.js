@@ -20,6 +20,8 @@ const FeaturePopup = props => {
   } = useMap();
   const popupRef = useRef();
   const feature = activeFeature;
+  const postId = activeFeature?.properties.post_id;
+  const postType = activeFeature?.properties.type;
 
   //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
   const popup = new mapboxgl.Popup({
@@ -28,15 +30,14 @@ const FeaturePopup = props => {
 
 
   const handleClose = () => {
-    DEBUG && console.log("CLOSE FEATURE POPUP",feature.properties.id);
+    DEBUG && console.log("CLOSE POST POPUP",postId);
     const url = getMapUrl();
     navigate(url);
   }
 
   const handleOpen = e => {
-    DEBUG && console.log("HANDLE OPEN",feature.properties.id);
+    DEBUG && console.log("OPEN POST POPUP",postId);
     e.preventDefault();
-    const postId = feature.properties.post_id;
     const post = getMapPostById(postId);
     if (!post) return;
     const feature_url = getPostUrl(post);
@@ -64,9 +65,7 @@ const FeaturePopup = props => {
       <div style={{ display: "none" }}>
         <div ref={popupRef}>
           <div className="feature-popup">
-            <FeatureCard
-            feature={feature}
-            />
+            <FeatureCard type={postType} id={postId}/>
             {
               feature.properties.has_more &&
               <div className="popup-actions">

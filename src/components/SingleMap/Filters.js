@@ -43,24 +43,24 @@ const Filters = (props) => {
   const {
     mapFeatureCollection,
     featuresList,
-    filterTermsByFeatures,
+    getTermsForFeatures,
     selectAllTerms,
     selectNoTerms,
     openFilterSlugs,
     setOpenFilterSlugs
   } = useMap();
 
-  const categories = filterTermsByFeatures('category',mapFeatureCollection());
-  //const renderedCategories = filterTermsByFeatures('category',featuresList);
+  const categories = getTermsForFeatures('category',mapFeatureCollection());
+  //const renderedCategories = getTermsForFeatures('category',featuresList);
 
-  const tags = filterTermsByFeatures('post_tag',mapFeatureCollection());
-  //const renderedTags = filterTermsByFeatures('post_tag',featuresList);
+  const tags = getTermsForFeatures('post_tag',mapFeatureCollection());
+  //const renderedTags = getTermsForFeatures('post_tag',featuresList);
 
-  const formats = filterTermsByFeatures('tdp_format',mapFeatureCollection());
-  //const renderedFormats = filterTermsByFeatures('tdp_format',featuresList);
+  const formats = getTermsForFeatures('tdp_format',mapFeatureCollection());
+  //const renderedFormats = getTermsForFeatures('tdp_format',featuresList);
 
-  const areas = filterTermsByFeatures('tdp_area',mapFeatureCollection());
-  //const renderedAreas = filterTermsByFeatures('tdp_area',featuresList);
+  const areas = getTermsForFeatures('tdp_area',mapFeatureCollection());
+  //const renderedAreas = getTermsForFeatures('tdp_area',featuresList);
 
   //const mapAreas = getFeaturesAreas(mapFeatureCollection());
   //const renderedAreas = getFeaturesAreas(featuresList);

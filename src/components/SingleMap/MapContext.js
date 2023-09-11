@@ -75,22 +75,10 @@ export function MapProvider({children}){
 		//console.info(`FILTER FEATURES FOR TERM '${term.slug}' OF TYPE '${term.taxonomy}'`)
 
 		return (features || []).filter(feature=>{
-			const slugs = feature.properties[propertyName] || [];
-			return slugs.includes(term.slug);
-		})
-	}
-
-
-	const filterFeaturesByTermSlug = (features,taxonomy,slug) => {
-
-		if (!slug) return false;
-
-		const propertyName = getPropertyNameFromTaxonomy(taxonomy);
-		if (!propertyName) return false;
-
-		return (features || []).filter(feature=>{
-			const format = feature.properties[propertyName];
-			return format === slug;
+			const postId = feature.properties.post_id;
+			const post = getMapPostById(postId);
+			const postTermIds = post[propertyName] || [];
+			return postTermIds.includes(term.term_id);
 		})
 	}
 
@@ -230,8 +218,7 @@ export function MapProvider({children}){
 	//hover features  matching this tag
 	const toggleHoverTerm = (term,bool) => {
 
-		if (!term) return;
-		if (!term.term_id) return;
+		if (!term?.term_id) return;
 
     const matches = filterFeaturesByTermId(mapFeatureCollection(),term.term_id);
 
@@ -277,9 +264,9 @@ export function MapProvider({children}){
 
 		const slugProps = Object.values((taxonomiesMap || []));
 
-		const ignorePropValues = {};
+		const taxonomyIgnoreIds = {};
 
-		// get all disabled slugs, sorted by taxonomy
+		// get all disabled IDs sorted by taxonomy
 		(disabledTermIds || []).forEach(termId => {
 		  const term = getMapTermById(termId);
 		  if (!term) return;
@@ -287,23 +274,24 @@ export function MapProvider({children}){
 		  if (!propName) return;
 
 		  // update array
-		  ignorePropValues[propName] = (ignorePropValues[propName] || []).concat(term.slug);
+		  taxonomyIgnoreIds[propName] = (taxonomyIgnoreIds[propName] || []).concat(term.term_id);
 		});
-
-		//console.info("PROPS WITH VALUES TO IGNORE",ignorePropValues);
 
 		//function responsible for ignoring a feature
 		const shouldIgnoreFeature = feature => {
 
-		  for (const propName in ignorePropValues) {
-		    if (feature.properties.hasOwnProperty(propName)) {
-		      const featureValues = feature.properties[propName];
-		      const ignoreValues = ignorePropValues[propName];
+			const postId = feature.properties.post_id;
+			const post = getMapPostById(postId);
 
-					const match = (ignoreValues || []).filter(slug => {
-						const exists = featureValues.includes(slug);
+		  for (const propName in taxonomyIgnoreIds) {
+		    if (post.hasOwnProperty(propName)) {
+		      const postTermIds = post[propName];
+		      const termIdsToIgnore = taxonomyIgnoreIds[propName];
+
+					const match = (termIdsToIgnore || []).filter(id => {
+						const exists = postTermIds.includes(id);
 						if (exists){
-							//console.info(`FILTER OUT FEATURE #${feature.properties.id} BECAUSE PROPERTY '${propName}' CONTAINS '${slug}'`)
+							//console.info(`FILTER OUT FEATURE #${post.id} BECAUSE PROPERTY '${propName}' CONTAINS '${slug}'`)
 						}
 						return exists;
 					})
@@ -348,21 +336,29 @@ export function MapProvider({children}){
 		return items;
 	}
 
-	const getFeaturesByFormat = format => {
-		if (!format) return;
-	  return (mapFeatureCollection() || []).filter(feature => feature.properties.format === format);
+	const getRenderedFeatureByPostId = postId => {
+		if (!postId) return;
+		if (!mapboxMap.current) return null;
+
+		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
+		return (features || []).find(feature => {
+			return (feature.properties.post_id === postId);
+		});
+
 	}
 
-	const getFeaturesByTerm = (taxonomy,slug) => {
-		if (!slug) return;
-		const propName = getPropertyNameFromTaxonomy(taxonomy);
+	const getRenderedFeaturesByTermId = termId => {
+		if (!termId) return;
+		const term = getMapTermById(termId);
+		const propName = getPropertyNameFromTaxonomy(term.taxonomy);
 		if (!propName) return;
-	  return (mapFeatureCollection() || []).filter(feature => feature.properties[propName].includes(slug) );
-	}
 
-	const getFeaturesByAreaId = areaId => {
-		if (areaId === undefined) return;
-		return (mapFeatureCollection() || []).filter(feature => feature.properties.areas.includes(areaId) );
+	  return (mapFeatureCollection() || [])
+			.filter(feature => {
+				const postId = feature.properties.post_id;
+				const post = getMapPostById(postId);
+				return (post[propName] || []).includes(termId);
+			});
 	}
 
 	//INIT
@@ -373,7 +369,7 @@ export function MapProvider({children}){
     let isSubscribed = true;
 
     const fetchData = async mapId => {
-	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{mapbox:true});
+	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{format:'frontend'});
 			if (isSubscribed) {
 
         /*
@@ -476,42 +472,37 @@ export function MapProvider({children}){
 
 	},[activeFeature])
 
-	const getTermsFromSlugs = (taxonomy,slugs) => {
-		slugs = maybeDecodeJson(slugs);
-		slugs = [...new Set(slugs||[])];
-		return slugs.map(slug=>{
-			return getTerms(taxonomy).find(item => item.slug === slug);
-		})
-	}
-
-	const filterTermsByFeatures = (taxonomy,features) => {
-	  let slugs = [];
+	const getTermsForFeatures = (taxonomy,features) => {
+	  let termIds = [];
 
 		const propName = getPropertyNameFromTaxonomy(taxonomy);
 		if (!propName) return;
 
-	  (features || []).forEach(feature => {
-			const terms = maybeDecodeJson(feature.properties[propName]) || [];
-	    slugs = slugs.concat(terms);
+		//get term IDs by post
+	  termIds = (features || []).map(feature => {
+			const postId = feature.properties.post_id;
+			const post = getMapPostById(postId);
+			return post[propName] ?? [];
 	  });
 
-		slugs = [...new Set(slugs)];
-	  return getTermsFromSlugs(taxonomy,slugs);
+		termIds = termIds.flat();//flatten
+		termIds = [...new Set(termIds)];//unique
+
+		//get terms
+		const terms = (termIds || []).map(id => {
+			return getMapTermById(id);
+		});
+
+		return terms;
 	}
 
-	const getRenderedPointIds = () => {
+	const getRenderedPostIds = () => {
 		if (!mapboxMap.current) return null;
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
 		return (features || [])
 			.map((feature) => feature.properties.post_id)
-			.filter(id=>(id!==undefined))
+			.filter(postId=>(postId!==undefined))
 	};
-
-	const getRenderedPointByPostId = post_id => {
-		if (!post_id) return;
-		if (!mapboxMap.current) return null;
-		return (getRenderedPointIds() || []).find(feature => feature.properties?.post_id === post_id);
-	}
 
 	const getAreaByTermId = term_id => {
 		if (!term_id) return;
@@ -583,7 +574,7 @@ export function MapProvider({children}){
 	    return clusterPostIds.flat();
 	  };
 
-	  const pointPostIds = getRenderedPointIds();
+	  const pointPostIds = getRenderedPostIds();
 	  const clusterPostIds = await getClustersPostIds();
 	  let postIds = pointPostIds
 			.concat(clusterPostIds)
@@ -634,7 +625,6 @@ export function MapProvider({children}){
 	  setSortMarkerBy,
 	  setMapFeatureState,
 	  filterFeaturesByTermId,
-	  filterFeaturesByTermSlug,
 		disabledTermIds,
 	  setDisabledTermIds,
 		toggleTermId,
@@ -647,17 +637,16 @@ export function MapProvider({children}){
 		featuresList,
 		updateFeaturesList,
 		mapAreaCollection,
-		getTermsFromSlugs,
-		filterTermsByFeatures,
+		getMapTermById,
+		getTermsForFeatures,
 		openFilterSlugs,
 		setOpenFilterSlugs,
-		getRenderedPointByPostId,
+		getRenderedFeatureByPostId,
+		getRenderedFeaturesByTermId,
 		getClusterByPostId,
 		getMapUrl,
 		getPointUrl,
 		getPostUrl,
-		getFeaturesByTerm,
-		getFeaturesByAreaId,
 		getTermChildren,
 		mapId,
 		mapTerm,
