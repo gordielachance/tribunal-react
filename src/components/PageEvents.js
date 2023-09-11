@@ -21,7 +21,7 @@ const PageEvents = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    const data = await DatabaseAPI.getItems('features',{categories:WP_CAT_ID_EVENT,frontend:true});
+  	    const data = await DatabaseAPI.getItems('features',{categories:WP_CAT_ID_EVENT,format:'frontend'});
   			if (isSubscribed) {
   				DEBUG && console.info("...EVENTS POSTS LOADED",data);
           setLoading(false);
