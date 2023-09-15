@@ -191,7 +191,8 @@ const FeaturesList = props => {
         {
           sortedFeatures.map((feature,k) => {
             const postId = feature.properties.post_id;
-            const postType = feature.properties.type;
+            const post = postId ? getMapPostById(postId) : undefined;
+            const postType = post?.type;
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
 
