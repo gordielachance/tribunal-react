@@ -18,15 +18,15 @@ const WpPostModal = (props) => {
 
     let url;
 
-    if (props.post){
+    if (props.id){
       setLoading(true);
-      url = getWpIframePostUrl(props.post.id);
-      console.log("LOAD POST ID IN MODAL",props.post.id,url);
+      url = getWpIframePostUrl(props.id);
+      console.log("LOAD POST ID IN MODAL",props.id,url);
     }
 
     setUrl(url);
 
-  },[props.post])
+  },[props.id])
 
   const handleLoaded = () => {
     setLoading(false);
@@ -44,7 +44,7 @@ const WpPostModal = (props) => {
     >
       <Modal.Header>
       {
-          <span>{props.post?.title}</span>
+          <span>{props.title}</span>
       }
       </Modal.Header>
         <Dimmer.Dimmable as={Modal.Content} dimmed={loading}>

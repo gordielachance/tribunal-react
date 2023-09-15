@@ -85,7 +85,7 @@ export const FeatureCard = props => {
     >
       <div className="feature-header">
         <p className="feature-title">
-          <span className="feature-icon" style={{'--point-color': post?.color}}>
+          <span className="feature-icon" style={{'--point-color': post?.feature_color}}>
             <Icon name="circle"/>
           </span>
           {post?.title}

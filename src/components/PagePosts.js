@@ -79,7 +79,8 @@ const PagePosts = (props) => {
       {
         ( modalPost !== undefined ) &&
         <WpPostModal
-        post={modalPost}
+        id={modalPost.id}
+        title={modalPost.title}
         onClose={handleCloseModal}
         />
       }

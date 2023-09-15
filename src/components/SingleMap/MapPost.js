@@ -39,28 +39,12 @@ const MapPost = (props) => {
     getMapPostById
   } = useMap();
 
-  const [modalPost,setModalPost] = useState();
-
   const [item,setItem] = useState();
 
   //pass ID to context
   useEffect(()=>{
     setMapId(props.id);
   },[props.id])
-
-  useEffect(()=>{
-
-    if (mapData === undefined) return;
-
-    let post = undefined;
-
-    if ( (urlItemType==='posts') && activeFeature){
-      const postId = activeFeature?.properties.post_id;
-      post = getMapPostById(postId);
-    }
-    setModalPost(post);
-
-  },[mapData,activeFeature,urlItemType])
 
   const handleCloseModal = () => {
     const url = getPointUrl(activeFeature.properties.id);
@@ -70,9 +54,10 @@ const MapPost = (props) => {
   return (
     <div className="page-content" id={`map-${props.id}`}>
       {
-        ( modalPost !== undefined ) &&
+        ( (urlItemType==='posts') && activeFeature ) &&
         <WpPostModal
-        post={modalPost}
+        id={activeFeature.properties.post_id}
+        title={activeFeature.properties.post_title}
         onClose={handleCloseModal}
         />
       }
