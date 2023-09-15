@@ -1,7 +1,7 @@
 ////https://gist.github.com/jimode/c1d2d4c1ab33ba1b7be8be8c50d64555
 
 import React, { useState,useEffect,createContext,useRef } from 'react';
-import {DEBUG,maybeDecodeJson,taxonomiesMap,getPropertyNameFromTaxonomy} from "../../Constants";
+import {DEBUG,taxonomiesMap,getPropertyNameFromTaxonomy} from "../../Constants";
 import {getUniqueMapFeatures} from "./MapFunctions";
 import * as turf from "@turf/turf";
 

@@ -1,11 +1,11 @@
-export const APP_VERSION = '114';//when updated, the local data will be cleared
+export const APP_VERSION = '115';//when updated, the local data will be cleared
 
 const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 
 const FORCE_REMOTE_DB = false;
 export const DEBUG = IS_LOCAL;
 
-export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://datas.tribunaldesprejuges.org';
+export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://new.tribunaldesprejuges.org/datas';
 
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_CONTACT = 20;
@@ -50,10 +50,4 @@ export const getWpIframePostUrl = post_id => {
   if (post_id === undefined) return;
   const url = getWpIframeUrl(WP_URL + '/?p=' + post_id);
   return url;
-}
-
-//sometime we parse features from mapbox, sometimes from wordpress.
-//It seems that from mapbox, some properties are rendered as strings while it should be objects.
-export function maybeDecodeJson(value){
-  return (typeof value === 'string') ? JSON.parse(value) : value;
 }
