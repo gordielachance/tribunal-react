@@ -22,9 +22,11 @@ const PageCreations = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    const data = await DatabaseAPI.getItems('features',{categories:WP_CAT_ID_CREATION,format:'frontend'});
-
-        console.log("DATA YO",data);
+  	    const data = await DatabaseAPI.getItems('features',{
+          categories:WP_CAT_ID_CREATION,
+          format:'frontend',
+          orderby:'rand'
+        });
 
   			if (isSubscribed) {
   				DEBUG && console.info("...CREATIONS POSTS LOADED",data);
