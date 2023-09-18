@@ -20,7 +20,7 @@ const FeaturePopup = props => {
   } = useMap();
   const popupRef = useRef();
   const feature = activeFeature;
-  const postId = activeFeature?.properties.post_id;
+  const postId = activeFeature?.properties.wp_id;
   const post = postId ? getMapPostById(postId) : undefined;
   const postType = post?.type;
 

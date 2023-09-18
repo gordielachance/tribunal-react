@@ -56,7 +56,7 @@ const MapPost = (props) => {
       {
         ( (urlItemType==='posts') && activeFeature ) &&
         <WpPostModal
-        id={activeFeature.properties.post_id}
+        id={activeFeature.properties.wp_id}
         title={activeFeature.properties.post_title}
         onClose={handleCloseModal}
         />

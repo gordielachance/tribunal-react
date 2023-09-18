@@ -75,7 +75,7 @@ export function MapProvider({children}){
 		//console.info(`FILTER FEATURES FOR TERM '${term.slug}' OF TYPE '${term.taxonomy}'`)
 
 		return (features || []).filter(feature=>{
-			const postId = feature.properties.post_id;
+			const postId = feature.properties.wp_id;
 			const post = getMapPostById(postId);
 			const postTermIds = post[propertyName] || [];
 			return postTermIds.includes(term.term_id);
@@ -280,7 +280,7 @@ export function MapProvider({children}){
 		//function responsible for ignoring a feature
 		const shouldIgnoreFeature = feature => {
 
-			const postId = feature.properties.post_id;
+			const postId = feature.properties.wp_id;
 			const post = getMapPostById(postId);
 
 		  for (const propName in taxonomyIgnoreIds) {
@@ -342,7 +342,7 @@ export function MapProvider({children}){
 
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
 		return (features || []).find(feature => {
-			return (feature.properties.post_id === postId);
+			return (feature.properties.wp_id === postId);
 		});
 
 	}
@@ -355,7 +355,7 @@ export function MapProvider({children}){
 
 	  return (mapFeatureCollection() || [])
 			.filter(feature => {
-				const postId = feature.properties.post_id;
+				const postId = feature.properties.wp_id;
 				const post = getMapPostById(postId);
 				return (post[propName] || []).includes(termId);
 			});
@@ -480,7 +480,7 @@ export function MapProvider({children}){
 
 		//get term IDs by post
 	  termIds = (features || []).map(feature => {
-			const postId = feature.properties.post_id;
+			const postId = feature.properties.wp_id;
 			const post = getMapPostById(postId);
 			return post[propName] ?? [];
 	  });
@@ -500,14 +500,14 @@ export function MapProvider({children}){
 		if (!mapboxMap.current) return null;
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
 		return (features || [])
-			.map((feature) => feature.properties.post_id)
+			.map((feature) => feature.properties.wp_id)
 			.filter(postId=>(postId!==undefined))
 	};
 
 	const getAreaByTermId = term_id => {
 		if (!term_id) return;
 		if (!mapboxMap.current) return null;
-		return (mapAreaCollection() || []).find(feature => feature.properties?.term_id === term_id);
+		return (mapAreaCollection() || []).find(feature => feature.properties?.wp_id === term_id);
 	}
 
 	//Get the cluser ID based on a post ID
@@ -549,7 +549,7 @@ export function MapProvider({children}){
 	      }
 
 	      // Extract individual point IDs from the leaves
-	      const ids = leaves.map((leaf) => leaf.properties.post_id);
+	      const ids = leaves.map((leaf) => leaf.properties.wp_id);
 
 	      resolve(ids);
 	    });
@@ -585,7 +585,7 @@ export function MapProvider({children}){
 	  // Filter source data
 		const features = mapFeatureCollection();
 	  let data = features
-			.filter((feature) => postIds.includes(feature.properties.post_id));
+			.filter((feature) => postIds.includes(feature.properties.wp_id));
 
 	  DEBUG && console.info("UPDATED FEATURES LIST",data.length);
 	  setFeaturesList(data);

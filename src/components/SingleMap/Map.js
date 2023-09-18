@@ -137,7 +137,7 @@ const Map = (props) => {
         break;
         case 'posts':
           return mapFeatureCollection()
-            .find(feature => feature.properties.post_id === id);
+            .find(feature => feature.properties.wp_id === id);
         break;
       }
     }

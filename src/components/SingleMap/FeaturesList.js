@@ -190,7 +190,7 @@ const FeaturesList = props => {
 
         {
           sortedFeatures.map((feature,k) => {
-            const postId = feature.properties.post_id;
+            const postId = feature.properties.wp_id;
             const post = postId ? getMapPostById(postId) : undefined;
             const postType = post?.type;
             const sortValue = getSortByText(feature);
