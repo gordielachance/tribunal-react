@@ -206,7 +206,7 @@ const FeaturesList = props => {
             })}
             >
             <p className='sorted-value'>{sortValue}</p>
-            <FeatureCard type={postType} id={postId}/>
+            <FeatureCard type={postType} id={postId} color={feature.properties.color}/>
             </li>
             /*
 
