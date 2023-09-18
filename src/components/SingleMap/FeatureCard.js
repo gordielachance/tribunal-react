@@ -85,7 +85,7 @@ export const FeatureCard = props => {
     >
       <div className="feature-header">
         <p className="feature-title">
-          <span className="feature-icon" style={color ? {'--feature-color': color} : ''}>
+          <span className="feature-icon" style={color ? {'--feature-color': color} : undefined}>
             <Icon name="circle"/>
           </span>
           {post?.title}
