@@ -189,8 +189,10 @@ const Map = (props) => {
     if (!mapboxMap.current) return;
     if (activeFeature === undefined) return;
 
+    //TOUFIX TODO zoom until marker is unclustered
+    //https://github.com/mapbox/supercluster/issues/193
+
     mapboxMap.current.easeTo({
-      //center: [-75,43],
       center: activeFeature.geometry.coordinates
     })
 
