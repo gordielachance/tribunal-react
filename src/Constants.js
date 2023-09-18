@@ -1,4 +1,4 @@
-export const APP_VERSION = '115';//when updated, the local data will be cleared
+export const APP_VERSION = '116';//when updated, the local data will be cleared
 
 const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 

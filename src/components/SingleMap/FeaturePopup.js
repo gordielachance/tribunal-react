@@ -18,17 +18,10 @@ const FeaturePopup = props => {
     getPostUrl,
     getMapPostById
   } = useMap();
-  const popupRef = useRef();
-  const feature = activeFeature;
+  const popupRef = useRef(null);
+  const popupContentRef = useRef();
   const postId = activeFeature?.properties.wp_id;
   const post = postId ? getMapPostById(postId) : undefined;
-  const postType = post?.type;
-
-  //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
-  const popup = new mapboxgl.Popup({
-    anchor:'bottom'
-  })
-
 
   const handleClose = () => {
     DEBUG && console.log("CLOSE POST POPUP",postId);
@@ -48,39 +41,46 @@ const FeaturePopup = props => {
   useEffect(() => {
     if (mapboxMap.current === undefined) return;
 
-    if (feature){
-      popup
-      .setLngLat(feature.geometry.coordinates)
-      .setDOMContent(popupRef.current)
+    if (activeFeature){
+      // Create a new popup instance
+      //https://docs.mapbox.com/mapbox-gl-js/api/markers/#popup
+      popupRef.current = new mapboxgl.Popup({
+        anchor: "bottom",
+      })
+      .setLngLat(activeFeature.geometry.coordinates)
+      .setDOMContent(popupContentRef.current)
       .addTo(mapboxMap.current)
       .on('close',handleClose)
+    }
+
+    //clean-up
+    return () => {
+      popupRef.current
+      .off('close',handleClose)
+      .remove();
     }
 
   }, [activeFeature]);
 
   return (
-    <>
-    {
-      feature &&
-      <div style={{ display: "none" }}>
-        <div ref={popupRef}>
+    <div style={{ display: "none" }}>
+      <div ref={popupContentRef}>
+        {
+          post &&
           <div className="feature-popup">
-            <FeatureCard type={postType} id={postId}/>
+            <FeatureCard type={post?.type} id={post?.id}/>
             {
               post.has_more &&
               <div className="popup-actions">
                 <Button onClick={handleOpen}>Ouvrir</Button>
               </div>
             }
-
           </div>
-        </div>
-      </div>
-    }
-    </>
+        }
 
+      </div>
+    </div>
   );
 };
 
 export default FeaturePopup;
-//TOUFIX TOUCHECK use react.memo ?
