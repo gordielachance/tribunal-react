@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from "react";
 import { useApp } from './../AppContext';
 import DatabaseAPI from "../databaseAPI/api";
-import {DEBUG} from "../Constants";
+import {DEBUG,WP_CAT_ID_EVENT} from "../Constants";
 import PagePosts from "./PagePosts";
 import {BGAgenda} from "./PageBackgrounds";
 
@@ -21,7 +21,7 @@ const PageEvents = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    const data = await DatabaseAPI.getItems('agenda');
+  	    const data = await DatabaseAPI.getItems('features',{categories:WP_CAT_ID_EVENT,format:'frontend'});
   			if (isSubscribed) {
   				DEBUG && console.info("...EVENTS POSTS LOADED",data);
           setLoading(false);

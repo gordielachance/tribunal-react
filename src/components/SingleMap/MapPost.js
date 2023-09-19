@@ -1,14 +1,16 @@
 import React, { useEffect,useState }  from "react";
 import { Link,useParams,useNavigate } from 'react-router-dom';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import {DEBUG,ImageLogo,getFeatureUrl} from "../../Constants";
+import * as turf from "@turf/turf";
+
+import {DEBUG,ImageLogo} from "../../Constants";
 
 
 import './Map.scss';
-import {getUniqueMapFeatures} from "./MapFunctions";
 import WpPostModal from "../WpPostModal";
-import MapSidebar from "./MapSidebar";
+import Sidebar from "./Sidebar";
 import MapLegend from "./MapLegend";
+import DatabaseAPI from "../../databaseAPI/api";
 
 import { useMap } from './MapContext';
 import Map from "./Map";
@@ -25,94 +27,42 @@ export const TdpLogoLink = props => {
 
 const MapPost = (props) => {
   const navigate = useNavigate();
-  const {mapPostId,mapPostSlug,urlFeatureAction} = useParams();
-  const {mapboxMap,mapData,setRawMapData,mapHasInit,activeFeature,setActiveFeature,featuresFilter,layersDisabled} = useMap();
-  const [loading,setLoading] = useState(true);
-	const [sidebarFeatures,setSidebarFeatures] = useState();
-  const [modalPostId,setModalPostId] = useState();
+  const {mapPostId,mapPostSlug,urlItemType} = useParams();
+  const {
+    mapboxMap,
+    mapData,
+    setMapId,
+    mapHasInit,
+    activeFeature,
+    getPointUrl,
+    assignAreasToPoints,
+    getMapPostById
+  } = useMap();
 
-  const updateSidebarFeatures = e => {
-    //get visible features on map for use in the sidebar
+  const [item,setItem] = useState();
 
-    const getVisibleFeatures = (layerIds) => {
-
-      //ensure layer exists or query will fail
-      if (mapboxMap === undefined) return;
-      layerIds = layerIds.filter(layerId => {
-        return ( mapboxMap.getLayer(layerId) )
-      })
-
-      let features = mapboxMap.queryRenderedFeatures({
-        layers: layerIds,
-        filter: featuresFilter
-      }) || [];
-      return getUniqueMapFeatures(features);
-    }
-
-    const features = getVisibleFeatures(['creations','annotations','events','partners']);
-
-    setSidebarFeatures(features);
-  }
-
-  //initialize map data
+  //pass ID to context
   useEffect(()=>{
-    if (props.mapData === undefined) return;
-    setRawMapData(props.mapData);
-  },[props.mapData]);
-
-  useEffect(()=>{
-    if (mapHasInit){
-      setLoading(false);
-    }
-  },[mapHasInit]);
-
-  //update sidebar features when map initialize or is moved
-  useEffect(()=>{
-    if (!mapHasInit) return;
-
-    updateSidebarFeatures();
-    mapboxMap.on('moveend',updateSidebarFeatures);
-
-  },[mapHasInit])
-
-  //update sidebar features when filters are updated
-  useEffect(()=>{
-    if (mapboxMap === undefined) return;
-    setTimeout(updateSidebarFeatures,250); //wait map finishes refreshing before update (TOUFIX TOUCHECK use 'idle' event instead?)
-  },[featuresFilter,layersDisabled])
-
-  useEffect(()=>{
-
-    let postId = undefined;
-
-    if ( (urlFeatureAction==='full') && activeFeature){
-      postId = activeFeature?.properties.post_id;
-    }
-    setModalPostId(postId);
-
-  },[activeFeature,urlFeatureAction])
+    setMapId(props.id);
+  },[props.id])
 
   const handleCloseModal = () => {
-    const url = getFeatureUrl(mapPostId,mapPostSlug,activeFeature.properties.source,activeFeature.properties.id);
+    const url = getPointUrl(activeFeature.properties.id);
     navigate(url);
   }
 
   return (
-    <div className="page-content">
-
-      <MapSidebar
-      title={props.title}
-      features={sidebarFeatures}
-      />
+    <div className="page-content" id={`map-${props.id}`}>
       {
-        ( modalPostId !== undefined ) &&
+        ( (urlItemType==='posts') && activeFeature ) &&
         <WpPostModal
-        postId={modalPostId}
+        id={activeFeature.properties.wp_id}
+        title={activeFeature.properties.post_title}
         onClose={handleCloseModal}
         />
       }
-      <TdpLogoLink/>
-      <MapLegend features={sidebarFeatures}/>
+      <Sidebar/>
+      <MapLegend/>
       <Map/>
     </div>
   );

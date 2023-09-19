@@ -1,31 +1,37 @@
 import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
-import {DEBUG,getMapUrl,getFeatureUrl,getUniqueFeatureId} from "../../Constants";
+import {DEBUG} from "../../Constants";
 import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
 import { useMap } from './MapContext';
-import { CreationCard } from "./CreationCard";
+import { FeatureCard } from "./FeatureCard";
 
 const FeaturesList = props => {
 
   const {
     mapboxMap,
     mapHasInit,
+    mapFeatureCollection,
+    featuresList,
     sortMarkerBy,
     setMapFeatureState,
-    zoomOnFeatures,
     activeFeature,
-    getAnnotationPolygonByHandle
+    updateFeaturesList,
+    getRenderedFeatureByPostId,
+    getClusterByPostId,
+    getMapPostById,
+    getPostUrl,
+    getMapUrl
   } = useMap();
 
   const navigate = useNavigate();
   const {mapPostId,mapPostSlug} = useParams();
 
   const [mapCenter,setMapCenter] = useState();
-  const [features,setFeatures] = useState();
+  const [sortedFeatures,setSortedFeatures] = useState();
   const scrollRefs = useRef([]);
 
-  const prepareFeatures = features => {
+  const sortFeatures = features => {
 
     //clone array; we don't want to alter the original data
     let newFeatures = JSON.parse(JSON.stringify(features || []));
@@ -54,32 +60,58 @@ const FeaturesList = props => {
 
   }
 
+  //listen to changes on the map and update features list
+  useEffect(() => {
+
+    // Define the listener function
+    const updateList = () => {
+      updateFeaturesList(mapboxMap.current);
+    };
+
+    if (mapboxMap.current) {
+      updateList();//first init
+      mapboxMap.current.on('idle', updateList);
+    }
+
+    // Return the cleanup function to remove the listener
+    return () => {
+      if (mapboxMap.current) {
+        mapboxMap.current.off('idle', updateList);
+      }
+    };
+  }, [mapboxMap.current]);
+
   useEffect(()=>{
-    if (props.features === undefined) return;
-    const data = prepareFeatures(props.features);
-    setFeatures(data);
-  },[props.features,mapCenter,sortMarkerBy])
+
+    if (featuresList === undefined) return;
+
+    //sort
+    const features = sortFeatures(featuresList);
+
+    setSortedFeatures(features);
+
+  },[featuresList,mapCenter,sortMarkerBy])
 
 
   useEffect(()=>{
-    if (features === undefined) return;
+    if (sortedFeatures === undefined) return;
     // Populate scrollable refs
-    scrollRefs.current = [...Array(features.length).keys()].map(
+    scrollRefs.current = [...Array(sortedFeatures.length).keys()].map(
       (_, i) => scrollRefs.current[i] ?? createRef()
     );
 
-  },[features])
+  },[sortedFeatures])
 
   useEffect(()=>{
 
     if (!mapHasInit) return;
 
     //on init
-    setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
+    setMapCenter([mapboxMap.current.getCenter().lng,mapboxMap.current.getCenter().lat]);
 
     //When the map is animated
-    mapboxMap.on('moveend', (e) => {
-      setMapCenter([mapboxMap.getCenter().lng,mapboxMap.getCenter().lat]);
+    mapboxMap.current.on('moveend', (e) => {
+      setMapCenter([mapboxMap.current.getCenter().lng,mapboxMap.current.getCenter().lat]);
     });
 
   },[mapHasInit])
@@ -93,7 +125,7 @@ const FeaturesList = props => {
 
       //using a feature ID, get its index in the filtered features array.
       const getListIndex = feature_id => {
-        let index = (features || []).findIndex(feature => feature.properties.id === feature_id);
+        let index = (sortedFeatures || []).findIndex(feature => feature.properties.id === feature_id);
         return (index !== -1) ? index : undefined;
       }
 
@@ -125,52 +157,56 @@ const FeaturesList = props => {
 
   }
 
-  const handleClick = feature => {
-
-    if ( activeFeature && (getUniqueFeatureId(feature) === getUniqueFeatureId(activeFeature)) ){//unset active
-      const url = getMapUrl(mapPostId,mapPostSlug);
-      navigate(url);
-    }else{//set active
-      switch(feature.source){
-        case 'creations':
-          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id) + '/full');
-        break;
-        default:
-          navigate(getFeatureUrl(mapPostId,mapPostSlug,feature.properties.source,feature.properties.id));
-      }
-    }
+  const toggleClickPost = postId => {
+    const post = getMapPostById(postId);
+    if (!post) return;
+    navigate(getPostUrl(post));
   }
 
-  const toggleHoverFeature = (feature,bool) => {
-    setMapFeatureState(feature,'hover',bool);
+  const toggleHoverPost = async(postId,bool) => {
+    //hover on 'points' layer
+    const feature = getRenderedFeatureByPostId(postId);
+
+    //get feature on 'points' layer
+
+    if (feature){
+      setMapFeatureState('points',feature.id,'hover',bool);
+    }else{
+      //hover on 'pointClusters' layer
+      const cluster = await getClusterByPostId(postId);
+      if (cluster){
+        const clusterId = cluster.properties.cluster_id;
+        //TOUFIX
+      }
+    }
+
   }
 
   return(
     <>
     {
-      (features || []).length ?
-      <ul
-      id="features-list"
-      className="map-section features-selection"
-      >
+      (sortedFeatures || []).length ?
+      <ul id="features-list">
 
         {
-          features.map((feature,k) => {
-
+          sortedFeatures.map((feature,k) => {
+            const postId = feature.properties.wp_id;
+            const post = postId ? getMapPostById(postId) : undefined;
+            const postType = post?.type;
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
 
             return <li
             key={k}
-            onMouseEnter={e=>toggleHoverFeature(feature,true)}
-            onMouseLeave={e=>toggleHoverFeature(feature,false)}
-            onClick={e=>{handleClick(feature)}}
+            onMouseEnter={e=>toggleHoverPost(postId,true)}
+            onMouseLeave={e=>toggleHoverPost(postId,false)}
+            onClick={e=>{toggleClickPost(postId)}}
             className={classNames({
               active:   active
             })}
             >
             <p className='sorted-value'>{sortValue}</p>
-            <CreationCard feature={feature}/>
+            <FeatureCard type={postType} id={postId} color={feature.properties.color}/>
             </li>
             /*
 
@@ -179,9 +215,9 @@ const FeaturesList = props => {
               <li
               ref={scrollRefs.current[k]}
               key={"feature-card-"+k}
-              onMouseEnter={e=>toggleHoverFeature(feature,true)}
-              onMouseLeave={e=>toggleHoverFeature(feature,false)}
-              onClick={e=>{handleClick(feature)}}
+              onMouseEnter={e=>toggleHoverPost(feature,true)}
+              onMouseLeave={e=>toggleHoverPost(feature,false)}
+              onClick={e=>{toggleClickPost(feature)}}
 
               >
                 <p className='sorted-value'>{sortValue}</p>
@@ -193,7 +229,9 @@ const FeaturesList = props => {
         }
       </ul>
       :
-      <span>Pas de marqueurs trouvés. Veuillez repositionner la carte.</span>
+      <div id="no-features-list">
+        <span>Pas de marqueurs trouvés. Veuillez repositionner la carte.</span>
+      </div>
     }
 
     </>

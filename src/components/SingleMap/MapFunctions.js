@@ -106,66 +106,6 @@ export const getHumanDistance = meters => {
 
 }
 
-export function getFormatText(slug){
-
-  let text;
-
-  switch(slug){
-    case 'gallery':
-      text='gallerie';
-    break;
-    case 'link':
-      text='lien';
-    break;
-    case 'quote':
-      text='citation';
-    break;
-    case 'video':
-      text='vidéo';
-    break;
-    case 'audio':
-      text='audio';
-    break;
-    case 'standard':
-      //nothing
-    break;
-    default:
-      text = slug;
-    break;
-  }
-
-  if (!text) return;
-
-  return text.charAt(0).toUpperCase() + text.slice(1);
-
-}
-
-export function getFormatIcon(slug){
-  switch(slug){
-    case 'gallery':
-      return 'images outline';
-    break;
-    case 'link':
-      return 'linkify';
-    break;
-    case 'image':
-      return 'image outline';
-    break;
-    case 'quote':
-      return 'quote left';
-    break;
-    case 'video':
-      return 'video';
-    break;
-    case 'audio':
-      return 'volume down';
-    break;
-    default:
-      return 'bars';
-    break;
-  }
-}
-
 // Because features come from tiled vector data,
 // feature geometries may be split
 // or duplicated across tile boundaries.
@@ -185,50 +125,9 @@ export function getUniqueMapFeatures(features){
   return uniqueFeatures;
 }
 
-export const getFeaturesTags = features => {
-  let arr = [];
-
-  (features || []).forEach(feature => {
-    const tags = feature.properties.tag_slugs || [];
-    arr = arr.concat(tags);
-  });
-
-  return [...new Set(arr)];
-}
-
 //checks if a source contains features
 export const isFeaturesSource = source => {
   return (source.data?.type === 'FeatureCollection');
-}
-
-export const getIdsForTag = (tag,features) => {
-  features = (features || []).filter(feature => (feature.properties.tag_slugs || []).includes(tag));
-  return features.map(feature=>feature.properties.id);
-}
-
-export const getFeaturesFormats = features => {
-  let arr = [];
-
-  (features || []).forEach(feature => {
-    const format = feature.properties.format;
-    arr.push(format);
-  });
-  arr = [...new Set(arr)];
-
-  //move standard at the end
-  const standardFormatIndex = arr.findIndex(format => format.slug === 'standard');
-
-  if (standardFormatIndex !== -1) {
-    arr.push(arr.splice(standardFormatIndex, 1)[0]);
-  }
-
-  return arr;
-
-}
-
-export const getIdsForFormat = (format,features) => {
-  features = (features || []).filter(feature => format === feature.properties.format);
-  return features.map(feature=>feature.properties.id);
 }
 
 export const bboxToCircle = bbox => {

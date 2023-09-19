@@ -4,54 +4,35 @@ import {databaseAPI} from "./connect";
 
 export default class DatabaseAPI extends React.Component {
 
-  static async getPaginatedItems(type,page,perPage){
+  static async getItems(type, params = {}) {
+    const defaultParams = {};
+    const mergedParams = { ...defaultParams, ...params };
 
-    console.info(`GET '${type}' ITEMS, PAGE: ${page}, PER_PAGE: ${perPage}`);
+    console.info(`GET '${type}' ITEMS,`,mergedParams);
 
     const config = {
       method: 'get',
       url: `/wp/v2/${type}`,
-      params: {
-        page: page ?? 1,
-        per_page: perPage ?? 10,
-      },
+      params: mergedParams,
     }
-    return databaseAPI.request(config)
+    const response = await databaseAPI.request(config);
+
+    return response.data;
+
   }
 
-  static async getItems(type,perPage) {
-    let page = 1;
-    let posts = [];
-    perPage = perPage ?? 10;
 
-    console.info(`GET '${type}' ITEMS, PER_PAGE: ${perPage}`);
+  static async getSingleItem(type,id,params){
 
-    while (true) {
-      try {
-        const request = await DatabaseAPI.getPaginatedItems(type,page,perPage);
-        const pageItems = request.data;
+    const defaultParams = {};
+    const mergedParams = { ...defaultParams, ...params };
 
-        if (pageItems.length === 0) {
-          // No more posts to fetch
-          break;
-        }
-
-        posts = posts.concat(pageItems);
-        page++;
-      } catch (error) {
-        console.error(`ERROR GETTING '${type}' ITEMS`, type, error);
-        break; // Exit the loop on error
-      }
-    }
-
-    return posts;
-  }
-
-  static async getSingleItem(type,id){
+    console.info(`GET '${type}' ITEM #${id}`,mergedParams);
 
     const config = {
      method: 'get',
      url: `wp/v2/${type}/${id}`,
+     params: mergedParams,
     }
 
     return databaseAPI.request(config)

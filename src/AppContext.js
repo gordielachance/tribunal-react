@@ -13,7 +13,6 @@ export function AppProvider({children}){
   const [verticalScreen,setVerticalScreen] = useState();
   const [mobileScreen,setMobileScreen] = useState();
 
-	const [tags,setTags] = useState();
 	const [homePost,setHomePost] = useState();
 	const [creditsPost,setCreditsPost] = useState();
   const [mapPosts,setMapPosts] = useState();
@@ -28,43 +27,22 @@ export function AppProvider({children}){
     setMobileScreen(isMobile);
   },[screenSize]);
 
-	//load tags on init
-	useEffect(() => {
-
-		let isSubscribed = true;
-
-		const fetchData = async () => {
-	    const data = await DatabaseAPI.getItems('tags',10000);
-			if (isSubscribed) {
-				DEBUG && console.info("...TAGS LOADED",data);
-	      setTags(data);
-	    }
-		}
-
-	  fetchData();
-
-		//clean up fn
-		return () => isSubscribed = false;
-
-  }, []);
-
 
 	// NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
   const value = {
-    tags:tags,
-		homePost:homePost,
-		setHomePost:setHomePost,
-		creditsPost:creditsPost,
-		setCreditsPost:setCreditsPost,
-    mapPosts:mapPosts,
-		setMapPosts:setMapPosts,
-		creationPosts:creationPosts,
-		setCreationPosts:setCreationPosts,
-		agendaPosts:agendaPosts,
-		setAgendaPosts:setAgendaPosts,
-		mobileScreen:mobileScreen,
-		verticalScreen:verticalScreen
+		homePost,
+		setHomePost,
+		creditsPost,
+		setCreditsPost,
+    mapPosts,
+		setMapPosts,
+		creationPosts,
+		setCreationPosts,
+		agendaPosts,
+		setAgendaPosts,
+		mobileScreen,
+		verticalScreen
 	};
 
   return (

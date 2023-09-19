@@ -21,7 +21,7 @@ const PageMaps = (props) => {
       setLoading(true);
 
   		const fetchData = async () => {
-  	    DEBUG && console.info("GETTING MAPS POSTS...");
+  	    DEBUG && console.info("GETTING MAPS...");
   	    const data = await DatabaseAPI.getItems('maps');
   			if (isSubscribed) {
   				DEBUG && console.info("...MAPS POSTS LOADED",data);

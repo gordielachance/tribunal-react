@@ -18,7 +18,8 @@
     margin-top:1em;
   }
   .mapboxgl-popup-content{
-    background:rgba(255,255,255,0.9);
+    background:rgba(255,255,255,0.95);
+    box-shadow: 0 10px 20px rgba(0,0,0,.15);
   }
 }
 
@@ -68,28 +69,8 @@
 
 .feature-card{
 
-  &[data-source="creations"]{
-    .feature-icon{
-      color: $creationsColor;
-    }
-  }
-
-  &[data-source="annotations"]{
-    .feature-icon{
-      color: $annotationsColor;
-    }
-  }
-
-  &[data-source="events"]{
-    .feature-icon{
-      color: $eventsColor;
-    }
-  }
-
-  &[data-source="partners"]{
-    .feature-icon{
-      color: $partnersColor;
-    }
+  .feature-icon {
+    color: var(--feature-color,$featureColor);
   }
 
   .feature-header{
@@ -99,7 +80,7 @@
     }
     .feature-meta{
       color: grey;
-      &.feature-tags{
+      &.feature-terms{
         margin:0;
         padding:0;
         display: inline;
@@ -107,14 +88,20 @@
 
         li{
           display:inline-block;
+          @extend .clickable;
+
           &:not(:last-child){
             margin-right:.5em;
           }
           .label{
+            background:rgba(232,232,232,1);
             font-weight: normal;
             margin: 0.25em 0;
             font-size:.8em;
             padding: 0.4em 0.5em;
+          }
+          &.feature-tag .label{
+            background:rgba(232,232,232, 0.5);
           }
         }
       }
@@ -147,24 +134,11 @@
   bottom: $sidebarHandleWidth;
   background: rgba(255,255,255,0.8);
   width: calc(100% - #{$sidebarWidth} - #{$sidebarHandleWidth});
-  height: $mapLegendHeight;
   padding: 0.5em;
   text-align:right;
   margin-bottom:auto;
   > *{
     margin-top:auto;
-  }
-  #map-settings-layers{
-    h5{
-      display:none;
-    }
-    ul{
-      margin-bottom: 0.5em;
-      white-space: nowrap;
-      li{
-        display:inline;
-      }
-    }
   }
 
   #mapBottomText{
