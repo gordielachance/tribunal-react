@@ -39,8 +39,6 @@ const MapPost = (props) => {
     getMapPostById
   } = useMap();
 
-  const [item,setItem] = useState();
-
   //pass ID to context
   useEffect(()=>{
     setMapId(props.id);
@@ -57,7 +55,7 @@ const MapPost = (props) => {
         ( (urlItemType==='posts') && activeFeature ) &&
         <WpPostModal
         id={activeFeature.properties.wp_id}
-        title={activeFeature.properties.post_title}
+        title={activeFeature.properties.wp_title}
         onClose={handleCloseModal}
         />
       }
