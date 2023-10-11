@@ -1,11 +1,11 @@
-export const APP_VERSION = '116';//when updated, the local data will be cleared
+export const APP_VERSION = '117';//when updated, the local data will be cleared
 
 const IS_LOCAL = (process.env.NODE_ENV !== 'production');
 
-const FORCE_REMOTE_DB = false;
+const FORCE_REMOTE_DB = true;
 export const DEBUG = IS_LOCAL;
 
-export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://new.tribunaldesprejuges.org/datas';
+export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://www.tribunaldesprejuges.org/datas';
 
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_CONTACT = 20;
