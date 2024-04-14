@@ -6,6 +6,8 @@ const FORCE_REMOTE_DB = true;
 export const DEBUG = IS_LOCAL;
 
 export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://www.tribunaldesprejuges.org/datas';
+export const STRAPI_URL = 'http://localhost:1337';
+
 
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_CONTACT = 20;
