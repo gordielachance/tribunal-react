@@ -11,6 +11,7 @@ import {
 	bboxToCircle,
 } from "./MapFunctions";
 
+import StrapiAPI from "../../strapiAPI/api";
 import DatabaseAPI from "../../databaseAPI/api";
 
 const MapContext = createContext();
@@ -88,6 +89,10 @@ export function MapProvider({children}){
 
 	const getMapPostById = id => {
 		return (mapData.posts || []).find(item => id === item.id);
+	}
+
+	const getMapFeatureById = id => {
+		return (mapData.sources.points.data.features || []).find(item => id === item.properties.id);
 	}
 
 	//we need a taxonomy to filter items since a lot of them have parentId = 0
@@ -370,6 +375,10 @@ export function MapProvider({children}){
 
     const fetchData = async mapId => {
 	    const data = await DatabaseAPI.getSingleItem('maps',mapId,{format:'frontend'});
+
+			console.log("STRAPI REPLACE POINTS");
+			data.sources.points.data = (await StrapiAPI.getFeatures({geojson:true})).data;
+
 			if (isSubscribed) {
 
         /*
@@ -496,12 +505,12 @@ export function MapProvider({children}){
 		return terms;
 	}
 
-	const getRenderedPostIds = () => {
+	const getRenderedFeatureIds = () => {
 		if (!mapboxMap.current) return null;
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
-		return (features || [])
-			.map((feature) => feature.properties.wp_id)
-			.filter(postId=>(postId!==undefined))
+		const ids = (features || [])
+			.map((feature) => feature.properties.id)
+		return [...new Set(ids)];//make unique
 	};
 
 	const getAreaByTermId = term_id => {
@@ -511,11 +520,11 @@ export function MapProvider({children}){
 	}
 
 	//Get the cluser ID based on a post ID
-	const getClusterByPostId = async postId => {
+	const getClusterByFeatureId = async id => {
 	  if (!mapboxMap.current) return null;
 
-		if (!postId){
-			throw "Missing 'postId' parameter .";
+		if (!id){
+			throw "Missing feature 'id' parameter .";
 		}
 
 	  const features = mapboxMap.current.queryRenderedFeatures({ layers: ['pointClusters'] });
@@ -524,10 +533,10 @@ export function MapProvider({children}){
 	    const clusterId = feature.properties.cluster_id;
 
 	    // Get the leaves for the current cluster
-	    const postIds = await getPostIdsByClusterId(clusterId);
+	    const ids = await getFeatureIdsByClusterId(clusterId);
 
 	    // Check if the postId exists in the leaves
-	    if (postIds.includes(postId)) {
+	    if (ids.includes(id)) {
 	      return feature; // Found the cluster containing the postId
 	    }
 	  }
@@ -536,7 +545,7 @@ export function MapProvider({children}){
 	};
 
 	// Get the post IDs related to a cluster using a Promise
-	const getPostIdsByClusterId = async clusterId => {
+	const getFeatureIdsByClusterId = async clusterId => {
 
 		if (!mapboxMap.current) return null;
 
@@ -549,7 +558,7 @@ export function MapProvider({children}){
 	      }
 
 	      // Extract individual point IDs from the leaves
-	      const ids = leaves.map((leaf) => leaf.properties.wp_id);
+	      const ids = leaves.map((leaf) => leaf.properties.id);
 
 	      resolve(ids);
 	    });
@@ -559,33 +568,36 @@ export function MapProvider({children}){
 	const updateFeaturesList = async (map) => {
 	  if (!map) return;
 
-	  const getClustersPostIds = async () => {
+	  const getClusterFeatureIds = async () => {
 	    const features = map.queryRenderedFeatures({ layers: ['pointClusters'] });
 
 	    const clusterIds = (features || []).map((feature) => feature.properties.cluster_id);
 
-	    const clusterPostIds = await Promise.all(
+	    const clusterFeatureIds = await Promise.all(
 	      clusterIds.map(async (clusterId) => {
-					return await getPostIdsByClusterId(clusterId);
+					return await getFeatureIdsByClusterId(clusterId);
 	      })
 	    );
 
 	    // Flatten the array of arrays
-	    return clusterPostIds.flat();
+	    const ids = clusterFeatureIds.flat();
+			return [...new Set(ids)];//make unique
+
 	  };
 
-	  const pointPostIds = getRenderedPostIds();
-	  const clusterPostIds = await getClustersPostIds();
-	  let postIds = pointPostIds
-			.concat(clusterPostIds)
+	  const pointFeatureIds = getRenderedFeatureIds();
+	  const clusterFeatureIds = await getClusterFeatureIds();
+
+	  let featureIds = pointFeatureIds
+			.concat(clusterFeatureIds)
 			.sort((a, b) => a - b)//for debug purposes
 
-		postIds = [...new Set(postIds)];//make unique
+		featureIds = [...new Set(featureIds)];//make unique
 
 	  // Filter source data
 		const features = mapFeatureCollection();
 	  let data = features
-			.filter((feature) => postIds.includes(feature.properties.wp_id));
+			.filter((feature) => featureIds.includes(feature.properties.id));
 
 	  DEBUG && console.info("UPDATED FEATURES LIST",data.length);
 	  setFeaturesList(data);
@@ -643,7 +655,7 @@ export function MapProvider({children}){
 		setOpenFilterSlugs,
 		getRenderedFeatureByPostId,
 		getRenderedFeaturesByTermId,
-		getClusterByPostId,
+		getClusterByFeatureId,
 		getMapUrl,
 		getPointUrl,
 		getPostUrl,
@@ -651,7 +663,8 @@ export function MapProvider({children}){
 		mapId,
 		mapTerm,
 		setMapId,
-		getMapPostById
+		getMapPostById,
+		getMapFeatureById
 	};
 
   return (

@@ -67,10 +67,11 @@ const FeatureTags = (props) => {
 }
 
 export const FeatureCard = props => {
-  const {getMapPostById} = useMap();
+  const {getMapPostById,getMapFeatureById} = useMap();
 
   const { id, color,...otherProps } = props;
 
+  const feature = getMapFeatureById(id);
   const post = getMapPostById(id);
 
   const post_tag_ids = post?.tags;
@@ -88,7 +89,7 @@ export const FeatureCard = props => {
           <span className="feature-icon" style={color ? {'--feature-color': color} : undefined}>
             <Icon name="circle"/>
           </span>
-          {post?.title}
+          {feature.properties.title}
         </p>
         <FeatureTags
         tags={post_tag_ids}

@@ -18,7 +18,7 @@ const FeaturesList = props => {
     activeFeature,
     updateFeaturesList,
     getRenderedFeatureByPostId,
-    getClusterByPostId,
+    getClusterByFeatureId,
     getMapPostById,
     getPostUrl,
     getMapUrl
@@ -173,7 +173,7 @@ const FeaturesList = props => {
       setMapFeatureState('points',feature.id,'hover',bool);
     }else{
       //hover on 'pointClusters' layer
-      const cluster = await getClusterByPostId(postId);
+      const cluster = await getClusterByFeatureId(postId);
       if (cluster){
         const clusterId = cluster.properties.cluster_id;
         //TOUFIX
@@ -190,23 +190,22 @@ const FeaturesList = props => {
 
         {
           sortedFeatures.map((feature,k) => {
-            const postId = feature.properties.wp_id;
-            const post = postId ? getMapPostById(postId) : undefined;
-            const postType = post?.type;
+            const featureId = feature.properties.id;
+            const wpId = feature.properties.wp_id;
             const sortValue = getSortByText(feature);
             let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
 
             return <li
             key={k}
-            onMouseEnter={e=>toggleHoverPost(postId,true)}
-            onMouseLeave={e=>toggleHoverPost(postId,false)}
-            onClick={e=>{toggleClickPost(postId)}}
+            onMouseEnter={e=>toggleHoverPost(featureId,true)}
+            onMouseLeave={e=>toggleHoverPost(featureId,false)}
+            onClick={e=>{toggleClickPost(featureId)}}
             className={classNames({
               active:   active
             })}
             >
             <p className='sorted-value'>{sortValue}</p>
-            <FeatureCard type={postType} id={postId} color={feature.properties.color}/>
+            <FeatureCard id={featureId} color={feature.properties.color}/>
             </li>
             /*
 

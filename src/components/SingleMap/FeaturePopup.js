@@ -20,6 +20,7 @@ const FeaturePopup = props => {
   } = useMap();
   const popupRef = useRef(null);
   const popupContentRef = useRef();
+  const featureId = activeFeature?.properties.id;
   const postId = activeFeature?.properties.wp_id;
   const post = postId ? getMapPostById(postId) : undefined;
 
@@ -66,11 +67,12 @@ const FeaturePopup = props => {
     <div style={{ display: "none" }}>
       <div ref={popupContentRef}>
         {
-          post &&
+          activeFeature &&
           <div className="feature-popup">
-            <FeatureCard type={post?.type} id={post?.id}/>
+            <FeatureCard id={featureId}/>
             {
-              post.has_more &&
+              //TOUFIX URGENT
+              //post.has_more &&
               <div className="popup-actions">
                 <Button onClick={handleOpen}>Ouvrir</Button>
               </div>
