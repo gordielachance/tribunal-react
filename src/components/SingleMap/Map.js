@@ -131,7 +131,7 @@ const Map = (props) => {
     const getUrlFeature = (type,id) => {
       id = parseInt(id);
       switch(type){
-        case 'points':
+        case 'features':
           return mapFeatureCollection()
             .find(feature => feature.properties.id === id);
         break;

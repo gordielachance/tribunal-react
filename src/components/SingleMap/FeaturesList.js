@@ -20,7 +20,7 @@ const FeaturesList = props => {
     getRenderedFeatureByPostId,
     getClusterByFeatureId,
     getMapPostById,
-    getPostUrl,
+    getOpenedFeatureUrl,
     getMapUrl
   } = useMap();
 
@@ -157,10 +157,8 @@ const FeaturesList = props => {
 
   }
 
-  const toggleClickPost = postId => {
-    const post = getMapPostById(postId);
-    if (!post) return;
-    navigate(getPostUrl(post));
+  const toggleClickFeature = id => {
+    navigate(getOpenedFeatureUrl(id));
   }
 
   const toggleHoverPost = async(postId,bool) => {
@@ -199,7 +197,7 @@ const FeaturesList = props => {
             key={k}
             onMouseEnter={e=>toggleHoverPost(featureId,true)}
             onMouseLeave={e=>toggleHoverPost(featureId,false)}
-            onClick={e=>{toggleClickPost(featureId)}}
+            onClick={e=>{toggleClickFeature(featureId)}}
             className={classNames({
               active:   active
             })}
@@ -216,7 +214,7 @@ const FeaturesList = props => {
               key={"feature-card-"+k}
               onMouseEnter={e=>toggleHoverPost(feature,true)}
               onMouseLeave={e=>toggleHoverPost(feature,false)}
-              onClick={e=>{toggleClickPost(feature)}}
+              onClick={e=>{toggleClickFeature(feature)}}
 
               >
                 <p className='sorted-value'>{sortValue}</p>

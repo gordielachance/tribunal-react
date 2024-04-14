@@ -15,7 +15,7 @@ const FeaturePopup = props => {
     mapboxMap,
     activeFeature,
     getMapUrl,
-    getPostUrl,
+    getOpenedFeatureUrl,
     getMapPostById
   } = useMap();
   const popupRef = useRef(null);
@@ -31,10 +31,9 @@ const FeaturePopup = props => {
   }
 
   const handleOpen = e => {
-    DEBUG && console.log("OPEN POST POPUP",postId);
+    DEBUG && console.log("OPEN FEATURE POPUP",featureId);
     e.preventDefault();
-    if (!post) return;
-    const feature_url = getPostUrl(post);
+    const feature_url = getOpenedFeatureUrl(featureId);
     navigate(feature_url);
   }
 

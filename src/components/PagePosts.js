@@ -59,19 +59,15 @@ const PagePosts = (props) => {
     navigate(getPageUrl());
   }
 
-  const getPostUrl = post => {
-
-    if (!post) return;
+  const getOpenedFeatureUrl = id => {
 
     //const url = `${getPageUrl()}/${post.id}/${post.slug}`;
-    const url = `${getPageUrl()}/${post.id}`;
+    const url = `${getPageUrl()}/${id}`;
     return url;
   };
 
-  const handleClick = postId => {
-    const post = getPostById(postId);
-    if(!post) return;
-    navigate(getPostUrl(post));
+  const handleClick = featureId => {
+    navigate(getOpenedFeatureUrl(featureId));
   }
 
   return(

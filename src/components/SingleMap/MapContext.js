@@ -551,7 +551,7 @@ export function MapProvider({children}){
 
 	  return new Promise((resolve, reject) => {
 
-	    mapboxMap.current.getSource("points").getClusterLeaves(clusterId, Infinity, 0, (error, leaves) => {
+	    mapboxMap.current.getSource('points').getClusterLeaves(clusterId, Infinity, 0, (error, leaves) => {
 	      if (error) {
 	        reject(error);
 	        return;
@@ -611,14 +611,15 @@ export function MapProvider({children}){
 
 	const getPointUrl = (featureId) => {
 	  const mapUrl = getMapUrl();
-	  let url = mapUrl + `/points/${featureId}`;
+	  let url = mapUrl + `/features/${featureId}`;
 	  return url;
 	}
 
-	const getPostUrl = post => {
+	//TOUFIX URGENT duplicate function ?
+	const getOpenedFeatureUrl = id => {
 	  const mapUrl = getMapUrl();
 		//const url = mapUrl + `/posts/${post.id}/${post.slug}`;
-	  const url = mapUrl + `/posts/${post.id}`;
+	  const url = mapUrl + `/posts/${id}`;
 	  return url;
 	}
 
@@ -658,7 +659,7 @@ export function MapProvider({children}){
 		getClusterByFeatureId,
 		getMapUrl,
 		getPointUrl,
-		getPostUrl,
+		getOpenedFeatureUrl,
 		getTermChildren,
 		mapId,
 		mapTerm,
