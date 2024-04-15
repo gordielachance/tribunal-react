@@ -1,7 +1,7 @@
 import React, {useState,useEffect,useRef} from 'react';
 import { Modal,Dimmer,Loader } from 'semantic-ui-react';
 import classNames from "classnames";
-import {createRoot} from 'react-dom/client'
+import TdpMarkdown from './Markdown';
 import Markdown from 'react-markdown';
 import {DEBUG,getWpIframePostUrl} from "../Constants";
 import {BGPopup} from "./PageBackgrounds";
@@ -66,12 +66,7 @@ const PostModal = (props) => {
           <Modal.Description>
             {
               feature &&
-              <xmp>{feature.properties.post}</xmp>
-            }
-            {
-              feature &&
-              <Markdown>{feature.properties.post}</Markdown>
-
+              <TdpMarkdown>{feature.properties.post}</TdpMarkdown>
             }
           </Modal.Description>
           <BGPopup/>
