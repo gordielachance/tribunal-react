@@ -90,11 +90,11 @@ const Layout = props => {
         <Route path="/" element={<PageHome/>} />
         <Route path="/agenda">
           <Route index element={<PageEvents/>} />
-          <Route path=":urlPostId" element={<PageEvents/>} />
+          <Route path=":featureId" element={<PageEvents/>} />
         </Route>
         <Route path="/creations">
           <Route index element={<PageCreations/>} />
-          <Route path=":urlPostId" element={<PageCreations/>} />
+          <Route path=":featureId" element={<PageCreations/>} />
         </Route>
         <Route path="/credits" element={<PageCredits/>} />
         <Route path="/cartes">

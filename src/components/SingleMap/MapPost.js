@@ -7,7 +7,7 @@ import {DEBUG,ImageLogo} from "../../Constants";
 
 
 import './Map.scss';
-import WpPostModal from "../WpPostModal";
+import PostModal from "../PostModal";
 import Sidebar from "./Sidebar";
 import MapLegend from "./MapLegend";
 import DatabaseAPI from "../../databaseAPI/api";
@@ -53,9 +53,10 @@ const MapPost = (props) => {
     <div className="page-content" id={`map-${props.id}`}>
       {
         ( (urlItemType==='posts') && activeFeature ) &&
-        <WpPostModal
-        id={activeFeature.properties.wp_id}
-        title={activeFeature.properties.wp_title}
+        <PostModal
+        id={activeFeature.properties.documentId}
+        wpid={activeFeature.properties.wp_id}
+        title={activeFeature.properties.title}
         onClose={handleCloseModal}
         />
       }

@@ -2,7 +2,7 @@ import React, { useEffect,useState }  from "react";
 import { Link,useParams,useNavigate,useLocation } from 'react-router-dom';
 import { Loader } from 'semantic-ui-react';
 import PageMenu from "./PageMenu";
-import WpPostModal from "./WpPostModal";
+import PostModal from "./PostModal";
 
 const SinglePost = props => {
   const post = props.post;
@@ -29,30 +29,21 @@ const PagePosts = (props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const loading = (props.posts === undefined);
-  const {urlPostId} = useParams();
-  const [modalPost,setModalPost] = useState();
+  const {featureId} = useParams();
+  const [wpPost,setWpPost] = useState();
 
-  const getPostById = id => {
-    return (props.posts || []).find(item => id === item.id);
+  const getWpPostById = id => {
+    id = parseInt(id);
+    return (props.posts || []).find(item => id === item.wp_id);
   }
 
   useEffect(()=>{
-
-    if (props.posts === undefined) return;
-
-    let post = undefined;
-    const postId = parseInt(urlPostId);
-
-    if (postId){
-      post = getPostById(postId);
-    }
-
-    setModalPost(post);
-
-  },[props.posts,urlPostId])
+    const wpPost = getWpPostById(featureId);
+    setWpPost(wpPost);
+  },[featureId])
 
   const getPageUrl = () => {
-    return location.pathname.replace('/'+modalPost?.id, '');
+    return location.pathname.replace('/'+wpPost?.id, '');
   }
 
   const handleCloseModal = () => {
@@ -73,10 +64,10 @@ const PagePosts = (props) => {
   return(
     <div id={props.id} className="page posts-page padding-page">
       {
-        ( modalPost !== undefined ) &&
-        <WpPostModal
-        id={modalPost.id}
-        title={modalPost.title}
+        ( wpPost !== undefined ) &&
+        <PostModal
+        wpid={wpPost.id}
+        title={wpPost.title}
         onClose={handleCloseModal}
         />
       }

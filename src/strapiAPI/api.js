@@ -22,4 +22,20 @@ export default class StrapiAPI extends React.Component {
     .then(resp => resp.data)
   }
 
+  static async getSingleFeature(id,params = {}){
+    const defaultParams = {};
+    const mergedParams = {
+      ...defaultParams,
+      ...params
+    };
+
+    const config = {
+     method: 'get',
+     url: `/features/${id}`,
+     params: mergedParams
+    }
+    return strapiAPI.request(config)
+    .then(resp => resp.data)
+  }
+
 }
