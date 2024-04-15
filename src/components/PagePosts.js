@@ -59,7 +59,7 @@ const PagePosts = (props) => {
     navigate(getPageUrl());
   }
 
-  const getOpenedFeatureUrl = id => {
+  const getPostUrl = id => {
 
     //const url = `${getPageUrl()}/${post.id}/${post.slug}`;
     const url = `${getPageUrl()}/${id}`;
@@ -67,7 +67,7 @@ const PagePosts = (props) => {
   };
 
   const handleClick = featureId => {
-    navigate(getOpenedFeatureUrl(featureId));
+    navigate(getPostUrl(featureId));
   }
 
   return(

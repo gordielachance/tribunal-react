@@ -124,6 +124,7 @@ const Map = (props) => {
   }
 
   //set active feature from current URL
+  //TOUFIX URGENT TO IMPROVE
   useEffect(()=>{
 
     if (!mapHasInit) return;
@@ -132,12 +133,9 @@ const Map = (props) => {
       id = parseInt(id);
       switch(type){
         case 'features':
-          return mapFeatureCollection()
-            .find(feature => feature.properties.id === id);
-        break;
         case 'posts':
           return mapFeatureCollection()
-            .find(feature => feature.properties.wp_id === id);
+            .find(feature => feature.properties.id === id);
         break;
       }
     }

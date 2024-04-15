@@ -585,6 +585,7 @@ export function MapProvider({children}){
 
 	  };
 
+		const features = mapFeatureCollection();
 	  const pointFeatureIds = getRenderedFeatureIds();
 	  const clusterFeatureIds = await getClusterFeatureIds();
 
@@ -595,7 +596,6 @@ export function MapProvider({children}){
 		featureIds = [...new Set(featureIds)];//make unique
 
 	  // Filter source data
-		const features = mapFeatureCollection();
 	  let data = features
 			.filter((feature) => featureIds.includes(feature.properties.id));
 
