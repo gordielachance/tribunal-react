@@ -45,7 +45,7 @@ const MapPost = (props) => {
   },[props.id])
 
   const handleCloseModal = () => {
-    const url = getPointUrl(activeFeature.properties.id);
+    const url = getPointUrl(activeFeature.properties.documentId);
     navigate(url);
   }
 

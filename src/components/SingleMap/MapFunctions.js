@@ -19,7 +19,7 @@ export const setFeatureDistance = (feature,origin) => {
 
 export const getDistanceFromFeatureToClosest = (feature_id,features) => {
 
-  const feature = (features || []).find(feature => feature.properties.id === feature_id);
+  const feature = (features || []).find(feature => feature.properties.documentId === feature_id);
 
   if (feature === undefined){
     throw 'Missing feature parameter.';
@@ -64,8 +64,8 @@ export const getClosestFeature = (feature,features)=>{
   const distanceFeatures =  JSON.parse(JSON.stringify(features || []));
 
   //remove the current feature from the set (using its UNIQUE id)
-  const featureIndex = feature.properties.id;
-  const collectionIndex = distanceFeatures.findIndex(feature=>feature.properties.id === featureIndex);
+  const docId = feature.properties.documentId;
+  const collectionIndex = distanceFeatures.findIndex(feature=>feature.properties.documentId === docId);
   distanceFeatures.splice(collectionIndex, 1);
 
   //add 'distance' prop

@@ -54,7 +54,7 @@ export function MapProvider({children}){
 		return featureSourceKeys.find(sourceKey => {
 			const source = sources[sourceKey];
 			const sourceFeatures = source.data.features || [];
-			return sourceFeatures.find(sourceFeature => sourceFeature.properties.id === feature.properties.id);
+			return sourceFeatures.find(sourceFeature => sourceFeature.properties.documentId === feature.properties.documentId);
 		})
 	}
 
@@ -92,7 +92,7 @@ export function MapProvider({children}){
 	}
 
 	const getMapFeatureById = id => {
-		return (mapData.sources.points.data.features || []).find(item => id === item.properties.id);
+		return (mapData.sources.points.data.features || []).find(item => id === item.properties.documentId);
 	}
 
 	//we need a taxonomy to filter items since a lot of them have parentId = 0
@@ -119,7 +119,7 @@ export function MapProvider({children}){
 
 	const getMapAreaById = areaId => {
 		const sourceCollection = mapData?.sources.areas?.data.features || [];
-	  return sourceCollection.find(feature => feature.properties.id === areaId);
+	  return sourceCollection.find(feature => feature.properties.documentId === areaId);
 	}
 
 	const selectAllTerms = taxonomy => {
@@ -217,7 +217,7 @@ export function MapProvider({children}){
 	const toggleShowArea = (termId,bool) => {
 		const area = getAreaByTermId(termId);
 		if(area===undefined) return;
-		setMapFeatureState('areas',area.properties.id,'hover',bool);
+		setMapFeatureState('areas',area.properties.documentId,'hover',bool);
 	}
 
 	//hover features  matching this tag
@@ -228,7 +228,7 @@ export function MapProvider({children}){
     const matches = filterFeaturesByTermId(mapFeatureCollection(),term.term_id);
 
     (matches || []).forEach(feature=>{
-      setMapFeatureState('points',feature.properties.id,'hover',bool);
+      setMapFeatureState('points',feature.properties.documentId,'hover',bool);
     })
 
 		if (term.taxonomy === 'tdp_area'){
@@ -316,10 +316,10 @@ export function MapProvider({children}){
 			})
 
 		const ignoredFeatureIds = (ignoredFeature || [])
-			.map(feature => feature.properties.id)
+			.map(feature => feature.properties.documentId)
 
 		const keepFeatures = (newPointsData.features || []).filter(feature => {
-			return !ignoredFeatureIds.includes(feature.properties.id);
+			return !ignoredFeatureIds.includes(feature.properties.documentId);
 		})
 
 		newPointsData.features = keepFeatures;
@@ -468,13 +468,13 @@ export function MapProvider({children}){
 
 		//hide old
 		if (prevActiveFeature.current){
-			setMapFeatureState('points',prevActiveFeature.current.properties.id,'active',false);
+			setMapFeatureState('points',prevActiveFeature.current.properties.documentId,'active',false);
 		}
 
 		//show new
 		if (activeFeature){
 			DEBUG && console.log("SET ACTIVE FEATURE",activeFeature);
-			setMapFeatureState('points',activeFeature.properties.id,'active',true);
+			setMapFeatureState('points',activeFeature.properties.documentId,'active',true);
 		}
 
 		prevActiveFeature.current = activeFeature;
@@ -509,7 +509,7 @@ export function MapProvider({children}){
 		if (!mapboxMap.current) return null;
 		const features = mapboxMap.current.queryRenderedFeatures({ layers: ['points'] });
 		const ids = (features || [])
-			.map((feature) => feature.properties.id)
+			.map((feature) => feature.properties.documentId)
 		return [...new Set(ids)];//make unique
 	};
 
@@ -558,7 +558,7 @@ export function MapProvider({children}){
 	      }
 
 	      // Extract individual point IDs from the leaves
-	      const ids = leaves.map((leaf) => leaf.properties.id);
+	      const ids = leaves.map((leaf) => leaf.properties.documentId);
 
 	      resolve(ids);
 	    });
@@ -597,7 +597,7 @@ export function MapProvider({children}){
 
 	  // Filter source data
 	  let data = features
-			.filter((feature) => featureIds.includes(feature.properties.id));
+			.filter((feature) => featureIds.includes(feature.properties.documentId));
 
 	  DEBUG && console.info("UPDATED FEATURES LIST",data.length);
 	  setFeaturesList(data);

@@ -95,7 +95,7 @@ const Map = (props) => {
     map.on('click',['points'], e => {
       if (e.features.length === 0) return;
       const feature = e.features[0];
-      navigate(getPointUrl(feature.properties.id));
+      navigate(getPointUrl(feature.properties.documentId));
     });
 
     //zoom on cluster on click
@@ -130,12 +130,11 @@ const Map = (props) => {
     if (!mapHasInit) return;
 
     const getUrlFeature = (type,id) => {
-      id = parseInt(id);
       switch(type){
         case 'features':
         case 'posts':
           return mapFeatureCollection()
-            .find(feature => feature.properties.id === id);
+            .find(feature => feature.properties.documentId === id);
         break;
       }
     }

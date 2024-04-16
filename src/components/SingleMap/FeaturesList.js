@@ -121,19 +121,19 @@ const FeaturesList = props => {
     if (activeFeature===undefined) return;
 
     //scroll to list item
-    const scrollToFeature = feature_id => {
+    const scrollToFeature = docId => {
 
       //using a feature ID, get its index in the filtered features array.
-      const getListIndex = feature_id => {
-        let index = (sortedFeatures || []).findIndex(feature => feature.properties.id === feature_id);
+      const getListIndex = docId => {
+        let index = (sortedFeatures || []).findIndex(feature => feature.properties.documentId === docId);
         return (index !== -1) ? index : undefined;
       }
 
-      const index = getListIndex(feature_id);
+      const index = getListIndex(docId);
       if (index === undefined) return;
 
       const ref = scrollRefs.current[index];
-      DEBUG && console.log("SCROLL TO FEATURE",{id:feature_id,index:index},ref);
+      DEBUG && console.log("SCROLL TO FEATURE",{docId:docId,index:index},ref);
       ref.current.scrollIntoView({ behavior: 'smooth'});
     }
 
@@ -188,10 +188,10 @@ const FeaturesList = props => {
 
         {
           sortedFeatures.map((feature,k) => {
-            const featureId = feature.properties.id;
+            const featureId = feature.properties.documentId;
             const wpId = feature.properties.wp_id;
             const sortValue = getSortByText(feature);
-            let active = ( (activeFeature?.properties.id === feature.properties.id) && (activeFeature?.properties.source === feature.properties.source) );
+            let active = ( (activeFeature?.properties.documentId === feature.properties.documentId) && (activeFeature?.properties.source === feature.properties.source) );
 
             return <li
             key={k}

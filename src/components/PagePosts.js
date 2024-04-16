@@ -32,9 +32,9 @@ const PagePosts = (props) => {
   const {featureId} = useParams();
   const [wpPost,setWpPost] = useState();
 
-  const getWpPostById = id => {
-    id = parseInt(id);
-    return (props.posts || []).find(item => id === item.wp_id);
+  const getWpPostById = wpId => {
+    wpId = parseInt(wpId);
+    return (props.posts || []).find(item => wpId === item.wp_id);
   }
 
   useEffect(()=>{
