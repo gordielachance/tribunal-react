@@ -8,11 +8,21 @@ export const DEBUG = IS_LOCAL;
 export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local' : 'https://www.tribunaldesprejuges.org/datas';
 export const STRAPI_URL = 'http://localhost:1337';
 
-
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_CONTACT = 20;
 export const WP_CAT_ID_EVENT = 91;
 export const WP_CAT_ID_CREATION = 89;
+
+export const DATE_LOCALE = 'fr-FR';
+export const DATE_OPTIONS = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    //second: 'numeric',
+    //timeZoneName: 'short'
+};
 
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 

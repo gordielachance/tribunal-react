@@ -2,7 +2,7 @@ import React, { useEffect,useState,createRef,useRef }  from "react";
 import classNames from "classnames";
 import { useNavigate,useParams } from 'react-router-dom';
 import {DEBUG} from "../../Constants";
-import {setFeatureDistance,getHumanDistance} from "./MapFunctions";
+import {setFeatureDistance,getHumanDistance,getHumanDate} from "./MapFunctions";
 import { useMap } from './MapContext';
 import { FeatureCard } from "./FeatureCard";
 
@@ -148,10 +148,10 @@ const FeaturesList = props => {
     //sort markers
     switch(sortMarkerBy){
       case 'distance':
-        return feature.properties?.distance ? getHumanDistance(feature.properties.distance) : undefined;
+        return getHumanDistance(feature.properties?.distance);
       break;
       default://date
-        return feature.properties.date_human
+        return getHumanDate(feature.properties?.publishedAt);
       break;
     }
 

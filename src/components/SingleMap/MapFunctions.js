@@ -1,5 +1,5 @@
 import * as turf from "@turf/turf";
-import {DEBUG} from "../../Constants";
+import {DEBUG,DATE_LOCALE,DATE_OPTIONS} from "../../Constants";
 
 //in meters
 export const setFeatureDistance = (feature,origin) => {
@@ -104,6 +104,11 @@ export const getHumanDistance = meters => {
     return meters.toFixed() + ' m';
   }
 
+}
+
+export const getHumanDate = isoDate => {
+  const date = new Date(isoDate);
+  return date.toLocaleString(DATE_LOCALE, DATE_OPTIONS);
 }
 
 // Because features come from tiled vector data,
