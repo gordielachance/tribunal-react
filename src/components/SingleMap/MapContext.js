@@ -491,7 +491,7 @@ export function MapProvider({children}){
 	  termIds = (features || []).map(feature => {
 			const postId = feature.properties.wp_id;
 			const post = getMapPostById(postId);
-			return post[propName] ?? [];
+			return post ? (post[propName] || []) : [];
 	  });
 
 		termIds = termIds.flat();//flatten
