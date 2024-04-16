@@ -18,7 +18,7 @@ const MapSettingsSort = props => {
 
   return(
     <div id="map-filters-orderby">
-      <h5>Tri</h5>
+      <h5>Tri par</h5>
       <ul>
         {
           Object.keys(sortByList).map(function(slug) {

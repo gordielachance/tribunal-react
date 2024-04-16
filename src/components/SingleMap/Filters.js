@@ -81,6 +81,7 @@ const Filters = (props) => {
 
   return (
     <ul id="map-filters" className="map-section">
+      <MapSettingsSort/>
     {
       ((categories || []).length > 1) &&
       <FilterSection
@@ -96,12 +97,6 @@ const Filters = (props) => {
         items={categories}
         />
       </FilterSection>
-    }
-
-    {
-      /*
-      <MapSettingsSort/>
-              */
     }
     {
       ((formats || []).length > 1) &&
