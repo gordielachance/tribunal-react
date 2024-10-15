@@ -6,6 +6,7 @@ import PageHome from "./components/PageHome";
 import PageMaps from "./components/PageMaps";
 import PageCreations from "./components/PageCreations";
 import PageEvents from "./components/PageEvents";
+import PageOutils from "./components/PageOutils";
 import PageCredits from "./components/PageCredits";
 import PagePosts from "./components/PagePosts";
 import PageSingleMap from "./components/PageSingleMap";
@@ -41,6 +42,11 @@ export const menuItems = [
     url:'/creations',
     path:'/creations/*',
     name:'Créations'
+  },
+  {
+    url:'/outils',
+    path:'/outils/*',
+    name:'Boîte à outils'
   },
   {
     url:'/credits',
@@ -97,6 +103,7 @@ const Layout = props => {
           <Route path=":urlPostId" element={<PageCreations/>} />
         </Route>
         <Route path="/credits" element={<PageCredits/>} />
+        <Route path="/outils" element={<PageOutils/>} />
         <Route path="/cartes">
           <Route index element={<PageMaps/>} />
           <Route path=":mapPostId/:mapPostSlug" element={singleMapPage} />

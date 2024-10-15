@@ -15,6 +15,7 @@ export function AppProvider({children}){
 
 	const [homePost,setHomePost] = useState();
 	const [creditsPost,setCreditsPost] = useState();
+	const [toolsPost,setToolsPost] = useState();
   const [mapPosts,setMapPosts] = useState();
 	const [creationPosts,setCreationPosts] = useState();
 	const [agendaPosts,setAgendaPosts] = useState();
@@ -39,6 +40,8 @@ export function AppProvider({children}){
 		setMapPosts,
 		creationPosts,
 		setCreationPosts,
+		toolsPost,
+		setToolsPost,
 		agendaPosts,
 		setAgendaPosts,
 		mobileScreen,
