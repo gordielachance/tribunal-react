@@ -50,7 +50,7 @@ const MapPost = (props) => {
   }
 
   return (
-    <div className="page-content" id={`map-${props.id}`}>
+    <div className="page-content map-content" data-map-id={props.id}>
       {
         ( (urlItemType==='posts') && activeFeature ) &&
         <WpPostModal

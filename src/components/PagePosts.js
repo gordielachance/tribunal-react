@@ -28,7 +28,7 @@ const SinglePost = props => {
 const PagePosts = (props) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const loading = (props.posts === undefined);
+  const postsLoading = (props.posts === undefined);
   const {urlPostId} = useParams();
   const [modalPost,setModalPost] = useState();
 
@@ -90,12 +90,19 @@ const PagePosts = (props) => {
         </div>
         {
 
-        <>
+        <div className="page-content">
           {
-            loading ?
+            props.page &&
+            <div
+              className="page-intro"
+              dangerouslySetInnerHTML={{__html: props.page.content.rendered}}
+            />
+          }
+          {
+            postsLoading ?
             <Loader active />
             :
-            <ul className="page-content posts-list">
+            <ul className="posts-list">
               {
                 //TOUFIX URGENT HANDLE NO POSTS
                 (props.posts || []).map((post,k) => {
@@ -110,8 +117,7 @@ const PagePosts = (props) => {
               }
             </ul>
           }
-
-        </>
+        </div>
         }
     </div>
   )

@@ -9,9 +9,10 @@ export const WP_URL = (IS_LOCAL && !FORCE_REMOTE_DB) ? 'http://tribunaldp.local'
 
 export const WP_POST_ID_HOME = 948;
 export const WP_POST_ID_CONTACT = 20;
-export const WP_POST_ID_OUTILS = 1227;
+export const WP_PAGE_ID_TOOLS = 1227;
 export const WP_CAT_ID_EVENT = 91;
 export const WP_CAT_ID_CREATION = 89;
+export const WP_CAT_ID_TOOLS = 126;
 
 export const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ29yZGllbGFjaGFuY2UiLCJhIjoiY2tmZ3N0Y2t2MG5oMjJ5bGRtYmF0Y2NscCJ9.sLVLQMjYhX9FBM_3AeuxtA';
 

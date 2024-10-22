@@ -1,34 +1,35 @@
 import React,{useEffect,useState} from "react";
-import {WP_POST_ID_OUTILS} from "./../Constants";
+import {WP_PAGE_ID_TOOLS,WP_CAT_ID_TOOLS} from "./../Constants";
 import { useApp } from './../AppContext';
-import PageMenu from "./PageMenu";
+import PagePosts from "./PagePosts";
 import DatabaseAPI from "../databaseAPI/api";
 import {DEBUG} from "../Constants";
-import { Loader,Dimmer } from 'semantic-ui-react';
-import {BGCredits} from "./PageBackgrounds";
+import {BGCreations} from "./PageBackgrounds";
 
 const PageOutils = (props) => {
 
-  const {toolsPost,setToolsPost} = useApp();
+  const {toolsPage,setToolsPage} = useApp();
+  const {toolsPosts,setToolsPosts} = useApp();
   const [loading,setLoading] = useState();
+  const [pageLoading,setPageLoading] = useState();
 
-  //load credits post on init
+  //load page on init
   useEffect(() => {
 
     let isSubscribed;
 
-    if (toolsPost === undefined){
+    if (toolsPage === undefined){
 
       isSubscribed = true;
-      setLoading(true);
+      setPageLoading(true);
 
   		const fetchData = async () => {
   	    DEBUG && console.info("GETTING TOOLS PAGE...");
-  	    const data = await DatabaseAPI.getSingleItem('pages',WP_POST_ID_OUTILS);
+  	    const data = await DatabaseAPI.getSingleItem('pages',WP_PAGE_ID_TOOLS);
   			if (isSubscribed) {
   				DEBUG && console.info("...TOOLS PAGE LOADED",data);
-          setLoading(false);
-  	      setToolsPost(data);
+          setPageLoading(false);
+  	      setToolsPage(data);
   	    }
   		}
 
@@ -38,28 +39,49 @@ const PageOutils = (props) => {
 		//clean up fn
 		return () => isSubscribed = false;
 
-  }, [toolsPost]);
+  }, [toolsPage]);
+
+
+  //load posts on init
+  useEffect(() => {
+
+    let isSubscribed;
+
+    if (toolsPosts === undefined){
+
+      isSubscribed = true;
+      setLoading(true);
+
+  		const fetchData = async () => {
+  	    const data = await DatabaseAPI.getItems('features',{
+          categories:WP_CAT_ID_TOOLS,
+          format:'frontend'
+        });
+
+  			if (isSubscribed) {
+  				DEBUG && console.info("...TOOLS POSTS LOADED",data);
+          setLoading(false);
+  	      setToolsPosts(data);
+  	    }
+  		}
+
+  	  fetchData();
+    }
+
+		//clean up fn
+		return () => isSubscribed = false;
+
+  }, [toolsPosts]);
 
   return(
     <div className="page-container">
-      <div id="toolsPage" className="page">
-        <div className="page-header">
-          <h1>Boîte à outils</h1>
-          <PageMenu/>
-        </div>
-        <Dimmer.Dimmable as="div" dimmed={loading} className="page-content">
-          <Dimmer active={loading} inverted>
-            <Loader />
-          </Dimmer>
-          {
-            toolsPost?.content.rendered &&
-            <div
-              dangerouslySetInnerHTML={{__html: toolsPost.content.rendered}}
-            />
-          }
-        </Dimmer.Dimmable>
-      </div>
-      <BGCredits/>
+      <PagePosts
+      id="toolsPage"
+      title="Boîte à Outils"
+      page={toolsPage}
+      posts={toolsPosts}
+      />
+      <BGCreations/>
     </div>
   )
 }

@@ -45,7 +45,11 @@ const PageCreations = (props) => {
 
   return(
     <div className="page-container">
-      <PagePosts id="creationsPage" title="Créations" posts={creationPosts}/>
+      <PagePosts
+      id="creationsPage"
+      title="Créations"
+      posts={creationPosts}
+      />
       <BGCreations/>
     </div>
   )

@@ -103,8 +103,17 @@ h2,h3,h4,h5,h6{
     }
   }
   .page-content{
-    &.posts-list{
-      width:100%;
+    &:not(.map-content){
+      > * {
+        width:100%;
+      }
+    }
+
+    .page-intro{
+      margin-bottom:2em;
+    }
+    ul.posts-list{
+
       li{
         width: 100%;
         display:flex;
